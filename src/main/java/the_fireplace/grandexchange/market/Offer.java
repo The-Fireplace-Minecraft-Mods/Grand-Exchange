@@ -1,12 +1,15 @@
 package the_fireplace.grandexchange.market;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import java.util.UUID;
 
+@SuppressWarnings("WeakerAccess")
 public abstract class Offer {
-	String item, offertype;
-	int amount, price;
-	UUID owner;
-	long timestamp = System.currentTimeMillis();
+	protected String item, offertype;
+	protected int amount, price, meta;
+	protected UUID owner;
+	protected long timestamp = System.currentTimeMillis();
 	Offer(String offertype, String item, int amount, int price, UUID owner){
 		this.offertype = offertype;
 		this.item = item;
@@ -15,11 +18,17 @@ public abstract class Offer {
 		this.owner = owner;
 	}
 
-	public final String getItem(){
+	public final Pair<String, Integer> getItemPair(){
+		return Pair.of(item, meta);
+	}
+	public final String getItemResourceName(){
 		return item;
 	}
 	public final int getAmount(){
 		return amount;
+	}
+	public final int getItemMeta(){
+		return meta;
 	}
 	public final int getPrice(){
 		return price;
