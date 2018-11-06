@@ -10,7 +10,7 @@ import the_fireplace.grandexchange.commands.CommandIdentify;
 import the_fireplace.grandexchange.commands.CommandBuy;
 import the_fireplace.grandexchange.commands.CommandSell;
 
-@Mod(modid = GrandExchange.MODID, name = GrandExchange.MODNAME, version = GrandExchange.VERSION, acceptedMinecraftVersions = "[1.12,1.13)", serverSideOnly = true, acceptableRemoteVersions = "*")
+@Mod(modid = GrandExchange.MODID, name = GrandExchange.MODNAME, version = GrandExchange.VERSION, acceptedMinecraftVersions = "[1.12,1.13)", acceptableRemoteVersions = "*")
 public class GrandExchange {
     public static final String MODID = "grandexchange";
     public static final String MODNAME = "Grand Exchange";
