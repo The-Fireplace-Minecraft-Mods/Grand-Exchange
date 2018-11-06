@@ -1,0 +1,13 @@
+[
+{
+  "modid": "grandexchange",
+  "name": "Grand Exchange",
+  "description": "A command-based marketplace for your Forge server.",
+  "version": "${version}",
+  "mcversion": "",
+  "logoFile": "",
+  "url": "",
+  "authorList": ["The_Fireplace"],
+  "screenshots": []
+}
+]
