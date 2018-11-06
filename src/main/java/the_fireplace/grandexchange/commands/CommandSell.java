@@ -64,16 +64,21 @@ public class CommandSell extends CommandBase {
                 if(itemCount < amount)
                     //noinspection RedundantArrayCreation
                     throw new CommandException("Error: You do not have enough of that item in your inventory to make this offer.", new Object[0]);
+                int i = 0;
                 for(ItemStack stack: ((EntityPlayerMP) sender).inventory.mainInventory) {
                     //noinspection ConstantConditions
-                    if(!stack.isEmpty() && stack.getItem().getRegistryName().equals(offerResource) && itemCount > 0 && TransactionDatabase.canTransactItem(stack)){
+                    while(!stack.isEmpty() && stack.getItem().getRegistryName().equals(offerResource) && itemCount > 0 && TransactionDatabase.canTransactItem(stack)){
                         if(stack.getCount() > 1)
                             stack.setCount(stack.getCount() - 1);
                         else
-                            ((EntityPlayerMP) sender).inventory.mainInventory.remove(stack);
+                            ((EntityPlayerMP) sender).inventory.mainInventory.set(i, ItemStack.EMPTY);
                         itemCount--;
                     }
+                    i++;
                 }
+                if(itemCount > 0)
+                    //noinspection RedundantArrayCreation
+                    throw new CommandException("Error: Something went wrong when removing items from your inventory.", new Object[0]);
 
                 boolean madePurchase = TransactionDatabase.makeOffer(new BuyOffer(offerResource.toString(), meta, amount, price, ((EntityPlayerMP) sender).getUniqueID()));
 
