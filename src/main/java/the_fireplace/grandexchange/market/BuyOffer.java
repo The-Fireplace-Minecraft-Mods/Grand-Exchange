@@ -3,7 +3,7 @@ package the_fireplace.grandexchange.market;
 import java.util.UUID;
 
 public class BuyOffer extends Offer {
-	BuyOffer(String item, int amount, int price, UUID owner) {
-		super("buy", item, amount, price, owner);
+	public BuyOffer(String item, int meta, int amount, long price, UUID owner) {
+		super("buy", item, meta, amount, price, owner);
 	}
 }

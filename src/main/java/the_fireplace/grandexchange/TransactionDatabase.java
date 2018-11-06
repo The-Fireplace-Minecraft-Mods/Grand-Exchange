@@ -11,15 +11,24 @@ import the_fireplace.grandexchange.market.BuyOffer;
 import the_fireplace.grandexchange.market.Offer;
 import the_fireplace.grandexchange.market.SellOffer;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class TransactionDatabase {
 	private static HashMap<Pair<String, Integer>, List<BuyOffer>> buyOffers = Maps.newHashMap();
 	private static HashMap<Pair<String, Integer>, List<SellOffer>> sellOffers = Maps.newHashMap();
 	private static HashMap<UUID, List<ItemStack>> payouts = Maps.newHashMap();
+
+	public static boolean hasPayout(UUID player){
+		return payouts.containsKey(player) && !payouts.get(player).isEmpty();
+	}
+
+	public static List<ItemStack> getPayout(UUID player){
+		return hasPayout(player) ? payouts.get(player) : Lists.newArrayList();
+	}
+
+	public static void removePayouts(UUID player, Collection<ItemStack> toRemove){
+		payouts.get(player).removeAll(toRemove);
+	}
 
 	public static boolean canTransactItem(ItemStack item){
 		return !item.isEmpty() && !item.hasTagCompound() && !item.isItemEnchanted();

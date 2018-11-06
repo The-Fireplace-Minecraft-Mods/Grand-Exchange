@@ -7,12 +7,14 @@ import java.util.UUID;
 @SuppressWarnings("WeakerAccess")
 public abstract class Offer {
 	protected String item, offertype;
-	protected int amount, price, meta;
+	protected int amount, meta;
+	protected long price;
 	protected UUID owner;
 	protected long timestamp = System.currentTimeMillis();
-	Offer(String offertype, String item, int amount, int price, UUID owner){
+	protected Offer(String offertype, String item, int meta, int amount, long price, UUID owner){
 		this.offertype = offertype;
 		this.item = item;
+		this.meta = meta;
 		this.amount = amount;
 		this.price = price;
 		this.owner = owner;
@@ -30,7 +32,7 @@ public abstract class Offer {
 	public final int getItemMeta(){
 		return meta;
 	}
-	public final int getPrice(){
+	public final long getPrice(){
 		return price;
 	}
 	public final UUID getOwner(){
