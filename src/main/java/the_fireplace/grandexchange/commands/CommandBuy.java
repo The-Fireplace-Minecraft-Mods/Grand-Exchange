@@ -51,11 +51,11 @@ public class CommandBuy extends CommandBase {
                     //noinspection RedundantArrayCreation
                     throw new CommandException("You cannot pay someone negative amount. That would be rude.", new Object[0]);
                 Account senderAccount = Account.get((EntityPlayerMP) sender);
-                if (senderAccount.getBalance() < price)
+                if (senderAccount.getBalance() < price*amount)
                     throw new InsufficientCreditException();
 
                 boolean madePurchase = TransactionDatabase.makeOffer(new BuyOffer(offerResource.toString(), meta, amount, price, ((EntityPlayerMP) sender).getUniqueID()));
-                senderAccount.addBalance(-price);
+                senderAccount.addBalance(-price*amount);
 
                 if(madePurchase)
                     sender.sendMessage(new TextComponentTranslation("Purchase succeeded! Your balance is now: %s. You can collect your items with /collect", senderAccount.getBalance()));
