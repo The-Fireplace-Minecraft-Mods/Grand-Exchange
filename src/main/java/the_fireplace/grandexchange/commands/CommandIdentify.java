@@ -48,6 +48,7 @@ public class CommandIdentify extends CommandBase {
         throw new WrongUsageException("/identify", new Object[0]);
     }
 
+    @Override
     public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
         return true;
     }

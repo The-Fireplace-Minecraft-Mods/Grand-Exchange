@@ -13,7 +13,21 @@ import the_fireplace.grandexchange.market.SellOffer;
 
 import java.util.*;
 
-public class TransactionDatabase {
+public final class TransactionDatabase {
+	public static HashMap<Pair<String, Integer>, List<BuyOffer>> getBuyOffers() {
+		sortOffers();
+		return buyOffers;
+	}
+
+	public static HashMap<Pair<String, Integer>, List<SellOffer>> getSellOffers() {
+		sortOffers();
+		return sellOffers;
+	}
+
+	public static HashMap<UUID, List<ItemStack>> getPayouts() {
+		return payouts;
+	}
+
 	private static HashMap<Pair<String, Integer>, List<BuyOffer>> buyOffers = Maps.newHashMap();
 	private static HashMap<Pair<String, Integer>, List<SellOffer>> sellOffers = Maps.newHashMap();
 	private static HashMap<UUID, List<ItemStack>> payouts = Maps.newHashMap();
