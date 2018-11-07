@@ -32,7 +32,7 @@ public class CommandMyOffers extends CommandBase {
     @Override
     @Nonnull
     public String getUsage(@Nullable ICommandSender sender) {
-        return "/myoffers";
+        return "/myoffers [page]";
     }
 
     @Override
@@ -74,9 +74,12 @@ public class CommandMyOffers extends CommandBase {
                     break;
                 sender.sendMessage(new TextComponentString(purple + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + " being sold for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getAmount()) + " each"));
             }
+
+            if(buyOffers.isEmpty() && sellOffers.isEmpty())
+                sender.sendMessage(new TextComponentString("You are not buying or selling anything."));
         }
         //noinspection RedundantArrayCreation
-        throw new WrongUsageException("/myoffers", new Object[0]);
+        throw new WrongUsageException("/myoffers [page]", new Object[0]);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package the_fireplace.grandexchange.commands;
 
+import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.item.ItemStack;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -11,22 +12,23 @@ import the_fireplace.grandexchange.TransactionDatabase;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 
+@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
 public class CommandIdentify extends CommandBase {
     @Override
-    @Nonnull
     public String getName() {
         return "identify";
     }
 
     @Override
-    @Nonnull
-    public String getUsage(@Nullable ICommandSender sender) {
+    public String getUsage(ICommandSender sender) {
         return "/identify";
     }
 
     @Override
-    public void execute(@Nullable MinecraftServer server, @Nonnull ICommandSender sender, @Nullable String[] args) throws CommandException {
+    public void execute(@Nullable MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if (sender instanceof EntityPlayer) {
             ItemStack held = ((EntityPlayer) sender).getHeldItemMainhand();
             if(!held.isEmpty()) {

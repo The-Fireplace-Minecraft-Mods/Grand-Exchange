@@ -1,5 +1,6 @@
 package the_fireplace.grandexchange.commands;
 
+import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import the_fireplace.grandeconomy.economy.Account;
@@ -11,26 +12,25 @@ import net.minecraft.util.text.TextComponentTranslation;
 import the_fireplace.grandexchange.TransactionDatabase;
 import the_fireplace.grandexchange.market.BuyOffer;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Collections;
 import java.util.List;
 
+@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
 public class CommandBuy extends CommandBase {
     @Override
-    @Nonnull
     public String getName() {
         return "buy";
     }
 
     @Override
-    @Nonnull
-    public String getUsage(@Nullable ICommandSender sender) {
+    public String getUsage(ICommandSender sender) {
         return "/buy <item> <meta> <amount> <price>";
     }
 
     @Override
-    public void execute(@Nonnull MinecraftServer server, @Nonnull ICommandSender sender, @Nonnull String[] args) throws CommandException {
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if (args.length == 4) {
             if(sender instanceof EntityPlayerMP) {
                 ResourceLocation offerResource = new ResourceLocation(args[0]);
@@ -72,8 +72,7 @@ public class CommandBuy extends CommandBase {
     }
 
     @Override
-    @Nonnull
-    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, BlockPos targetPos) {
         //TODO Tab completions
         return Collections.emptyList();
     }

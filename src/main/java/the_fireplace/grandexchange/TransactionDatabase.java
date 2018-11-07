@@ -70,6 +70,7 @@ public final class TransactionDatabase {
 			payouts.put(offer.getOwner(), Lists.newArrayList());
 		ResourceLocation offerResource = new ResourceLocation(offer.getItemResourceName());
 		boolean isOfferBlock = ForgeRegistries.BLOCKS.containsKey(offerResource);
+		@SuppressWarnings("ConstantConditions")
 		ItemStack sizeCheckStack = isOfferBlock ? new ItemStack(ForgeRegistries.BLOCKS.getValue(offerResource), 1, offer.getItemMeta()) : new ItemStack(ForgeRegistries.ITEMS.getValue(offerResource), 1, offer.getItemMeta());
 		int maxStackSize = sizeCheckStack.getMaxStackSize();
 		sortOffers();
