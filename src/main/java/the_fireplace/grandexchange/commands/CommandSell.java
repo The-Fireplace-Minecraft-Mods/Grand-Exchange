@@ -11,6 +11,7 @@ import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import the_fireplace.grandeconomy.economy.Account;
 import the_fireplace.grandexchange.TransactionDatabase;
 import the_fireplace.grandexchange.market.BuyOffer;
+import the_fireplace.grandexchange.market.SellOffer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -80,7 +81,7 @@ public class CommandSell extends CommandBase {
                     //noinspection RedundantArrayCreation
                     throw new CommandException("Error: Something went wrong when removing items from your inventory.", new Object[0]);
 
-                boolean madePurchase = TransactionDatabase.makeOffer(new BuyOffer(offerResource.toString(), meta, amount, price, ((EntityPlayerMP) sender).getUniqueID()));
+                boolean madePurchase = TransactionDatabase.makeOffer(new SellOffer(offerResource.toString(), meta, amount, price, ((EntityPlayerMP) sender).getUniqueID()));
 
                 Account senderAccount = Account.get((EntityPlayerMP) sender);
                 if(madePurchase)
