@@ -1,6 +1,10 @@
 # Grand Exchange - A server-side marketplace mod
 
-Grand Exchange adds a command-based marketplace to Forge servers. It is a server-side only mod, so players do not have to install the mod to join your server.
+Grand Exchange adds a command-based marketplace to Forge servers. It is a server-side only mod, so players do not have to install the mod to join your server and use it.
+
+Almost anything can be traded on the marketplace. The only things that can't are Enchanted items and other NBT tagged items, such as Written Books.
+
+This mod requires Grand Economy to work.
 
 ## Commands
 /ge buy <item> <meta> <amount> <price>
