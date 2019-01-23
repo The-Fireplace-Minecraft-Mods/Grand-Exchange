@@ -4,7 +4,7 @@ Grand Exchange adds a command-based marketplace to Forge servers. It is a server
 
 Almost anything can be traded on the marketplace. The only things that can't are Enchanted items and other NBT tagged items, such as Written Books.
 
-This mod requires [https://minecraft.curseforge.com/projects/grand-economy](Grand Economy) to work.
+This mod requires [Grand Economy](https://minecraft.curseforge.com/projects/grand-economy) to work.
 
 ## Commands
 /ge buy <item> <meta> <amount> <price>
