@@ -59,7 +59,7 @@ public class CommandBuy extends CommandBase {
                 senderAccount.addBalance(-price*amount);
 
                 if(madePurchase)
-                    sender.sendMessage(new TextComponentTranslation("Purchase succeeded! Your balance is now: %s. You can collect your items with /collect", senderAccount.getBalance()));
+                    sender.sendMessage(new TextComponentTranslation("Purchase succeeded! Your balance is now: %s. You can collect your items with /ge collect", senderAccount.getBalance()));
                 else
                     sender.sendMessage(new TextComponentTranslation("Offer succeeded! Your balance is now: %s", senderAccount.getBalance()));
                 return;

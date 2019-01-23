@@ -63,7 +63,7 @@ public class CommandCancelOffer extends CommandBase {
             for (SellOffer offer : sellOffers) {
                 if(curIndex++ == cancelIndex) {
                     TransactionDatabase.cancelOffer(offer);
-                    sender.sendMessage(new TextComponentString("Offer cancelled."));
+                    sender.sendMessage(new TextComponentString("Offer cancelled. You can collect your items with /ge collect"));
                     break;
                 }
             }
