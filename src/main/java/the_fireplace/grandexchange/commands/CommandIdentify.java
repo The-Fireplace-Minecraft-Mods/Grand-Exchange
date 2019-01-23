@@ -24,7 +24,7 @@ public class CommandIdentify extends CommandBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "/identify";
+        return "/ge identify";
     }
 
     @Override
@@ -47,7 +47,7 @@ public class CommandIdentify extends CommandBase {
             return;
         }
         //noinspection RedundantArrayCreation
-        throw new WrongUsageException("/identify", new Object[0]);
+        throw new WrongUsageException("/ge identify", new Object[0]);
     }
 
     @Override

@@ -44,6 +44,13 @@ public final class TransactionDatabase {
 		payouts.get(player).removeAll(toRemove);
 	}
 
+	public static boolean cancelOffer(Offer offer){
+		if(offer instanceof BuyOffer && buyOffers.get(offer.getItemPair()).remove(offer)) {
+			return true;
+		} else
+			return offer instanceof SellOffer && sellOffers.get(offer.getItemPair()).remove(offer);
+	}
+
 	public static boolean canTransactItem(ItemStack item){
 		return !item.isEmpty() && !item.hasTagCompound() && !item.isItemEnchanted();
 	}

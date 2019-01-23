@@ -22,12 +22,12 @@ import java.util.List;
 public class CommandCollect extends CommandBase {
     @Override
     public String getName() {
-        return "collect";
+        return "ge collect";
     }
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "/collect";
+        return "/ge collect";
     }
 
     @Override
@@ -50,7 +50,7 @@ public class CommandCollect extends CommandBase {
             return;
         }
         //noinspection RedundantArrayCreation
-        throw new WrongUsageException("/collect", new Object[0]);
+        throw new WrongUsageException("/ge collect", new Object[0]);
     }
 
     @Override

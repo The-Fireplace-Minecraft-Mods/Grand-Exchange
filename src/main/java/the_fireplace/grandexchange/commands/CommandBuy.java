@@ -12,6 +12,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import the_fireplace.grandexchange.TransactionDatabase;
 import the_fireplace.grandexchange.market.BuyOffer;
 
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Collections;
 import java.util.List;
@@ -26,7 +27,7 @@ public class CommandBuy extends CommandBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "/buy <item> <meta> <amount> <price>";
+        return "/ge buy <item> <meta> <amount> <price>";
     }
 
     @Override
@@ -68,11 +69,11 @@ public class CommandBuy extends CommandBase {
             }
         }
         //noinspection RedundantArrayCreation
-        throw new WrongUsageException("/buy <item> <meta> <amount> <price>", new Object[0]);
+        throw new WrongUsageException("/ge buy <item> <meta> <amount> <price>", new Object[0]);
     }
 
     @Override
-    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, BlockPos targetPos) {
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
         //TODO Tab completions
         return Collections.emptyList();
     }

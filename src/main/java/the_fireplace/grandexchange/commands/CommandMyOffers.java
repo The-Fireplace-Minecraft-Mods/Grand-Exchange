@@ -23,6 +23,7 @@ import java.util.function.Predicate;
 public class CommandMyOffers extends CommandBase {
     private static final String blue = "§3";
     private static final String purple = "§5";
+    private static final String yellow = "§e";
     @Override
     @Nonnull
     public String getName() {
@@ -32,7 +33,7 @@ public class CommandMyOffers extends CommandBase {
     @Override
     @Nonnull
     public String getUsage(@Nullable ICommandSender sender) {
-        return "/myoffers [page]";
+        return "/ge myoffers [page]";
     }
 
     @Override
@@ -58,13 +59,14 @@ public class CommandMyOffers extends CommandBase {
             page *= 50;
             //Subtract 50 because the first page starts with entry 0
             page -= 50;
+            int orderIndex = page;
             int termLength = 50;
             for (BuyOffer offer : buyOffers) {
                 if (page-- > 0)
                     continue;
                 if (termLength-- <= 0)
                     break;
-                sender.sendMessage(new TextComponentString(blue + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + " wanted for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getAmount()) + " each"));
+                sender.sendMessage(new TextComponentString(yellow + orderIndex++ + ". " + blue + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + " wanted for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
             }
 
             for (SellOffer offer : sellOffers) {
@@ -72,14 +74,14 @@ public class CommandMyOffers extends CommandBase {
                     continue;
                 if (termLength-- <= 0)
                     break;
-                sender.sendMessage(new TextComponentString(purple + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + " being sold for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getAmount()) + " each"));
+                sender.sendMessage(new TextComponentString(yellow + orderIndex++ + ". " + purple + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + " being sold for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
             }
 
             if(buyOffers.isEmpty() && sellOffers.isEmpty())
                 sender.sendMessage(new TextComponentString("You are not buying or selling anything."));
         }
         //noinspection RedundantArrayCreation
-        throw new WrongUsageException("/myoffers [page]", new Object[0]);
+        throw new WrongUsageException("/ge myoffers [page]", new Object[0]);
     }
 
     @Override

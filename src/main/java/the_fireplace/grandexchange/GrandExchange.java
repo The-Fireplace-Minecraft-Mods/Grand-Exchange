@@ -21,12 +21,6 @@ public final class GrandExchange {
         MinecraftServer server = event.getServer();
         ICommandManager command = server.getCommandManager();
         ServerCommandManager manager = (ServerCommandManager) command;
-        manager.registerCommand(new CommandBuy());
-        manager.registerCommand(new CommandSell());
-        manager.registerCommand(new CommandIdentify());
-        manager.registerCommand(new CommandCollect());
-        manager.registerCommand(new CommandBuyOffers());
-        manager.registerCommand(new CommandSellOffers());
-        manager.registerCommand(new CommandMyOffers());
+        manager.registerCommand(new CommandGe());
     }
 }

@@ -30,7 +30,7 @@ public class CommandSell extends CommandBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "/sell <item> <meta> <amount> <price>";
+        return "/ge sell <item> <meta> <amount> <price>";
     }
 
     @Override
@@ -97,7 +97,7 @@ public class CommandSell extends CommandBase {
             }
         }
         //noinspection RedundantArrayCreation
-        throw new WrongUsageException("/sell <item> <meta> <amount> <price>", new Object[0]);
+        throw new WrongUsageException("/ge sell <item> <meta> <amount> <price>", new Object[0]);
     }
 
     @Override

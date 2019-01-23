@@ -29,7 +29,7 @@ public class CommandSellOffers extends CommandBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "/selloffers [page]";
+        return "/ge selloffers [page]";
     }
 
     @Override
@@ -60,7 +60,7 @@ public class CommandSellOffers extends CommandBase {
             if(offers.isEmpty())
                 sender.sendMessage(new TextComponentString("Nobody is selling anything."));
         } else
-            throw new WrongUsageException("/selloffers [page]");
+            throw new WrongUsageException("/ge selloffers [page]");
     }
 
     @Override
