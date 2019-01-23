@@ -71,6 +71,7 @@ public class CommandCancelOffer extends CommandBase {
 
             if(buyOffers.isEmpty() && sellOffers.isEmpty())
                 sender.sendMessage(new TextComponentString("You are not buying or selling anything."));
+            return;
         }
         //noinspection RedundantArrayCreation
         throw new WrongUsageException("/ge canceloffer <offer number>", new Object[0]);

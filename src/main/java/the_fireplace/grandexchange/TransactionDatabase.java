@@ -36,6 +36,12 @@ public final class TransactionDatabase {
 		return payouts.containsKey(player) && !payouts.get(player).isEmpty();
 	}
 
+	public static void addPayout(UUID player, ItemStack payout){
+		if(!payouts.containsKey(player))
+			payouts.put(player, Lists.newArrayList());
+		payouts.get(player).add(payout);
+	}
+
 	public static List<ItemStack> getPayout(UUID player){
 		return hasPayout(player) ? payouts.get(player) : Lists.newArrayList();
 	}
@@ -46,9 +52,15 @@ public final class TransactionDatabase {
 
 	public static boolean cancelOffer(Offer offer){
 		if(offer instanceof BuyOffer && buyOffers.get(offer.getItemPair()).remove(offer)) {
+			GrandEconomyApi.addToBalance(offer.getOwner(), offer.getPrice()*offer.getAmount());
+			return true;
+		} else if(offer instanceof SellOffer && sellOffers.get(offer.getItemPair()).remove(offer)) {
+			ResourceLocation offerRes = new ResourceLocation(offer.getItemResourceName());
+			boolean isOfferBlock = ForgeRegistries.BLOCKS.containsKey(offerRes);
+			addPayout(offer.getOwner(), isOfferBlock ? new ItemStack(Objects.requireNonNull(ForgeRegistries.BLOCKS.getValue(offerRes)), offer.getAmount(), offer.getItemMeta()) : new ItemStack(Objects.requireNonNull(ForgeRegistries.ITEMS.getValue(offerRes)), offer.getAmount(), offer.getItemMeta()));
 			return true;
 		} else
-			return offer instanceof SellOffer && sellOffers.get(offer.getItemPair()).remove(offer);
+			return false;
 	}
 
 	public static boolean canTransactItem(ItemStack item){

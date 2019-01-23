@@ -79,6 +79,8 @@ public class CommandMyOffers extends CommandBase {
 
             if(buyOffers.isEmpty() && sellOffers.isEmpty())
                 sender.sendMessage(new TextComponentString("You are not buying or selling anything."));
+
+            return;
         }
         //noinspection RedundantArrayCreation
         throw new WrongUsageException("/ge myoffers [page]", new Object[0]);
