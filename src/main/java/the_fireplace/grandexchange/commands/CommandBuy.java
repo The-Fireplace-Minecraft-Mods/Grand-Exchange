@@ -3,6 +3,7 @@ package the_fireplace.grandexchange.commands;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import the_fireplace.grandeconomy.api.InsufficientCreditException;
 import the_fireplace.grandeconomy.economy.Account;
 import net.minecraft.command.*;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -30,6 +31,7 @@ public class CommandBuy extends CommandBase {
         return "/ge buy <item> <meta> <amount> <price>";
     }
 
+    @SuppressWarnings("Duplicates")
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if (args.length == 4) {
@@ -55,8 +57,8 @@ public class CommandBuy extends CommandBase {
                 if (senderAccount.getBalance() < price*amount)
                     throw new InsufficientCreditException();
 
-                boolean madePurchase = TransactionDatabase.makeOffer(new BuyOffer(offerResource.toString(), meta, amount, price, ((EntityPlayerMP) sender).getUniqueID()));
-                senderAccount.addBalance(-price*amount);
+                boolean madePurchase = TransactionDatabase.getInstance().makeOffer(new BuyOffer(offerResource.toString(), meta, amount, price, ((EntityPlayerMP) sender).getUniqueID()));
+                senderAccount.addBalance(-price*amount, false);
 
                 if(madePurchase)
                     sender.sendMessage(new TextComponentTranslation("Purchase succeeded! Your balance is now: %s. You can collect your items with /ge collect", senderAccount.getBalance()));

@@ -17,9 +17,6 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public class CommandCancelOffer extends CommandBase {
-    private static final String blue = "§3";
-    private static final String purple = "§5";
-    private static final String yellow = "§e";
     @Override
     @Nonnull
     public String getName() {
@@ -32,6 +29,7 @@ public class CommandCancelOffer extends CommandBase {
         return "/ge canceloffer <offer number>";
     }
 
+    @SuppressWarnings("Duplicates")
     @Override
     public void execute(@Nullable MinecraftServer server, @Nonnull ICommandSender sender, @Nullable String[] args) throws CommandException {
         if(sender instanceof EntityPlayerMP) {
@@ -54,7 +52,7 @@ public class CommandCancelOffer extends CommandBase {
             int curIndex = 0;
             for (BuyOffer offer : buyOffers) {
                 if(curIndex++ == cancelIndex) {
-                    TransactionDatabase.cancelOffer(offer);
+                    TransactionDatabase.getInstance().cancelOffer(offer);
                     sender.sendMessage(new TextComponentString("Offer cancelled."));
                     break;
                 }
@@ -62,7 +60,7 @@ public class CommandCancelOffer extends CommandBase {
 
             for (SellOffer offer : sellOffers) {
                 if(curIndex++ == cancelIndex) {
-                    TransactionDatabase.cancelOffer(offer);
+                    TransactionDatabase.getInstance().cancelOffer(offer);
                     sender.sendMessage(new TextComponentString("Offer cancelled. You can collect your items with /ge collect"));
                     break;
                 }

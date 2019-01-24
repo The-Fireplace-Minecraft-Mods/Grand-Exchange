@@ -37,7 +37,7 @@ public class CommandCollect extends CommandBase {
                     if(((EntityPlayer) sender).addItemStackToInventory(stack))
                         removeItems.add(stack);
                 }
-                TransactionDatabase.removePayouts(((EntityPlayer) sender).getUniqueID(), removeItems);
+                TransactionDatabase.getInstance().removePayouts(((EntityPlayer) sender).getUniqueID(), removeItems);
                 if(TransactionDatabase.hasPayout(((EntityPlayer) sender).getUniqueID()))
                     sender.sendMessage(new TextComponentString("You have run out of room for collection. Make room in your inventory and try again."));
                 else

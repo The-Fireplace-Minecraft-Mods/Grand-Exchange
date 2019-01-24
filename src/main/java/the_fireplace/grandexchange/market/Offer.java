@@ -2,10 +2,11 @@ package the_fireplace.grandexchange.market;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 @SuppressWarnings("WeakerAccess")
-public abstract class Offer {
+public abstract class Offer implements Serializable {
 	protected String item, offertype;
 	protected int amount, meta;
 	protected long price;

@@ -9,6 +9,7 @@ import net.minecraft.command.WrongUsageException;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentString;
 import the_fireplace.grandeconomy.api.GrandEconomyApi;
+import the_fireplace.grandexchange.MinecraftColors;
 import the_fireplace.grandexchange.TransactionDatabase;
 import the_fireplace.grandexchange.market.SellOffer;
 
@@ -18,7 +19,6 @@ import java.util.List;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class CommandSellOffers extends CommandBase {
-    private static final String purple = "§5";
     @Override
     public String getName() {
         return "selloffers";
@@ -52,7 +52,7 @@ public class CommandSellOffers extends CommandBase {
                     continue;
                 if (termLength-- <= 0)
                     break;
-                sender.sendMessage(new TextComponentString(purple + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + " being sold for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getAmount()) + " each"));
+                sender.sendMessage(new TextComponentString(MinecraftColors.PURPLE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + " being sold for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getAmount()) + " each"));
             }
             if(offers.isEmpty())
                 sender.sendMessage(new TextComponentString("Nobody is selling anything."));

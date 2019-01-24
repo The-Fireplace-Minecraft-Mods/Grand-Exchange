@@ -31,6 +31,7 @@ public class CommandSell extends CommandBase {
         return "/ge sell <item> <meta> <amount> <price>";
     }
 
+    @SuppressWarnings("Duplicates")
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if (args.length == 4) {
@@ -81,7 +82,7 @@ public class CommandSell extends CommandBase {
                     //noinspection RedundantArrayCreation
                     throw new CommandException("Error: Something went wrong when removing items from your inventory.", new Object[0]);
 
-                boolean madePurchase = TransactionDatabase.makeOffer(new SellOffer(offerResource.toString(), meta, amount, price, ((EntityPlayerMP) sender).getUniqueID()));
+                boolean madePurchase = TransactionDatabase.getInstance().makeOffer(new SellOffer(offerResource.toString(), meta, amount, price, ((EntityPlayerMP) sender).getUniqueID()));
 
                 Account senderAccount = Account.get((EntityPlayerMP) sender);
                 if(madePurchase)
