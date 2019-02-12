@@ -1,3 +1,5 @@
 Enable selling items with NBT data
 Fix ge collection database save errors
 *This update breaks databases from 1.0.0*
+Add command: /ge sellthis <amount> <price>
+Sell item meta bugfix
