@@ -1,4 +1,4 @@
-package the_fireplace.grandexchange;
+package the_fireplace.grandexchange.util;
 
 public class MinecraftColors {
 	public static final String BLUE = "§3";

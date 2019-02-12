@@ -1,5 +1,3 @@
-import scala.tools.nsc.io.Jar
-
 buildscript {
     repositories {
         jcenter()
@@ -118,7 +116,7 @@ modsIO {
     key = project.hasProperty("modsioApiKey")? project.modsioApiKey : "empty"
     project{
 		artifact = new File(jar.destinationDir, archivesBaseName+"-"+version+".jar")
-		modid = "0000"
+		modid = "1279"
 		minecraft = "1.12.2"
 		try{changelog = file('changelog.txt').text}catch(Exception e){changelog=""}
 		tag = ""

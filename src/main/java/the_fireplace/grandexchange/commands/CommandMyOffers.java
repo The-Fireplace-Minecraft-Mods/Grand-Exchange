@@ -9,8 +9,8 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentString;
 import the_fireplace.grandeconomy.api.GrandEconomyApi;
-import the_fireplace.grandexchange.MinecraftColors;
-import the_fireplace.grandexchange.TransactionDatabase;
+import the_fireplace.grandexchange.util.MinecraftColors;
+import the_fireplace.grandexchange.util.TransactionDatabase;
 import the_fireplace.grandexchange.market.BuyOffer;
 import the_fireplace.grandexchange.market.SellOffer;
 
@@ -61,7 +61,7 @@ public class CommandMyOffers extends CommandBase {
                     continue;
                 if (termLength-- <= 0)
                     break;
-                sender.sendMessage(new TextComponentString(MinecraftColors.YELLOW + orderIndex++ + ". " + MinecraftColors.BLUE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + " wanted for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
+                sender.sendMessage(new TextComponentString(MinecraftColors.YELLOW + orderIndex++ + ". " + MinecraftColors.BLUE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " wanted for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
             }
 
             for (SellOffer offer : sellOffers) {
@@ -69,7 +69,7 @@ public class CommandMyOffers extends CommandBase {
                     continue;
                 if (termLength-- <= 0)
                     break;
-                sender.sendMessage(new TextComponentString(MinecraftColors.YELLOW + orderIndex++ + ". " + MinecraftColors.PURPLE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + " being sold for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
+                sender.sendMessage(new TextComponentString(MinecraftColors.YELLOW + orderIndex++ + ". " + MinecraftColors.PURPLE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " being sold for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
             }
 
             if(buyOffers.isEmpty() && sellOffers.isEmpty())

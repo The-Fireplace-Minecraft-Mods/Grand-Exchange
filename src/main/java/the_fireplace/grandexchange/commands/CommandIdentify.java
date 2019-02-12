@@ -8,10 +8,11 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
-import the_fireplace.grandexchange.TransactionDatabase;
+import the_fireplace.grandexchange.util.TransactionDatabase;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.Objects;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -36,7 +37,7 @@ public class CommandIdentify extends CommandBase {
                     String regName = held.getItem().getRegistryName().toString();
                     if(regName.startsWith("minecraft:"))
                         regName = regName.substring(10);
-                    notifyCommandListener(sender, this, "This item is: %s", regName+' '+held.getMetadata());
+                    notifyCommandListener(sender, this, "This item is: %s", regName+' '+held.getMetadata()+(held.hasTagCompound() ? Objects.requireNonNull(held.getTagCompound()).toString() : ""));
                 } else {
                     notifyCommandListener(sender, this, "This item cannot be traded on the Grand Exchange.");
                 }
@@ -45,8 +46,7 @@ public class CommandIdentify extends CommandBase {
             }
             return;
         }
-        //noinspection RedundantArrayCreation
-        throw new WrongUsageException("/ge identify", new Object[0]);
+        throw new WrongUsageException(getUsage(sender));
     }
 
     @Override

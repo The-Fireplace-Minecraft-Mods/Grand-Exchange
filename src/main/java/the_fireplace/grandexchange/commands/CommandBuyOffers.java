@@ -9,8 +9,8 @@ import net.minecraft.command.WrongUsageException;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentString;
 import the_fireplace.grandeconomy.api.GrandEconomyApi;
-import the_fireplace.grandexchange.MinecraftColors;
-import the_fireplace.grandexchange.TransactionDatabase;
+import the_fireplace.grandexchange.util.MinecraftColors;
+import the_fireplace.grandexchange.util.TransactionDatabase;
 import the_fireplace.grandexchange.market.BuyOffer;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -30,6 +30,7 @@ public class CommandBuyOffers extends CommandBase {
         return "/ge buyoffers [page]";
     }
 
+    @SuppressWarnings("Duplicates")
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if(args.length <= 1) {
@@ -53,7 +54,7 @@ public class CommandBuyOffers extends CommandBase {
                     continue;
                 if (termLength-- <= 0)
                     break;
-                sender.sendMessage(new TextComponentString(MinecraftColors.BLUE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + " wanted for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getAmount()) + " each"));
+                sender.sendMessage(new TextComponentString(MinecraftColors.BLUE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " wanted for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getAmount()) + " each"));
             }
             if(offers.isEmpty())
                 sender.sendMessage(new TextComponentString("Nobody is buying anything."));

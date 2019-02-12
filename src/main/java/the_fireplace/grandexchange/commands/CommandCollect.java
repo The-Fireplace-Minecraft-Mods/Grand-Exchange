@@ -10,7 +10,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentString;
-import the_fireplace.grandexchange.TransactionDatabase;
+import the_fireplace.grandexchange.util.SerializationUtils;
+import the_fireplace.grandexchange.util.TransactionDatabase;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
@@ -32,10 +33,11 @@ public class CommandCollect extends CommandBase {
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if (sender instanceof EntityPlayer) {
             if(TransactionDatabase.hasPayout(((EntityPlayer) sender).getUniqueID())){
-                List<ItemStack> removeItems = Lists.newArrayList();
-                for(ItemStack stack: TransactionDatabase.getPayout(((EntityPlayer) sender).getUniqueID())) {
-                    if(((EntityPlayer) sender).addItemStackToInventory(stack))
-                        removeItems.add(stack);
+                List<String> removeItems = Lists.newArrayList();
+                for(String stackStr: TransactionDatabase.getPayout(((EntityPlayer) sender).getUniqueID())) {
+                    ItemStack stack = SerializationUtils.stackFromString(stackStr);
+                    if(stack != null && ((EntityPlayer) sender).addItemStackToInventory(stack))
+                        removeItems.add(stackStr);
                 }
                 TransactionDatabase.getInstance().removePayouts(((EntityPlayer) sender).getUniqueID(), removeItems);
                 if(TransactionDatabase.hasPayout(((EntityPlayer) sender).getUniqueID()))
@@ -47,8 +49,7 @@ public class CommandCollect extends CommandBase {
             }
             return;
         }
-        //noinspection RedundantArrayCreation
-        throw new WrongUsageException("/ge collect", new Object[0]);
+        throw new WrongUsageException(getUsage(sender));
     }
 
     @Override
