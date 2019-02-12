@@ -18,6 +18,7 @@ import java.util.Arrays;
 public class CommandGe extends CommandBase {
     private static final CommandBase buy = new CommandBuy();
     private static final CommandBase sell = new CommandSell();
+    private static final CommandBase sellthis = new CommandSellThis();
     private static final CommandBase identify = new CommandIdentify();
     private static final CommandBase collect = new CommandCollect();
     private static final CommandBase buyoffers = new CommandBuyOffers();
@@ -53,6 +54,10 @@ public class CommandGe extends CommandBase {
             case "sell":
             case "s":
                 sell.execute(server, sender, args);
+                return;
+            case "sellthis":
+            case "st":
+                sellthis.execute(server, sender, args);
                 return;
             case "identify":
             case "i":

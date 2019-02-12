@@ -37,7 +37,7 @@ public class CommandIdentify extends CommandBase {
                     String regName = held.getItem().getRegistryName().toString();
                     if(regName.startsWith("minecraft:"))
                         regName = regName.substring(10);
-                    notifyCommandListener(sender, this, "This item is: %s", regName+' '+held.getMetadata()+(held.hasTagCompound() ? Objects.requireNonNull(held.getTagCompound()).toString() : ""));
+                    notifyCommandListener(sender, this, "This item is: %s", regName+' '+held.getMetadata()+' '+(held.hasTagCompound() ? Objects.requireNonNull(held.getTagCompound()).toString() : ""));
                 } else {
                     notifyCommandListener(sender, this, "This item cannot be traded on the Grand Exchange.");
                 }
