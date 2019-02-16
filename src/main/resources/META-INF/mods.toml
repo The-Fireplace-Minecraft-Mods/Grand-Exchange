@@ -1,0 +1,33 @@
+modLoader="javafml"
+loaderVersion="[24,)"
+issueTrackerURL="https://github.com/The-Fireplace-Minecraft-Mods/Grand-Exchange/issues"
+displayURL="https://minecraft.curseforge.com/projects/grand-exchange"
+credits="Thanks to koshkayaguau for the idea and motivation to make this."
+authors="The_Fireplace"
+
+[[mods]]
+modId="grandexchange"
+version="${file.jarVersion}"
+displayName="Grand Exchange"
+description='''
+A command-based marketplace for your Forge server.
+'''
+
+[[dependencies.grandexchange]]
+    modId="forge"
+    mandatory=true
+    versionRange="[25,)"
+    ordering="NONE"
+    side="SERVER"
+[[dependencies.grandexchange]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.13.2,1.14)"
+    ordering="NONE"
+    side="SERVER"
+[[dependencies.grandexchange]]
+    modId="grandeconomy"
+    mandatory=true
+    versionRange="[1.1.0,)"
+    ordering="AFTER"
+    side="SERVER"
