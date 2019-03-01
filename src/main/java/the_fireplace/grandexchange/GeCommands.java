@@ -191,42 +191,32 @@ class GeCommands {
     private static final Command<CommandSource> sellThisCommand = context -> {
         EntityPlayerMP sender = (EntityPlayerMP) Objects.requireNonNull(context.getSource().getEntity());
         boolean isValidRequest = !sender.getHeldItemMainhand().isEmpty() || !sender.getHeldItemOffhand().isEmpty();
-        if(!isValidRequest)
+        if (!isValidRequest)
             throw new CommandException(new TextComponentString("Error: You aren't holding anything"));
         ItemStack selling = sender.getHeldItemMainhand().isEmpty() ? sender.getHeldItemOffhand() : sender.getHeldItemMainhand();
         int amount = context.getArgument("amount", Integer.class);
-        if(amount <= 0)
+        if (amount <= 0)
             throw new CommandException(new TextComponentString("Error: Amount cannot be less than 1"));
         long price = context.getArgument("price", Integer.class);
         if (price < 0)
             throw new CommandException(new TextComponentString("You cannot pay someone negative amount. That would be rude."));
-        String tag;
-        try {
-            tag = context.getArgument("nbt", String.class);
-        } catch(IllegalArgumentException e) {
-            tag = null;
-        }
-        NBTTagCompound nbt;
-        try {
-            nbt = JsonToNBT.getTagFromJson(tag);
-        } catch(CommandSyntaxException e) {
-            nbt = null;
-        }
+        NBTTagCompound nbt = selling.getTag();
+        //context.getArgument("error", Byte.class);
         int itemCount = 0;
-        for(ItemStack stack: sender.inventory.mainInventory) {
-            if(!stack.isEmpty() && Objects.equals(stack.getItem().getRegistryName(), selling.getItem().getRegistryName()) && Objects.equals(nbt, stack.getTag()) && TransactionDatabase.canTransactItem(stack)){
-                if(stack.getCount() + itemCount >= amount)
+        for (ItemStack stack : sender.inventory.mainInventory) {
+            if (!stack.isEmpty() && Objects.equals(stack.getItem().getRegistryName(), selling.getItem().getRegistryName()) && Objects.equals(nbt, stack.getTag()) && TransactionDatabase.canTransactItem(stack)) {
+                if (stack.getCount() + itemCount >= amount)
                     itemCount = amount;
                 else
                     itemCount += stack.getCount();
             }
         }
-        if(itemCount < amount)
+        if (itemCount < amount)
             throw new CommandException(new TextComponentString("Error: You do not have enough of that item in your inventory to make this offer."));
         int i = 0;
-        for(ItemStack stack: sender.inventory.mainInventory) {
-            while(!stack.isEmpty() && Objects.equals(stack.getItem().getRegistryName(), selling.getItem().getRegistryName()) && Objects.equals(nbt, stack.getTag()) && itemCount > 0 && TransactionDatabase.canTransactItem(stack)){
-                if(stack.getCount() > 1)
+        for (ItemStack stack : sender.inventory.mainInventory) {
+            while (!stack.isEmpty() && Objects.equals(stack.getItem().getRegistryName(), selling.getItem().getRegistryName()) && Objects.equals(nbt, stack.getTag()) && itemCount > 0 && TransactionDatabase.canTransactItem(stack)) {
+                if (stack.getCount() > 1)
                     stack.setCount(stack.getCount() - 1);
                 else
                     sender.inventory.mainInventory.set(i, ItemStack.EMPTY);
@@ -234,13 +224,13 @@ class GeCommands {
             }
             i++;
         }
-        if(itemCount > 0)
+        if (itemCount > 0)
             throw new CommandException(new TextComponentString("Error: Something went wrong when removing items from your inventory."));
 
-        boolean madePurchase = TransactionDatabase.getInstance().makeOffer(new SellOffer(selling.getItem().getRegistryName().toString(), amount, price, sender.getUniqueID(), tag));
+        boolean madePurchase = TransactionDatabase.getInstance().makeOffer(new SellOffer(selling.getItem().getRegistryName().toString(), amount, price, sender.getUniqueID(), nbt != null ? nbt.toString() : null));
 
-        Account senderAccount = Account.get(sender);
-        if(madePurchase)
+        Account senderAccount = Account.get(sender.getUniqueID());
+        if (senderAccount != null && madePurchase)
             sender.sendMessage(new TextComponentTranslation("Offer completed! Your balance is now: %s", senderAccount.getBalance()));
         else
             sender.sendMessage(new TextComponentTranslation("Offer succeeded!"));
@@ -300,13 +290,13 @@ class GeCommands {
         int page;
         try {
             page = context.getArgument("page", Integer.class);
-        } catch (CommandException e) {
+        } catch (IllegalArgumentException e) {
             page = 1;
         }
         //Expand page to be the first entry on the page
         page *= 50;
         //Subtract 49 because the first page starts with entry 1
-        page -= 49;
+        page -= 50;
         int orderIndex = page;
         int termLength = 50;
         for (BuyOffer offer : buyOffers) {
@@ -374,7 +364,7 @@ class GeCommands {
         int page;
         try {
             page = context.getArgument("page", Integer.class);
-        } catch (CommandException e) {
+        } catch (IllegalArgumentException e) {
             page = 1;
         }
         //Expand page to be the first entry on the page
@@ -406,7 +396,7 @@ class GeCommands {
         int page;
         try {
             page = context.getArgument("page", Integer.class);
-        } catch (CommandException e) {
+        } catch (IllegalArgumentException e) {
             page = 1;
         }
         //Expand page to be the first entry on the page
