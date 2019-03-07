@@ -23,7 +23,7 @@ plugins {
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'net.cazzar.gradle.modsio'
 
-version = "1.2.0"
+version = "1.2.1"
 group = "the_fireplace.grandexchange"
 archivesBaseName = "GrandExchange-1.13.2"
 

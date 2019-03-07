@@ -7,6 +7,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.CommandSource;
@@ -34,7 +35,6 @@ import java.util.Objects;
 
 class GeCommands {
     private static ArrayList<ResourceLocation> itemResources;
-    @SuppressWarnings("Duplicates")
     static void register(CommandDispatcher<CommandSource> commandDispatcher) {
         itemResources = Lists.newArrayList();
         itemResources.addAll(ForgeRegistries.BLOCKS.getKeys());
@@ -45,17 +45,17 @@ class GeCommands {
                       Commands.argument("item", StringArgumentType.word())
                 .then(Commands.argument("amount", IntegerArgumentType.integer(1, 64*37))
                 .then(Commands.argument("price", IntegerArgumentType.integer(1))
-                .executes(buyCommand)
+                .executes(context -> runBuyCommand(context, null))
                 .then(Commands.argument("nbt", StringArgumentType.greedyString())
-                .executes(buyCommand)
+                .executes(context -> runBuyCommand(context, context.getArgument("nbt", String.class)))
                 )));
         ArgumentBuilder<CommandSource, ?> sellArgs =
                       Commands.argument("item", StringArgumentType.word())
                 .then(Commands.argument("amount", IntegerArgumentType.integer(1, 64*37))
                 .then(Commands.argument("price", IntegerArgumentType.integer(1))
-                .executes(sellCommand)
+                .executes(context -> runSellCommand(context, null))
                 .then(Commands.argument("nbt", StringArgumentType.greedyString())
-                .executes(sellCommand)
+                .executes(context -> runSellCommand(context, context.getArgument("nbt", String.class)))
                 )));
         ArgumentBuilder<CommandSource, ?> sellThisArgs =
                       Commands.argument("amount", IntegerArgumentType.integer(1, 64*37))
@@ -97,24 +97,13 @@ class GeCommands {
         commandDispatcher.register(geCommand);
     }
 
-    private static final Command<CommandSource> buyCommand = context -> {
+    @SuppressWarnings("Duplicates")
+    private static int runBuyCommand(CommandContext<CommandSource> context, String tag) {
         EntityPlayerMP sender = (EntityPlayerMP) Objects.requireNonNull(context.getSource().getEntity());
         ResourceLocation offerResource = new ResourceLocation(context.getArgument("item", String.class));
-        boolean isValidRequest = itemResources.contains(offerResource);
-        if(!isValidRequest)
-            throw new CommandException(new TextComponentString("Error: Item not found"));
         int amount = context.getArgument("amount", Integer.class);
-        if(amount <= 0)
-            throw new CommandException(new TextComponentString("Error: Amount cannot be less than 1"));
         int price = context.getArgument("price", Integer.class);
-        if (price < 0)
-            throw new CommandException(new TextComponentString("You cannot pay someone negative amount. That would be rude."));
-        String tag;
-        try {
-            tag = context.getArgument("nbt", String.class);
-        } catch(IllegalArgumentException e) {
-            tag = null;
-        }
+        validateCommandArgs(offerResource, amount, price);
         Account senderAccount = Account.get(sender);
         if (senderAccount.getBalance() < price*amount)
             throw new InsufficientCreditException();
@@ -126,26 +115,16 @@ class GeCommands {
         else
             sender.sendMessage(new TextComponentTranslation("Offer succeeded! Your balance is now: %s", senderAccount.getBalance()));
         return 1;
-    };
+    }
 
-    private static final Command<CommandSource> sellCommand = context -> {
+    @SuppressWarnings("Duplicates")
+    private static int runSellCommand(CommandContext<CommandSource> context, String tag) {
         EntityPlayerMP sender = (EntityPlayerMP) Objects.requireNonNull(context.getSource().getEntity());
         ResourceLocation offerResource = new ResourceLocation(context.getArgument("item", String.class));
-        boolean isValidRequest = itemResources.contains(offerResource);
-        if(!isValidRequest)
-            throw new CommandException(new TextComponentString("Error: Item not found"));
         int amount = context.getArgument("amount", Integer.class);
-        if(amount <= 0)
-            throw new CommandException(new TextComponentString("Error: Amount cannot be less than 1"));
         int price = context.getArgument("price", Integer.class);
-        if (price < 0)
-            throw new CommandException(new TextComponentString("You cannot pay someone negative amount. That would be rude."));
-        String tag;
-        try {
-            tag = context.getArgument("nbt", String.class);
-        } catch(IllegalArgumentException e) {
-            tag = null;
-        }
+        validateCommandArgs(offerResource, amount, price);
+
         NBTTagCompound nbt = null;
         if(tag != null) {
             try {
@@ -187,8 +166,17 @@ class GeCommands {
         else
             sender.sendMessage(new TextComponentTranslation("Offer succeeded!"));
         return 1;
-    };
+    }
 
+    private static void validateCommandArgs(ResourceLocation offerResource, int price, int amount) throws CommandException {
+        boolean isValidRequest = itemResources.contains(offerResource);
+        if(!isValidRequest)
+            throw new CommandException(new TextComponentString("Error: Item not found"));
+        if(amount <= 0)
+            throw new CommandException(new TextComponentString("Error: Amount cannot be less than 1"));
+        if (price < 0)
+            throw new CommandException(new TextComponentString("You cannot pay someone negative amount. That would be rude."));
+    }
 
     private static final Command<CommandSource> sellThisCommand = context -> {
         EntityPlayerMP sender = (EntityPlayerMP) Objects.requireNonNull(context.getSource().getEntity());
@@ -203,7 +191,6 @@ class GeCommands {
         if (price < 0)
             throw new CommandException(new TextComponentString("You cannot pay someone negative amount. That would be rude."));
         NBTTagCompound nbt = selling.getTag();
-        //context.getArgument("error", Byte.class);
         int itemCount = 0;
         for (ItemStack stack : sender.inventory.mainInventory) {
             if (!stack.isEmpty() && Objects.equals(stack.getItem().getRegistryName(), selling.getItem().getRegistryName()) && Objects.equals(nbt, stack.getTag()) && TransactionDatabase.canTransactItem(stack)) {
