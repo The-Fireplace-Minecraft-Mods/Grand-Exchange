@@ -146,11 +146,13 @@ class GeCommands {
         } catch(IllegalArgumentException e) {
             tag = null;
         }
-        NBTTagCompound nbt;
-        try {
-            nbt = JsonToNBT.getTagFromJson(tag);
-        } catch(CommandSyntaxException e) {
-            nbt = null;
+        NBTTagCompound nbt = null;
+        if(tag != null) {
+            try {
+                nbt = JsonToNBT.getTagFromJson(tag);
+            } catch (CommandSyntaxException e) {
+                //Do nothing
+            }
         }
         int itemCount = 0;
         for(ItemStack stack: sender.inventory.mainInventory) {
