@@ -67,11 +67,13 @@ public class CommandSellThis extends CommandBase {
                 for(ItemStack stack: ((EntityPlayerMP) sender).inventory.mainInventory) {
                     //noinspection ConstantConditions
                     while(!stack.isEmpty() && stack.getItem().getRegistryName().equals(selling.getItem().getRegistryName()) && stack.getMetadata() == selling.getMetadata() && ((!stack.hasTagCompound() && !selling.hasTagCompound()) || stack.getTagCompound().toString().equals(selling.getTagCompound().toString())) && itemCount > 0 && TransactionDatabase.canTransactItem(stack)){
+                        itemCount--;
                         if(stack.getCount() > 1)
                             stack.setCount(stack.getCount() - 1);
-                        else
+                        else {
                             ((EntityPlayerMP) sender).inventory.mainInventory.set(i, ItemStack.EMPTY);
-                        itemCount--;
+                            break;
+                        }
                     }
                     i++;
                 }

@@ -68,11 +68,13 @@ public class CommandSell extends CommandBase {
                 for(ItemStack stack: ((EntityPlayerMP) sender).inventory.mainInventory) {
                     //noinspection ConstantConditions
                     while(!stack.isEmpty() && stack.getItem().getRegistryName().equals(offerResource) && stack.getMetadata() == meta && ((!stack.hasTagCompound() && args.length == 4) || stack.getTagCompound().toString().equals(args[4])) && itemCount > 0 && TransactionDatabase.canTransactItem(stack)){
+                        itemCount--;
                         if(stack.getCount() > 1)
                             stack.setCount(stack.getCount() - 1);
-                        else
+                        else {
                             ((EntityPlayerMP) sender).inventory.mainInventory.set(i, ItemStack.EMPTY);
-                        itemCount--;
+                            break;
+                        }
                     }
                     i++;
                 }
