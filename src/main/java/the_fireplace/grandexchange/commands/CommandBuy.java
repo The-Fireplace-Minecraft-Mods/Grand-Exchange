@@ -3,13 +3,13 @@ package the_fireplace.grandexchange.commands;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
-import the_fireplace.grandeconomy.api.InsufficientCreditException;
-import the_fireplace.grandeconomy.economy.Account;
+import the_fireplace.grandeconomy.api.GrandEconomyApi;
 import net.minecraft.command.*;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
+import the_fireplace.grandeconomy.econhandlers.ge.InsufficientCreditException;
 import the_fireplace.grandexchange.util.SerializationUtils;
 import the_fireplace.grandexchange.util.TransactionDatabase;
 import the_fireplace.grandexchange.market.BuyOffer;
@@ -52,17 +52,16 @@ public class CommandBuy extends CommandBase {
                     throw new CommandException("You cannot pay someone negative amount. That would be rude.");
                 if(args.length == 5 && !args[4].isEmpty() && !SerializationUtils.isValidNBT(args[4]))
                     throw new CommandException("Invalid NBT specified.");
-                Account senderAccount = Account.get((EntityPlayerMP) sender);
-                if (senderAccount.getBalance() < price*amount)
+                if (GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID()) < price*amount)
                     throw new InsufficientCreditException();
 
                 boolean madePurchase = TransactionDatabase.getInstance().makeOffer(new BuyOffer(offerResource.toString(), meta, amount, price, ((EntityPlayerMP) sender).getUniqueID(), args.length == 5 ? args[4] : null));
-                senderAccount.addBalance(-price*amount, false);
+                GrandEconomyApi.takeFromBalance(((EntityPlayerMP) sender).getUniqueID(), price*amount, false);
 
                 if(madePurchase)
-                    sender.sendMessage(new TextComponentTranslation("Purchase succeeded! Your balance is now: %s. You can collect your items with /ge collect", senderAccount.getBalance()));
+                    sender.sendMessage(new TextComponentTranslation("Purchase succeeded! Your balance is now: %s. You can collect your items with /ge collect", GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID())));
                 else
-                    sender.sendMessage(new TextComponentTranslation("Offer succeeded! Your balance is now: %s", senderAccount.getBalance()));
+                    sender.sendMessage(new TextComponentTranslation("Offer succeeded! Your balance is now: %s", GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID())));
                 return;
             } else {
                 throw new CommandException("You must be a player to do this");

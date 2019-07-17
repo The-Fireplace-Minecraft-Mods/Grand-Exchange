@@ -9,7 +9,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
-import the_fireplace.grandeconomy.economy.Account;
+import the_fireplace.grandeconomy.api.GrandEconomyApi;
 import the_fireplace.grandexchange.util.SerializationUtils;
 import the_fireplace.grandexchange.util.TransactionDatabase;
 import the_fireplace.grandexchange.market.SellOffer;
@@ -83,9 +83,8 @@ public class CommandSell extends CommandBase {
 
                 boolean madePurchase = TransactionDatabase.getInstance().makeOffer(new SellOffer(offerResource.toString(), meta, amount, price, ((EntityPlayerMP) sender).getUniqueID(), args.length == 5 ? args[4] : null));
 
-                Account senderAccount = Account.get((EntityPlayerMP) sender);
                 if(madePurchase)
-                    sender.sendMessage(new TextComponentTranslation("Offer completed! Your balance is now: %s", senderAccount.getBalance()));
+                    sender.sendMessage(new TextComponentTranslation("Offer completed! Your balance is now: %s", GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID())));
                 else
                     sender.sendMessage(new TextComponentTranslation("Offer succeeded!"));
                 return;
