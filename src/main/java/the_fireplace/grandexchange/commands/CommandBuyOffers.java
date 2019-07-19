@@ -47,14 +47,13 @@ public class CommandBuyOffers extends CommandBase {
                 } catch (NumberFormatException e) {
                     throw new CommandException("Invalid page number!");
                 }
-            
+
             List<String> buyresults = Lists.newArrayList();
-            String buysearch = "";
             if(args.length == 2){
-            	buysearch = args[1];
+                String buysearch = args[1];
                 buyresults = Utils.getListOfStringsMatchingString(buysearch, Utils.getBuyNames(offers));
             }
-            
+
             //Expand page to be the first entry on the page
             page *= 50;
             //Subtract 50 because the first page starts with entry 0
@@ -67,9 +66,10 @@ public class CommandBuyOffers extends CommandBase {
                     break;
                 if(!buyresults.isEmpty())
                 {
-                	if(buyresults.contains(offer.getItemResourceName())){
-                		sender.sendMessage(new TextComponentString(MinecraftColors.BLUE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " wanted for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
-                	}                } else {
+                    if(buyresults.contains(offer.getItemResourceName())){
+                        sender.sendMessage(new TextComponentString(MinecraftColors.BLUE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " wanted for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
+                    }
+                } else {
                     sender.sendMessage(new TextComponentString(MinecraftColors.BLUE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " wanted for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getAmount()) + " each"));
                 }
             }

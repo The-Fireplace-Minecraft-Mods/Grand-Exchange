@@ -41,11 +41,11 @@ public class CommandMyOffers extends CommandBase {
             List<BuyOffer> buyOffers = Lists.newArrayList();
             for (List<BuyOffer> offerList : TransactionDatabase.getBuyOffers().values())
                 buyOffers.addAll(offerList);
-            
+
             List<SellOffer> sellOffers = Lists.newArrayList();
             for (List<SellOffer> offerList : TransactionDatabase.getSellOffers().values())
                 sellOffers.addAll(offerList);
-            
+
             buyOffers.removeIf(offer -> !offer.getOwner().equals(((EntityPlayerMP) sender).getUniqueID()));
             sellOffers.removeIf(offer -> !offer.getOwner().equals(((EntityPlayerMP) sender).getUniqueID()));
 
@@ -56,14 +56,13 @@ public class CommandMyOffers extends CommandBase {
                 } catch (NumberFormatException e) {
                     throw new CommandException("Invalid page number!");
                 }
-            
+
             List<String> buyresults = Lists.newArrayList();
-            String buysearch = "";
-            if(args.length == 2){
-            	buysearch = args[1];
+            if(args != null && args.length == 2){
+                String buysearch = args[1];
                 buyresults = Utils.getListOfStringsMatchingString(buysearch, Utils.getBuyNames(buyOffers));
             }
-            
+
             //Expand page to be the first entry on the page
             page *= 50;
             //Subtract 50 because the first page starts with entry 0
@@ -75,36 +74,34 @@ public class CommandMyOffers extends CommandBase {
                     continue;
                 if (termLength-- <= 0)
                     break;
-                
+
                 if(!buyresults.isEmpty())
                 {
-                	if(buyresults.contains(offer.getItemResourceName())){
-                		sender.sendMessage(new TextComponentString(MinecraftColors.BLUE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " wanted for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
-                	}
+                    if(buyresults.contains(offer.getItemResourceName())){
+                        sender.sendMessage(new TextComponentString(MinecraftColors.BLUE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " wanted for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
+                    }
                 } else {
-                	sender.sendMessage(new TextComponentString(MinecraftColors.YELLOW + orderIndex++ + ". " + MinecraftColors.BLUE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " wanted for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
+                    sender.sendMessage(new TextComponentString(MinecraftColors.YELLOW + orderIndex++ + ". " + MinecraftColors.BLUE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " wanted for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
                 }
             }
-            
-            List<String> sellresults = Lists.newArrayList();
-            String sellsearch = "";
-            if(args.length == 2){
-            	sellsearch = args[1];
-                sellresults = Utils.getListOfStringsMatchingString(sellsearch, Utils.getSellNames(sellOffers));
 
+            List<String> sellresults = Lists.newArrayList();
+            if(args != null && args.length == 2){
+                String sellsearch = args[1];
+                sellresults = Utils.getListOfStringsMatchingString(sellsearch, Utils.getSellNames(sellOffers));
             }
 
             for (SellOffer offer : sellOffers) {
                 if (page-- > 0)
-                    continue; 
+                    continue;
                 if (termLength-- <= 0)
                     break;
                 if(!sellresults.isEmpty())
                 {
-                	if(sellresults.contains(offer.getItemResourceName())){
-                		sender.sendMessage(new TextComponentString(MinecraftColors.PURPLE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " being sold for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
-                	}                
-                } else if(sellresults.isEmpty()){
+                    if(sellresults.contains(offer.getItemResourceName())){
+                        sender.sendMessage(new TextComponentString(MinecraftColors.PURPLE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " being sold for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
+                    }
+                } else {
                     sender.sendMessage(new TextComponentString(MinecraftColors.YELLOW + orderIndex++ + ". " + MinecraftColors.PURPLE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " being sold for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
                 }
             }

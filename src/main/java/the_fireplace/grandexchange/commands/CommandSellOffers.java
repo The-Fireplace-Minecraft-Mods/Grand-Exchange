@@ -52,11 +52,9 @@ public class CommandSellOffers extends CommandBase {
             page -= 50;
             int termLength = 50;
             List<String> sellresults = Lists.newArrayList();
-            String sellsearch = "";
             if(args.length == 2){
-            	sellsearch = args[1];
+                String sellsearch = args[1];
                 sellresults = Utils.getListOfStringsMatchingString(sellsearch, Utils.getSellNames(offers));
-
             }
 
             for (SellOffer offer : offers) {
@@ -66,9 +64,9 @@ public class CommandSellOffers extends CommandBase {
                     break;
                 if(!sellresults.isEmpty())
                 {
-                	if(sellresults.contains(offer.getItemResourceName())){
-                		sender.sendMessage(new TextComponentString(MinecraftColors.PURPLE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " being sold for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
-                	}
+                    if(sellresults.contains(offer.getItemResourceName())){
+                        sender.sendMessage(new TextComponentString(MinecraftColors.PURPLE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " being sold for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
+                    }
                 } else {
                     sender.sendMessage(new TextComponentString(MinecraftColors.PURPLE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " being sold for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
                 }
