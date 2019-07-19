@@ -25,7 +25,7 @@ import java.util.Objects;
 public class CommandSellThis extends CommandBase {
     @Override
     public String getName() {
-        return "sell";
+        return "sellthis";
     }
 
     @Override

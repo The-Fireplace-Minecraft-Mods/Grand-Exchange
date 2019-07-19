@@ -111,8 +111,7 @@ public class CommandMyOffers extends CommandBase {
 
             return;
         }
-        //noinspection RedundantArrayCreation
-        throw new WrongUsageException("/ge myoffers [page] [filter]", new Object[0]);
+        throw new WrongUsageException(getUsage(sender));
     }
 
     @Override

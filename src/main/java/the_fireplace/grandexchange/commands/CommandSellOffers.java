@@ -74,7 +74,7 @@ public class CommandSellOffers extends CommandBase {
             if(offers.isEmpty())
                 sender.sendMessage(new TextComponentString("Nobody is selling anything."));
         } else
-            throw new WrongUsageException("/ge selloffers [page] [filter]");
+            throw new WrongUsageException(getUsage(sender));
     }
 
     @Override

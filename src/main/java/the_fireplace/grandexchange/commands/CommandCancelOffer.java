@@ -20,7 +20,7 @@ public class CommandCancelOffer extends CommandBase {
     @Override
     @Nonnull
     public String getName() {
-        return "canceloffer <offer number>";
+        return "canceloffer";
     }
 
     @Override
@@ -70,8 +70,7 @@ public class CommandCancelOffer extends CommandBase {
                 sender.sendMessage(new TextComponentString("You are not buying or selling anything."));
             return;
         }
-        //noinspection RedundantArrayCreation
-        throw new WrongUsageException("/ge canceloffer <offer number>", new Object[0]);
+        throw new WrongUsageException(getUsage(sender));
     }
 
     @Override

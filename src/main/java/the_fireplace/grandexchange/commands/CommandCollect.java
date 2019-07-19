@@ -21,7 +21,7 @@ import java.util.List;
 public class CommandCollect extends CommandBase {
     @Override
     public String getName() {
-        return "ge collect";
+        return "collect";
     }
 
     @Override
