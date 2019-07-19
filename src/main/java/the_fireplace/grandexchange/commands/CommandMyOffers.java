@@ -1,6 +1,12 @@
 package the_fireplace.grandexchange.commands;
 
+import java.util.List;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import com.google.common.collect.Lists;
+
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -9,14 +15,12 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentString;
 import the_fireplace.grandeconomy.api.GrandEconomyApi;
+import the_fireplace.grandexchange.market.BuyOffer;
+import the_fireplace.grandexchange.market.Offer;
+import the_fireplace.grandexchange.market.SellOffer;
 import the_fireplace.grandexchange.util.MinecraftColors;
 import the_fireplace.grandexchange.util.TransactionDatabase;
-import the_fireplace.grandexchange.market.BuyOffer;
-import the_fireplace.grandexchange.market.SellOffer;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.List;
+import the_fireplace.grandexchange.util.Utils;
 
 public class CommandMyOffers extends CommandBase {
     @Override
@@ -28,7 +32,7 @@ public class CommandMyOffers extends CommandBase {
     @Override
     @Nonnull
     public String getUsage(@Nullable ICommandSender sender) {
-        return "/ge myoffers [page]";
+        return "/ge myoffers [page] [filter]";
     }
 
     @Override
@@ -37,9 +41,11 @@ public class CommandMyOffers extends CommandBase {
             List<BuyOffer> buyOffers = Lists.newArrayList();
             for (List<BuyOffer> offerList : TransactionDatabase.getBuyOffers().values())
                 buyOffers.addAll(offerList);
+            
             List<SellOffer> sellOffers = Lists.newArrayList();
             for (List<SellOffer> offerList : TransactionDatabase.getSellOffers().values())
                 sellOffers.addAll(offerList);
+            
             buyOffers.removeIf(offer -> !offer.getOwner().equals(((EntityPlayerMP) sender).getUniqueID()));
             sellOffers.removeIf(offer -> !offer.getOwner().equals(((EntityPlayerMP) sender).getUniqueID()));
 
@@ -50,26 +56,57 @@ public class CommandMyOffers extends CommandBase {
                 } catch (NumberFormatException e) {
                     throw new CommandException("Invalid page number!");
                 }
+            
+            List<String> buyresults = Lists.newArrayList();
+            String buysearch = "";
+            if(args.length == 2){
+            	buysearch = args[1];
+                buyresults = Utils.getListOfStringsMatchingString(buysearch, Utils.getBuyNames(buyOffers));
+            }
+            
             //Expand page to be the first entry on the page
             page *= 50;
             //Subtract 50 because the first page starts with entry 0
             page -= 50;
             int orderIndex = page;
             int termLength = 50;
-            for (BuyOffer offer : buyOffers) {
+            for (Offer offer : buyOffers) {
                 if (page-- > 0)
                     continue;
                 if (termLength-- <= 0)
                     break;
-                sender.sendMessage(new TextComponentString(MinecraftColors.YELLOW + orderIndex++ + ". " + MinecraftColors.BLUE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " wanted for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
+                
+                if(!buyresults.isEmpty())
+                {
+                	if(buyresults.contains(offer.getItemResourceName())){
+                		sender.sendMessage(new TextComponentString(MinecraftColors.BLUE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " wanted for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
+                	}
+                } else {
+                	sender.sendMessage(new TextComponentString(MinecraftColors.YELLOW + orderIndex++ + ". " + MinecraftColors.BLUE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " wanted for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
+                }
+            }
+            
+            List<String> sellresults = Lists.newArrayList();
+            String sellsearch = "";
+            if(args.length == 2){
+            	sellsearch = args[1];
+                sellresults = Utils.getListOfStringsMatchingString(sellsearch, Utils.getSellNames(sellOffers));
+
             }
 
             for (SellOffer offer : sellOffers) {
                 if (page-- > 0)
-                    continue;
+                    continue; 
                 if (termLength-- <= 0)
                     break;
-                sender.sendMessage(new TextComponentString(MinecraftColors.YELLOW + orderIndex++ + ". " + MinecraftColors.PURPLE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " being sold for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
+                if(!sellresults.isEmpty())
+                {
+                	if(sellresults.contains(offer.getItemResourceName())){
+                		sender.sendMessage(new TextComponentString(MinecraftColors.PURPLE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " being sold for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
+                	}                
+                } else if(sellresults.isEmpty()){
+                    sender.sendMessage(new TextComponentString(MinecraftColors.YELLOW + orderIndex++ + ". " + MinecraftColors.PURPLE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " being sold for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
+                }
             }
 
             if(buyOffers.isEmpty() && sellOffers.isEmpty())
@@ -78,7 +115,7 @@ public class CommandMyOffers extends CommandBase {
             return;
         }
         //noinspection RedundantArrayCreation
-        throw new WrongUsageException("/ge myoffers [page]", new Object[0]);
+        throw new WrongUsageException("/ge myoffers [page] [filter]", new Object[0]);
     }
 
     @Override
