@@ -111,7 +111,7 @@ public class CommandGe extends CommandBase {
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos)
     {
         if(args.length == 1){
-            return getListOfStringsMatchingLastWord(args, "buy","sell","identify","collect","buyoffers","selloffers","myoffers","cenceloffer","help");
+            return getListOfStringsMatchingLastWord(args, "buy","sell","identify","collect","buyoffers","selloffers","myoffers","canceloffer","help");
         }
         return Collections.emptyList();
     }

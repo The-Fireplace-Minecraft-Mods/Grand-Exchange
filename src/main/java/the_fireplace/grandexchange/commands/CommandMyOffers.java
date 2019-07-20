@@ -32,7 +32,7 @@ public class CommandMyOffers extends CommandBase {
     @Override
     @Nonnull
     public String getUsage(@Nullable ICommandSender sender) {
-        return "/ge myoffers [page] [filter]";
+        return "/ge myoffers [filter] [page]";
     }
 
     @Override
@@ -50,16 +50,16 @@ public class CommandMyOffers extends CommandBase {
             sellOffers.removeIf(offer -> !offer.getOwner().equals(((EntityPlayerMP) sender).getUniqueID()));
 
             int page = 1;
-            if (args != null && args.length == 1)
+            if (args != null && args.length == 2)
                 try {
-                    page = Integer.parseInt(args[0]);
+                    page = Integer.parseInt(args[1]);
                 } catch (NumberFormatException e) {
                     throw new CommandException("Invalid page number!");
                 }
 
             List<String> buyresults = Lists.newArrayList();
-            if(args != null && args.length == 2){
-                String buysearch = args[1];
+            if(args != null && args.length >= 1){
+                String buysearch = args[0];
                 buyresults = Utils.getListOfStringsMatchingString(buysearch, Utils.getBuyNames(buyOffers));
             }
 
@@ -69,41 +69,52 @@ public class CommandMyOffers extends CommandBase {
             page -= 50;
             int orderIndex = page;
             int termLength = 50;
+            boolean buyresult = false;
             for (Offer offer : buyOffers) {
                 if (page-- > 0)
                     continue;
                 if (termLength-- <= 0)
                     break;
 
-                if(!buyresults.isEmpty())
+                if(args.length >= 1)
                 {
                     if(buyresults.contains(offer.getItemResourceName())){
+                    	buyresult=true;
                         sender.sendMessage(new TextComponentString(MinecraftColors.BLUE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " wanted for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
                     }
+                    
                 } else {
                     sender.sendMessage(new TextComponentString(MinecraftColors.YELLOW + orderIndex++ + ". " + MinecraftColors.BLUE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " wanted for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
                 }
             }
+            if(!buyresult && args.length >= 1){
+            	sender.sendMessage(new TextComponentString(MinecraftColors.RED + "No buy results found"));
+            }
 
             List<String> sellresults = Lists.newArrayList();
-            if(args != null && args.length == 2){
-                String sellsearch = args[1];
+            if(args != null && args.length >= 1){
+                String sellsearch = args[0];
                 sellresults = Utils.getListOfStringsMatchingString(sellsearch, Utils.getSellNames(sellOffers));
             }
 
+            boolean sellresult=false;
             for (SellOffer offer : sellOffers) {
                 if (page-- > 0)
                     continue;
                 if (termLength-- <= 0)
                     break;
-                if(!sellresults.isEmpty())
+                if(args.length >= 1)
                 {
                     if(sellresults.contains(offer.getItemResourceName())){
+                    	sellresult=true;
                         sender.sendMessage(new TextComponentString(MinecraftColors.PURPLE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " being sold for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
                     }
                 } else {
                     sender.sendMessage(new TextComponentString(MinecraftColors.YELLOW + orderIndex++ + ". " + MinecraftColors.PURPLE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " being sold for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
                 }
+            }
+            if(!sellresult && args.length >= 1){
+            	sender.sendMessage(new TextComponentString(MinecraftColors.RED + "No sell results found"));
             }
 
             if(buyOffers.isEmpty() && sellOffers.isEmpty())

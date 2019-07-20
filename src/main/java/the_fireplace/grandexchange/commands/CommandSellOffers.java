@@ -40,9 +40,9 @@ public class CommandSellOffers extends CommandBase {
             for (List<SellOffer> offerList : TransactionDatabase.getSellOffers().values())
                 offers.addAll(offerList);
             int page = 1;
-            if (args.length == 1)
+            if (args.length == 2)
                 try {
-                    page = Integer.parseInt(args[0]);
+                    page = Integer.parseInt(args[1]);
                 } catch (NumberFormatException e) {
                     throw new CommandException("Invalid page number!");
                 }
@@ -52,25 +52,29 @@ public class CommandSellOffers extends CommandBase {
             page -= 50;
             int termLength = 50;
             List<String> sellresults = Lists.newArrayList();
-            if(args.length == 2){
-                String sellsearch = args[1];
+            if(args.length >= 1){
+                String sellsearch = args[0];
                 sellresults = Utils.getListOfStringsMatchingString(sellsearch, Utils.getSellNames(offers));
             }
 
+            boolean result = false;
             for (SellOffer offer : offers) {
                 if (page-- > 0)
                     continue;
                 if (termLength-- <= 0)
                     break;
-                if(!sellresults.isEmpty())
+                if(args.length >= 1)
                 {
                     if(sellresults.contains(offer.getItemResourceName())){
+                    	result=true;
                         sender.sendMessage(new TextComponentString(MinecraftColors.PURPLE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " being sold for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
                     }
                 } else {
                     sender.sendMessage(new TextComponentString(MinecraftColors.PURPLE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " being sold for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
                 }
             }
+            if(!result && args.length >= 1)
+            	sender.sendMessage(new TextComponentString(MinecraftColors.RED + "No results found"));
             if(offers.isEmpty())
                 sender.sendMessage(new TextComponentString("Nobody is selling anything."));
         } else
