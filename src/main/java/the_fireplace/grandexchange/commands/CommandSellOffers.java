@@ -54,6 +54,8 @@ public class CommandSellOffers extends CommandBase {
             List<String> sellresults = Lists.newArrayList();
             if(args.length >= 1){
                 String sellsearch = args[0];
+                if(!sellsearch.contains(":")) sellsearch = "minecraft:"+ sellsearch;
+                if(args[0].equals("*")) sellsearch = "";
                 sellresults = Utils.getListOfStringsMatchingString(sellsearch, Utils.getSellNames(offers));
             }
 

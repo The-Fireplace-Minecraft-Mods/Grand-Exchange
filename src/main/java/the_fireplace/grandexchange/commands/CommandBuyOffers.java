@@ -51,6 +51,8 @@ public class CommandBuyOffers extends CommandBase {
             List<String> buyresults = Lists.newArrayList();
             if(args.length >= 1){
                 String buysearch = args[0];
+                if(!buysearch.contains(":")) buysearch = "minecraft:"+ buysearch;
+                if(args[0].equals("*")) buysearch = "";
                 buyresults = Utils.getListOfStringsMatchingString(buysearch, Utils.getBuyNames(offers));
             }
 

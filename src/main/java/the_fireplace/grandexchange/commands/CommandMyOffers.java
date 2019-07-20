@@ -60,6 +60,8 @@ public class CommandMyOffers extends CommandBase {
             List<String> buyresults = Lists.newArrayList();
             if(args != null && args.length >= 1){
                 String buysearch = args[0];
+                if(!buysearch.contains(":")) buysearch = "minecraft:"+ buysearch;
+                if(args[0].equals("*")) buysearch = "";
                 buyresults = Utils.getListOfStringsMatchingString(buysearch, Utils.getBuyNames(buyOffers));
             }
 
@@ -94,6 +96,8 @@ public class CommandMyOffers extends CommandBase {
             List<String> sellresults = Lists.newArrayList();
             if(args != null && args.length >= 1){
                 String sellsearch = args[0];
+                if(!sellsearch.contains(":")) sellsearch = "minecraft:"+ sellsearch;
+                if(args[0].equals("*")) sellsearch = "";
                 sellresults = Utils.getListOfStringsMatchingString(sellsearch, Utils.getSellNames(sellOffers));
             }
 
