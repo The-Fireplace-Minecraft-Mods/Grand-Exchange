@@ -29,7 +29,7 @@ public class CommandSellOffers extends CommandBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "/ge selloffers [page] [filter]";
+        return "/ge selloffers [filter] [page]";
     }
 
     @SuppressWarnings("Duplicates")
@@ -54,8 +54,8 @@ public class CommandSellOffers extends CommandBase {
             List<String> sellresults = Lists.newArrayList();
             if(args.length >= 1){
                 String sellsearch = args[0];
-                if(!sellsearch.contains(":")) sellsearch = "minecraft:"+ sellsearch;
-                if(args[0].equals("*")) sellsearch = "";
+                if(sellsearch.matches("^[a-zA-Z_]*$")) sellsearch = "minecraft:"+ sellsearch;
+                else if(sellsearch.equals("any") || sellsearch.equals("*")) sellsearch = ".*";
                 sellresults = Utils.getListOfStringsMatchingString(sellsearch, Utils.getSellNames(offers));
             }
 

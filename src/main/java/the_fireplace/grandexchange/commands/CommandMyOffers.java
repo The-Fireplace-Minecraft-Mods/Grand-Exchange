@@ -58,10 +58,10 @@ public class CommandMyOffers extends CommandBase {
                 }
 
             List<String> buyresults = Lists.newArrayList();
-            if(args != null && args.length >= 1){
+            if(args != null && args.length >= 1) {
                 String buysearch = args[0];
-                if(!buysearch.contains(":")) buysearch = "minecraft:"+ buysearch;
-                if(args[0].equals("*")) buysearch = "";
+                if(buysearch.matches("^[a-zA-Z_]*$")) buysearch = "minecraft:"+ buysearch;
+                else if(buysearch.equals("any") || buysearch.equals("*")) buysearch = ".*";
                 buyresults = Utils.getListOfStringsMatchingString(buysearch, Utils.getBuyNames(buyOffers));
             }
 
@@ -78,7 +78,7 @@ public class CommandMyOffers extends CommandBase {
                 if (termLength-- <= 0)
                     break;
 
-                if(args.length >= 1)
+                if(args != null && args.length >= 1)
                 {
                     if(buyresults.contains(offer.getItemResourceName())){
                     	buyresult=true;
@@ -89,15 +89,15 @@ public class CommandMyOffers extends CommandBase {
                     sender.sendMessage(new TextComponentString(MinecraftColors.YELLOW + orderIndex++ + ". " + MinecraftColors.BLUE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " wanted for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
                 }
             }
-            if(!buyresult && args.length >= 1){
+            if(args != null && !buyresult && args.length >= 1){
             	sender.sendMessage(new TextComponentString(MinecraftColors.RED + "No buy results found"));
             }
 
             List<String> sellresults = Lists.newArrayList();
             if(args != null && args.length >= 1){
                 String sellsearch = args[0];
-                if(!sellsearch.contains(":")) sellsearch = "minecraft:"+ sellsearch;
-                if(args[0].equals("*")) sellsearch = "";
+                if(sellsearch.matches("^[a-zA-Z_]*$")) sellsearch = "minecraft:"+ sellsearch;
+                else if(sellsearch.equals("any") || sellsearch.equals("*")) sellsearch = ".*";
                 sellresults = Utils.getListOfStringsMatchingString(sellsearch, Utils.getSellNames(sellOffers));
             }
 
@@ -107,7 +107,7 @@ public class CommandMyOffers extends CommandBase {
                     continue;
                 if (termLength-- <= 0)
                     break;
-                if(args.length >= 1)
+                if(args != null && args.length >= 1)
                 {
                     if(sellresults.contains(offer.getItemResourceName())){
                     	sellresult=true;

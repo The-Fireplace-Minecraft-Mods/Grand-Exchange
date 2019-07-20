@@ -30,7 +30,7 @@ public class CommandBuyOffers extends CommandBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "/ge buyoffers [page] [filter]";
+        return "/ge buyoffers [filter] [page]";
     }
 
     @SuppressWarnings("Duplicates")
@@ -51,8 +51,8 @@ public class CommandBuyOffers extends CommandBase {
             List<String> buyresults = Lists.newArrayList();
             if(args.length >= 1){
                 String buysearch = args[0];
-                if(!buysearch.contains(":")) buysearch = "minecraft:"+ buysearch;
-                if(args[0].equals("*")) buysearch = "";
+                if(buysearch.matches("^[a-zA-Z_]*$")) buysearch = "minecraft:"+ buysearch;
+                else if(buysearch.equals("any") || buysearch.equals("*")) buysearch = ".*";
                 buyresults = Utils.getListOfStringsMatchingString(buysearch, Utils.getBuyNames(offers));
             }
 
