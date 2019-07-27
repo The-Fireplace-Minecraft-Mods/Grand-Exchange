@@ -1,5 +1,6 @@
 package the_fireplace.grandexchange.commands;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -12,10 +13,13 @@ import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import the_fireplace.grandeconomy.api.GrandEconomyApi;
 import the_fireplace.grandexchange.market.SellOffer;
+import the_fireplace.grandexchange.util.ChatPageUtil;
 import the_fireplace.grandexchange.util.MinecraftColors;
+import the_fireplace.grandexchange.util.TextStyles;
 import the_fireplace.grandexchange.util.TransactionDatabase;
 import the_fireplace.grandexchange.util.Utils;
 
@@ -46,39 +50,43 @@ public class CommandSellOffers extends CommandBase {
                 } catch (NumberFormatException e) {
                     throw new CommandException("Invalid page number!");
                 }
-            //Expand page to be the first entry on the page
-            page *= 50;
-            //Subtract 50 because the first page starts with entry 0
-            page -= 50;
-            int termLength = 50;
+
             List<String> sellresults = Lists.newArrayList();
+            
+            String sellsearch;
             if(args.length >= 1){
-                String sellsearch = args[0];
+                sellsearch = args[0];
                 if(sellsearch.matches("^[a-zA-Z_]*$")) sellsearch = "minecraft:"+ sellsearch;
                 else if(sellsearch.equals("any") || sellsearch.equals("*")) sellsearch = ".*";
                 sellresults = Utils.getListOfStringsMatchingString(sellsearch, Utils.getSellNames(offers));
+                
+                final List<String> finalSellResults = sellresults;
+
+                offers.removeIf(offer -> !finalSellResults.contains(offer.getItemResourceName()));
+            } else {
+            	sellsearch = ".*";
             }
 
+            ArrayList<ITextComponent> messages = Lists.newArrayList();
+            
             boolean result = false;
             for (SellOffer offer : offers) {
-                if (page-- > 0)
-                    continue;
-                if (termLength-- <= 0)
-                    break;
-                if(args.length >= 1)
+            	if(args.length >= 1)
                 {
-                    if(sellresults.contains(offer.getItemResourceName())){
+                    if(sellsearch.contains(offer.getItemResourceName())){
                     	result=true;
-                        sender.sendMessage(offer.getOfferChatMessage(sender));
+                        messages.add(offer.getOfferChatMessage(sender));
                     }
                 } else {
-                    sender.sendMessage(offer.getOfferChatMessage(sender));
+                    messages.add(offer.getOfferChatMessage(sender));
                 }
             }
             if(!result && args.length >= 1)
-            	sender.sendMessage(new TextComponentString(MinecraftColors.RED + "No results found"));
+            	sender.sendMessage(new TextComponentString("No results found").setStyle(TextStyles.RED));
             if(offers.isEmpty())
                 sender.sendMessage(new TextComponentString("Nobody is selling anything."));
+            else
+                ChatPageUtil.showPaginatedChat(sender, "/ge selloffers " + sellsearch + " %s", messages, page);
         } else
             throw new WrongUsageException(getUsage(sender));
     }

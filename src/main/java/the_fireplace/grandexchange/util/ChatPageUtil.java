@@ -13,10 +13,11 @@ public class ChatPageUtil {
 
     public static void showPaginatedChat(ICommandSender sender, String command, List<ITextComponent> items, int page) {
         int resultsOnPage = 7;
+        int current = page;
         int totalPageCount = items.size() % resultsOnPage > 0 ? (items.size()/resultsOnPage)+1 : items.size()/resultsOnPage;
 
-        ITextComponent counter = new TextComponentString("Page: " + page + "/" + totalPageCount);
-        ITextComponent top = new TextComponentString(MinecraftColors.GREEN + "-----------------").appendSibling(counter).appendText(MinecraftColors.GREEN + "-------------------");
+        ITextComponent counter = new TextComponentString("Page: " + current + "/" + totalPageCount);
+        ITextComponent top = new TextComponentString("-----------------").setStyle(TextStyles.GREEN).appendSibling(counter).appendText("-------------------").setStyle(TextStyles.GREEN);
 
         //Expand page to be the first entry on the page
         page *= resultsOnPage;
@@ -33,9 +34,9 @@ public class ChatPageUtil {
             printItems.add(item);
         }
 
-        ITextComponent nextButton = page < totalPageCount ? new TextComponentString("[Next]").setStyle(new Style().setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format(command, page+1)))) : new TextComponentString("-----");
-        ITextComponent prevButton = page > 1 ? new TextComponentString("[Previous]").setStyle(new Style().setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format(command, page-1)))) : new TextComponentString("------");
-        ITextComponent bottom = new TextComponentString(MinecraftColors.GREEN + "---------------").appendSibling(prevButton).appendText(MinecraftColors.GREEN + "---").appendSibling(nextButton).appendText(MinecraftColors.GREEN + "-------------");
+        ITextComponent nextButton = current < totalPageCount ? new TextComponentString("[Next]").setStyle(new Style().setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format(command, current+1)))) : new TextComponentString("-----");
+        ITextComponent prevButton = current > 1 ? new TextComponentString("[Previous]").setStyle(new Style().setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format(command, current-1)))) : new TextComponentString("------");
+        ITextComponent bottom = new TextComponentString("---------------").setStyle(TextStyles.GREEN).appendSibling(prevButton).appendText("---").setStyle(TextStyles.GREEN).appendSibling(nextButton).appendText("-------------").setStyle(TextStyles.GREEN);
 
         sender.sendMessage(top);
 

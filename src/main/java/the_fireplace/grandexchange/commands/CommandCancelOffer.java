@@ -29,7 +29,6 @@ public class CommandCancelOffer extends CommandBase {
         return "/ge canceloffer <offer number>";
     }
 
-    @SuppressWarnings("Duplicates")
     @Override
     public void execute(@Nullable MinecraftServer server, @Nonnull ICommandSender sender, @Nullable String[] args) throws CommandException {
         if(sender instanceof EntityPlayerMP) {
