@@ -1,5 +1,7 @@
 package the_fireplace.grandexchange.market;
 
+import net.minecraft.command.ICommandSender;
+import net.minecraft.util.text.ITextComponent;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
@@ -54,4 +56,6 @@ public abstract class Offer implements Serializable {
 		timestamp = System.currentTimeMillis();
 		amount -= reduceBy;
 	}
+
+	public abstract ITextComponent getOfferChatMessage(ICommandSender sender);
 }

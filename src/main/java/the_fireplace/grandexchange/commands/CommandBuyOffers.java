@@ -14,14 +14,9 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.event.ClickEvent;
-import the_fireplace.grandeconomy.api.GrandEconomyApi;
 import the_fireplace.grandexchange.market.BuyOffer;
-import the_fireplace.grandexchange.util.MinecraftColors;
-import the_fireplace.grandexchange.util.TransactionDatabase;
-import the_fireplace.grandexchange.util.Utils;
+import the_fireplace.grandexchange.util.*;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -51,8 +46,6 @@ public class CommandBuyOffers extends CommandBase {
                     throw new CommandException("Invalid page number!");
                 }
             
-            int pageNum = page;
-            
             String buysearch;
             List<String> buyresults = Lists.newArrayList();
             if(args.length >= 1){
@@ -60,59 +53,32 @@ public class CommandBuyOffers extends CommandBase {
                 if(buysearch.matches("^[a-zA-Z_]*$")) buysearch = "minecraft:"+ buysearch;
                 else if(buysearch.equals("any") || buysearch.equals("*")) buysearch = ".*";
                 buyresults = Utils.getListOfStringsMatchingString(buysearch, Utils.getBuyNames(offers));
-                
-                
-                List<BuyOffer> tmp = new ArrayList<BuyOffer>();
-                for(BuyOffer offer : offers){
-                	if(buyresults.contains(offer.getItemResourceName()))
-                		tmp.add(offer);
-                }
-                offers = tmp;
-                
+                final List<String> finalBuyResults = buyresults;
+
+                offers.removeIf(offer -> !finalBuyResults.contains(offer.getItemResourceName()));
             } else {
             	buysearch = ".*";
             }
-            
-            int resultsOnPage = 5;
-            int total = offers.size()%resultsOnPage >0 ? (offers.size()/resultsOnPage)+1 : offers.size()/resultsOnPage;
 
-            sender.sendMessage(new TextComponentString("/ge buyoffers " + buysearch + " " + (pageNum+1 > total ? pageNum : pageNum+1)));
-
-            ITextComponent counter = new TextComponentString("Page: " + pageNum + "/" + total);
-            ITextComponent top = new TextComponentString(MinecraftColors.GREEN + "-----------------").appendSibling(counter).appendText(MinecraftColors.GREEN + "-------------------");
-            
-            //Expand page to be the first entry on the page
-            page *= resultsOnPage;
-            //Subtract 50 because the first page starts with entry 0
-            page -= resultsOnPage;
-            int termLength = resultsOnPage;
+            ArrayList<ITextComponent> messages = Lists.newArrayList();
             boolean result=false;
-            sender.sendMessage(top);
             for (BuyOffer offer : offers) {
-                if (page-- > 0)
-                    continue;
-                if (termLength-- <= 0)
-                    break;
                 if(args.length >= 1)
                 {
                     if(buyresults.contains(offer.getItemResourceName())){
                     	result=true;
-                        sender.sendMessage(new TextComponentString(MinecraftColors.BLUE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " wanted for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
+                        messages.add(offer.getOfferChatMessage(sender));
                     }
                 } else {
-                    sender.sendMessage(new TextComponentString(MinecraftColors.BLUE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " wanted for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getAmount()) + " each"));
+                    messages.add(offer.getOfferChatMessage(sender));
                 }
             }
             if(!result && args.length >= 1 && !offers.isEmpty())
-            	sender.sendMessage(new TextComponentString(MinecraftColors.RED + "No results found"));
-            if(offers.isEmpty())
+            	sender.sendMessage(new TextComponentString("No results found").setStyle(TextStyles.RED));
+            else if(offers.isEmpty())
                 sender.sendMessage(new TextComponentString("Nobody is buying anything."));
-            
-            ITextComponent nextButton = new TextComponentString("[Next]").setStyle(new Style().setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ge buyoffers " + buysearch + " " + (pageNum+1 > total ? pageNum : pageNum+1))));
-            ITextComponent prevButton = new TextComponentString("[Previous]").setStyle(new Style().setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ge buyoffers " +  buysearch + " " + (pageNum-1 < 1 ? pageNum : pageNum-1))));
-            ITextComponent bottom = new TextComponentString(MinecraftColors.GREEN + "---------------").appendSibling(prevButton).appendText(MinecraftColors.GREEN + "---").appendSibling(nextButton).appendText(MinecraftColors.GREEN + "-------------");
-            
-            sender.sendMessage(bottom);
+            else
+                ChatPageUtil.showPaginatedChat(sender, "/ge buyoffers " + buysearch + " %s", messages, page);
         } else
             throw new WrongUsageException(getUsage(sender));
     }

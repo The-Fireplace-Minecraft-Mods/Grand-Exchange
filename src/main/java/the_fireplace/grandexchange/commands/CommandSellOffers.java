@@ -69,10 +69,10 @@ public class CommandSellOffers extends CommandBase {
                 {
                     if(sellresults.contains(offer.getItemResourceName())){
                     	result=true;
-                        sender.sendMessage(new TextComponentString(MinecraftColors.PURPLE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " being sold for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
+                        sender.sendMessage(offer.getOfferChatMessage(sender));
                     }
                 } else {
-                    sender.sendMessage(new TextComponentString(MinecraftColors.PURPLE + offer.getAmount() + ' ' + offer.getItemResourceName() + ' ' + offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : "") + " being sold for " + offer.getPrice() + ' ' + GrandEconomyApi.getCurrencyName(offer.getPrice()) + " each"));
+                    sender.sendMessage(offer.getOfferChatMessage(sender));
                 }
             }
             if(!result && args.length >= 1)
