@@ -22,7 +22,7 @@ public class Utils {
 
             if (!possibleCompletions.isEmpty()) {
                 for (String s1 : possibleCompletions.stream().map(Functions.toStringFunction()).collect(Collectors.toList())) {
-                    if (/*doesStringStartWith(s, s1) || */s1.matches(s)) {
+                    if (/*doesStringStartWith(s, s1) || */s1.matches(".*" + s + ".*")) {
                         list.add(s1);
                     }
                 }

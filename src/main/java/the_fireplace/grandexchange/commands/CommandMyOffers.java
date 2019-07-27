@@ -64,7 +64,7 @@ public class CommandMyOffers extends CommandBase {
                 else if(buysearch.equals("any") || buysearch.equals("*")) buysearch = ".*";
                 buyresults = Utils.getListOfStringsMatchingString(buysearch, Utils.getBuyNames(buyOffers));
             }
-
+            
             //Expand page to be the first entry on the page
             page *= 50;
             //Subtract 50 because the first page starts with entry 0
