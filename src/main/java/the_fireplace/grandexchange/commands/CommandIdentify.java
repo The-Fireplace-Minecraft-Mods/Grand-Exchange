@@ -1,12 +1,12 @@
 package the_fireplace.grandexchange.commands;
 
 import mcp.MethodsReturnNonnullByDefault;
-import net.minecraft.item.ItemStack;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import the_fireplace.grandexchange.util.TransactionDatabase;
 

@@ -5,7 +5,7 @@ import net.minecraft.command.ServerCommandManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import the_fireplace.grandexchange.commands.*;
+import the_fireplace.grandexchange.commands.CommandGe;
 
 @SuppressWarnings("WeakerAccess")
 @Mod(modid = GrandExchange.MODID, name = GrandExchange.MODNAME, version = GrandExchange.VERSION, acceptedMinecraftVersions = "[1.12,1.13)", acceptableRemoteVersions = "*", dependencies="required-after:grandeconomy")//TODO @[1.2.0,)

@@ -8,9 +8,9 @@ import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentString;
-import the_fireplace.grandexchange.util.TransactionDatabase;
 import the_fireplace.grandexchange.market.BuyOffer;
 import the_fireplace.grandexchange.market.SellOffer;
+import the_fireplace.grandexchange.util.TransactionDatabase;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

@@ -1,12 +1,6 @@
 package the_fireplace.grandexchange.commands;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.ParametersAreNonnullByDefault;
-
 import com.google.common.collect.Lists;
-
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -16,7 +10,14 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import the_fireplace.grandexchange.market.BuyOffer;
-import the_fireplace.grandexchange.util.*;
+import the_fireplace.grandexchange.util.ChatPageUtil;
+import the_fireplace.grandexchange.util.TextStyles;
+import the_fireplace.grandexchange.util.TransactionDatabase;
+import the_fireplace.grandexchange.util.Utils;
+
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.ArrayList;
+import java.util.List;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault

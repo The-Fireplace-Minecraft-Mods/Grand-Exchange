@@ -125,7 +125,7 @@ public final class TransactionDatabase implements Serializable {
 						int givingAmount = sellOffer.getAmount();
 						GrandEconomyApi.addToBalance(sellOffer.getOwner(), givingAmount*sellOffer.getPrice(), false);
 						if(seller != null)
-							seller.sendMessage(new TextComponentTranslation(MinecraftColors.PURPLE+"Sell Offer fulfilled: %s %s %s at %s each.", givingAmount, offer.getItemResourceName(), offer.getItemMeta(), offer.getPrice()));
+							seller.sendMessage(new TextComponentTranslation("Sell Offer fulfilled: %s %s %s at %s each.", givingAmount, offer.getItemResourceName(), offer.getItemMeta(), offer.getPrice()).setStyle(TextStyles.DARK_PURPLE));
 						while(givingAmount > maxStackSize) {
 							//noinspection ConstantConditions
 							payouts.get(offer.getOwner()).add(SerializationUtils.stackToString(isOfferBlock ? new ItemStack(Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(offerResource)), maxStackSize, offer.getItemMeta(), SerializationUtils.getNbt(offer.getNbt())) : new ItemStack(ForgeRegistries.ITEMS.getValue(offerResource), maxStackSize, offer.getItemMeta(), SerializationUtils.getNbt(offer.getNbt()))));
@@ -148,11 +148,11 @@ public final class TransactionDatabase implements Serializable {
 						if(offer.getAmount() == sellOffer.getAmount()) {
 							removeOffers.add(sellOffer);
 							if(seller != null)
-								seller.sendMessage(new TextComponentTranslation(MinecraftColors.PURPLE+"Sell Offer fulfilled: %s %s %s at %s each.", offer.getAmount(), offer.getItemResourceName(), offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : ""), sellOffer.getPrice()));
+								seller.sendMessage(new TextComponentTranslation("Sell Offer fulfilled: %s %s %s at %s each.", offer.getAmount(), offer.getItemResourceName(), offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : ""), sellOffer.getPrice()).setStyle(TextStyles.DARK_PURPLE));
 						} else {
 							sellOffer.decrementAmount(offer.getAmount());
 							if(seller != null)
-								seller.sendMessage(new TextComponentTranslation(MinecraftColors.PURPLE+"Sell Offer partially fulfilled: %s %s %s at %s each.", offer.getAmount(), offer.getItemResourceName(), offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : ""), sellOffer.getPrice()));
+								seller.sendMessage(new TextComponentTranslation("Sell Offer partially fulfilled: %s %s %s at %s each.", offer.getAmount(), offer.getItemResourceName(), offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : ""), sellOffer.getPrice()).setStyle(TextStyles.DARK_PURPLE));
 						}
 						offerComplete = true;
 						break;
@@ -185,7 +185,7 @@ public final class TransactionDatabase implements Serializable {
 						offer.decrementAmount(buyOffer.getAmount());
 						removeOffers.add(buyOffer);
 						if(buyer != null)
-							buyer.sendMessage(new TextComponentTranslation(MinecraftColors.BLUE+"Buy Offer fulfilled: %s %s %s at %s each.", buyOffer.getAmount(), buyOffer.getItemResourceName(), buyOffer.getItemMeta() + (buyOffer.getNbt() != null ? " with NBT "+buyOffer.getNbt() : ""), buyOffer.getPrice()));
+							buyer.sendMessage(new TextComponentTranslation("Buy Offer fulfilled: %s %s %s at %s each.", buyOffer.getAmount(), buyOffer.getItemResourceName(), buyOffer.getItemMeta() + (buyOffer.getNbt() != null ? " with NBT "+buyOffer.getNbt() : ""), buyOffer.getPrice()).setStyle(TextStyles.BLUE));
 					} else {
 						int givingAmount = offer.getAmount();
 						GrandEconomyApi.addToBalance(offer.getOwner(), givingAmount*buyOffer.getPrice(), false);
@@ -199,11 +199,11 @@ public final class TransactionDatabase implements Serializable {
 						if(offer.getAmount() == buyOffer.getAmount()) {
 							removeOffers.add(buyOffer);
 							if(buyer != null)
-								buyer.sendMessage(new TextComponentTranslation(MinecraftColors.BLUE+"Buy Offer fulfilled: %s %s %s at %s each.", buyOffer.getAmount(), buyOffer.getItemResourceName(), buyOffer.getItemMeta() + (buyOffer.getNbt() != null ? " with NBT "+buyOffer.getNbt() : ""), buyOffer.getPrice()));
+								buyer.sendMessage(new TextComponentTranslation("Buy Offer fulfilled: %s %s %s at %s each.", buyOffer.getAmount(), buyOffer.getItemResourceName(), buyOffer.getItemMeta() + (buyOffer.getNbt() != null ? " with NBT "+buyOffer.getNbt() : ""), buyOffer.getPrice()).setStyle(TextStyles.BLUE));
 						} else {
 							buyOffer.decrementAmount(offer.getAmount());
 							if(buyer != null)
-								buyer.sendMessage(new TextComponentTranslation(MinecraftColors.BLUE+"Buy Offer partially fulfilled: %s %s %s at %s each.", offer.getAmount(), buyOffer.getItemResourceName(), buyOffer.getItemMeta() + (buyOffer.getNbt() != null ? " with NBT "+buyOffer.getNbt() : ""), buyOffer.getPrice()));
+								buyer.sendMessage(new TextComponentTranslation("Buy Offer partially fulfilled: %s %s %s at %s each.", offer.getAmount(), buyOffer.getItemResourceName(), buyOffer.getItemMeta() + (buyOffer.getNbt() != null ? " with NBT "+buyOffer.getNbt() : ""), buyOffer.getPrice()).setStyle(TextStyles.BLUE));
 						}
 						offerComplete = true;
 						break;

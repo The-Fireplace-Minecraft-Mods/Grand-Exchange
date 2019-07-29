@@ -4,7 +4,6 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import the_fireplace.grandeconomy.api.GrandEconomyApi;
-import the_fireplace.grandexchange.util.MinecraftColors;
 import the_fireplace.grandexchange.util.TextStyles;
 
 import javax.annotation.Nullable;

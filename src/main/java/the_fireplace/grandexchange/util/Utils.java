@@ -1,18 +1,17 @@
 package the_fireplace.grandexchange.util;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.regex.PatternSyntaxException;
-import java.util.stream.Collectors;
-
 import com.google.common.base.Functions;
 import com.google.common.collect.Lists;
-
 import net.minecraft.command.CommandException;
 import net.minecraft.util.ResourceLocation;
 import the_fireplace.grandexchange.market.BuyOffer;
 import the_fireplace.grandexchange.market.Offer;
 import the_fireplace.grandexchange.market.SellOffer;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.regex.PatternSyntaxException;
+import java.util.stream.Collectors;
 
 public class Utils {
     public static List<String> getListOfStringsMatchingString(String s, Collection<?> possibleCompletions) throws CommandException

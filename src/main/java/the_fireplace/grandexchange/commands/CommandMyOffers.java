@@ -1,13 +1,6 @@
 package the_fireplace.grandexchange.commands;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import com.google.common.collect.Lists;
-
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -16,15 +9,18 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
-import the_fireplace.grandeconomy.api.GrandEconomyApi;
 import the_fireplace.grandexchange.market.BuyOffer;
 import the_fireplace.grandexchange.market.Offer;
 import the_fireplace.grandexchange.market.SellOffer;
 import the_fireplace.grandexchange.util.ChatPageUtil;
-import the_fireplace.grandexchange.util.MinecraftColors;
 import the_fireplace.grandexchange.util.TextStyles;
 import the_fireplace.grandexchange.util.TransactionDatabase;
 import the_fireplace.grandexchange.util.Utils;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CommandMyOffers extends CommandBase {
     @Override
@@ -71,11 +67,9 @@ public class CommandMyOffers extends CommandBase {
             }
 
             ArrayList<ITextComponent> messages = Lists.newArrayList();
-            
-            List<String> buyresults = Lists.newArrayList();
-            buyresults = Utils.getListOfStringsMatchingString(search, Utils.getBuyNames(buyOffers));
-            final List<String> finalBuyResults = buyresults;
-            buyOffers.removeIf(offer -> !finalBuyResults.contains(offer.getItemResourceName()));
+
+            final List<String> buyresults = Utils.getListOfStringsMatchingString(search, Utils.getBuyNames(buyOffers));
+            buyOffers.removeIf(offer -> !buyresults.contains(offer.getItemResourceName()));
             
             boolean buyresult = false;
             for (Offer offer : buyOffers) {
@@ -94,11 +88,8 @@ public class CommandMyOffers extends CommandBase {
             	sender.sendMessage(new TextComponentString("No buy results found").setStyle(TextStyles.RED));
             }
 
-            List<String> sellresults = Lists.newArrayList();
-            
-            sellresults = Utils.getListOfStringsMatchingString(search, Utils.getSellNames(sellOffers));
-            final List<String> finalSellResults = sellresults;
-            sellOffers.removeIf(offer -> !finalSellResults.contains(offer.getItemResourceName()));
+            final List<String> sellresults = Utils.getListOfStringsMatchingString(search, Utils.getSellNames(sellOffers));
+            sellOffers.removeIf(offer -> !sellresults.contains(offer.getItemResourceName()));
 
             boolean sellresult=false;
             for (SellOffer offer : sellOffers) {
@@ -112,7 +103,7 @@ public class CommandMyOffers extends CommandBase {
                 	messages.add(offer.getOfferChatMessage(sender));
                 }
             }
-            if(!sellresult && args.length >= 1){
+            if(args != null && !sellresult && args.length >= 1){
             	sender.sendMessage(new TextComponentString("No sell results found").setStyle(TextStyles.RED));
             }
             
