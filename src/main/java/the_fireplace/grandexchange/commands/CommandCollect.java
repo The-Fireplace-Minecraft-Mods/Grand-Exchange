@@ -5,13 +5,12 @@ import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.TextComponentString;
 import the_fireplace.grandexchange.util.SerializationUtils;
 import the_fireplace.grandexchange.util.TransactionDatabase;
+import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
@@ -26,7 +25,7 @@ public class CommandCollect extends CommandBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "/ge collect";
+        return TranslationUtil.getRawTranslationString(sender, "commands.ge.collect.usage");
     }
 
     @Override
@@ -41,15 +40,13 @@ public class CommandCollect extends CommandBase {
                 }
                 TransactionDatabase.getInstance().removePayouts(((EntityPlayer) sender).getUniqueID(), removeItems);
                 if(TransactionDatabase.hasPayout(((EntityPlayer) sender).getUniqueID()))
-                    sender.sendMessage(new TextComponentString("You have run out of room for collection. Make room in your inventory and try again."));
+                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayer) sender).getUniqueID(), "commands.ge.collect.no_more_room"));
                 else
-                    sender.sendMessage(new TextComponentString("Collection successful."));
-            } else {
-                sender.sendMessage(new TextComponentString("You don't have anything to collect."));
-            }
-            return;
-        }
-        throw new WrongUsageException(getUsage(sender));
+                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayer) sender).getUniqueID(), "commands.ge.collect.success"));
+            } else
+                sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayer) sender).getUniqueID(), "commands.ge.collect.nothing_to_collect"));
+        } else
+            throw new CommandException(TranslationUtil.getRawTranslationString(sender, "commands.ge.common.not_player"));
     }
 
     @Override

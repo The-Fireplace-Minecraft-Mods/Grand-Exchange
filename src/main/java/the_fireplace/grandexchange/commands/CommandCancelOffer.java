@@ -4,13 +4,12 @@ import com.google.common.collect.Lists;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.TextComponentString;
 import the_fireplace.grandexchange.market.BuyOffer;
 import the_fireplace.grandexchange.market.SellOffer;
 import the_fireplace.grandexchange.util.TransactionDatabase;
+import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -26,7 +25,7 @@ public class CommandCancelOffer extends CommandBase {
     @Override
     @Nonnull
     public String getUsage(@Nullable ICommandSender sender) {
-        return "/ge canceloffer <offer number>";
+        return TranslationUtil.getRawTranslationString(sender, "commands.ge.canceloffer.usage");
     }
 
     @Override
@@ -46,13 +45,13 @@ public class CommandCancelOffer extends CommandBase {
                 try {
                     cancelIndex = Integer.parseInt(args[0]);
                 } catch (NumberFormatException e) {
-                    throw new CommandException("Invalid offer number!");
+                    throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.canceloffer.invalid_number"));
                 }
             int curIndex = 0;
             for (BuyOffer offer : buyOffers) {
                 if(curIndex++ == cancelIndex) {
                     TransactionDatabase.getInstance().cancelOffer(offer);
-                    sender.sendMessage(new TextComponentString("Offer cancelled."));
+                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.canceloffer.success_buy"));
                     break;
                 }
             }
@@ -60,16 +59,15 @@ public class CommandCancelOffer extends CommandBase {
             for (SellOffer offer : sellOffers) {
                 if(curIndex++ == cancelIndex) {
                     TransactionDatabase.getInstance().cancelOffer(offer);
-                    sender.sendMessage(new TextComponentString("Offer cancelled. You can collect your items with /ge collect"));
+                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.canceloffer.success_sell"));
                     break;
                 }
             }
 
             if(buyOffers.isEmpty() && sellOffers.isEmpty())
-                sender.sendMessage(new TextComponentString("You are not buying or selling anything."));
-            return;
-        }
-        throw new WrongUsageException(getUsage(sender));
+                sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.not_buying_or_selling"));
+        } else
+            throw new CommandException(TranslationUtil.getRawTranslationString(sender, "commands.ge.common.not_player"));
     }
 
     @Override

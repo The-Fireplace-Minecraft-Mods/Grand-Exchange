@@ -8,12 +8,12 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
 import the_fireplace.grandexchange.market.BuyOffer;
 import the_fireplace.grandexchange.util.ChatPageUtil;
 import the_fireplace.grandexchange.util.TextStyles;
 import the_fireplace.grandexchange.util.TransactionDatabase;
 import the_fireplace.grandexchange.util.Utils;
+import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ public class CommandBuyOffers extends CommandBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "/ge buyoffers [filter] [page]";
+        return TranslationUtil.getRawTranslationString(sender, "commands.ge.buyoffers.usage");
     }
 
     @Override
@@ -44,7 +44,7 @@ public class CommandBuyOffers extends CommandBase {
                 try {
                     page = Integer.parseInt(args[1]);
                 } catch (NumberFormatException e) {
-                    throw new CommandException("Invalid page number!");
+                    throw new CommandException(TranslationUtil.getRawTranslationString(sender, "commands.ge.common.invalid_page"));
                 }
             
             String buysearch;
@@ -75,9 +75,9 @@ public class CommandBuyOffers extends CommandBase {
                 }
             }
             if(!result && args.length >= 1 && !offers.isEmpty())
-            	sender.sendMessage(new TextComponentString("No results found").setStyle(TextStyles.RED));
+            	sender.sendMessage(TranslationUtil.getTranslation(sender, "commands.ge.common.no_results").setStyle(TextStyles.RED));
             else if(offers.isEmpty())
-                sender.sendMessage(new TextComponentString("Nobody is buying anything."));
+                sender.sendMessage(TranslationUtil.getTranslation(sender, "commands.ge.buyoffers.none"));
             else
                 ChatPageUtil.showPaginatedChat(sender, "/ge buyoffers " + buysearch + " %s", messages, page);
         } else

@@ -4,11 +4,9 @@ import com.google.common.collect.Lists;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
 import the_fireplace.grandexchange.market.BuyOffer;
 import the_fireplace.grandexchange.market.Offer;
 import the_fireplace.grandexchange.market.SellOffer;
@@ -16,6 +14,7 @@ import the_fireplace.grandexchange.util.ChatPageUtil;
 import the_fireplace.grandexchange.util.TextStyles;
 import the_fireplace.grandexchange.util.TransactionDatabase;
 import the_fireplace.grandexchange.util.Utils;
+import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -32,7 +31,7 @@ public class CommandMyOffers extends CommandBase {
     @Override
     @Nonnull
     public String getUsage(@Nullable ICommandSender sender) {
-        return "/ge myoffers [filter] [page]";
+        return TranslationUtil.getRawTranslationString(sender, "commands.ge.myoffers.usage");
     }
 
     @Override
@@ -54,7 +53,7 @@ public class CommandMyOffers extends CommandBase {
                 try {
                     page = Integer.parseInt(args[1]);
                 } catch (NumberFormatException e) {
-                    throw new CommandException("Invalid page number!");
+                    throw new CommandException(TranslationUtil.getRawTranslationString(sender, "commands.ge.common.invalid_page"));
                 }
             
             String search;
@@ -85,7 +84,7 @@ public class CommandMyOffers extends CommandBase {
             }
             
             if(args != null && !buyresult && args.length >= 1){
-            	sender.sendMessage(new TextComponentString("No buy results found").setStyle(TextStyles.RED));
+            	sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.myoffers.no_buy_results").setStyle(TextStyles.RED));
             }
 
             final List<String> sellresults = Utils.getListOfStringsMatchingString(search, Utils.getSellNames(sellOffers));
@@ -104,19 +103,16 @@ public class CommandMyOffers extends CommandBase {
                 }
             }
             if(args != null && !sellresult && args.length >= 1){
-            	sender.sendMessage(new TextComponentString("No sell results found").setStyle(TextStyles.RED));
+                sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.myoffers.no_sell_results").setStyle(TextStyles.RED));
             }
             
 
             if(buyOffers.isEmpty() && sellOffers.isEmpty())
-                sender.sendMessage(new TextComponentString("You are not buying or selling anything."));
+                sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.not_buying_or_selling"));
             else
                 ChatPageUtil.showPaginatedChat(sender, "/ge myoffers " + search + " %s", messages, page);
-
- 
-            return;
-        }
-        throw new WrongUsageException(getUsage(sender));
+        } else
+            throw new CommandException(TranslationUtil.getRawTranslationString(sender, "commands.ge.common.not_player"));
     }
 
     @Override

@@ -13,25 +13,24 @@ import java.util.UUID;
 
 public class TranslationUtil {
 
-    //TODO populate
     public static List<UUID> grandExchangeClients = Lists.newArrayList();
 
     /**
-     * Gets the translation for the given key and arguments and returns the formatted string.
+     * Gets the translation for the given key and arguments and returns the unformatted string.
      */
     public static String getStringTranslation(String translationKey, Object... args) {
-        return getTranslation(translationKey, args).getFormattedText();
+        return getTranslation(translationKey, args).getUnformattedText();
     }
 
     /**
-     * Gets the translation for the given key and arguments and returns the formatted string.
+     * Gets the translation for the given key and arguments and returns the unformatted string.
      */
     public static String getStringTranslation(ICommandSender sender, String translationKey, Object... args) {
-        return getTranslation(sender, translationKey, args).getFormattedText();
+        return getTranslation(sender, translationKey, args).getUnformattedText();
     }
 
     /**
-     * Gets the translation for the given key and arguments and returns the formatted string.
+     * Gets the translation for the given key and arguments and returns the unformatted string.
      */
     public static String getStringTranslation(@Nullable UUID target, String translationKey, Object... args) {
         return getTranslation(target, translationKey, args).getUnformattedText();

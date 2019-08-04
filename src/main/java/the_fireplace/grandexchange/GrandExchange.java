@@ -3,6 +3,7 @@ package the_fireplace.grandexchange;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.command.ServerCommandManager;
 import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.common.config.Config;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import the_fireplace.grandexchange.commands.CommandGe;
@@ -22,5 +23,11 @@ public final class GrandExchange {
         ICommandManager command = server.getCommandManager();
         ServerCommandManager manager = (ServerCommandManager) command;
         manager.registerCommand(new CommandGe());
+    }
+
+    @Config(modid=MODID, name=MODNAME)
+    public static class cfg {
+        @Config.Comment("Server locale - the client's locale takes precedence if Grand Exchange is installed there.")
+        public static String locale = "en_us";
     }
 }

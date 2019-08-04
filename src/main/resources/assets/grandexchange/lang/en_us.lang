@@ -1,0 +1,55 @@
+commands.ge.common.invalid_item=Error: Item not found.
+commands.ge.common.invalid_meta=Error: Invalid meta.
+commands.ge.common.invalid_amount=Error: Amount cannot be less than 1.
+commands.ge.common.invalid_price=You cannot pay someone negative amount. That would be rude.
+commands.ge.common.invalid_nbt=Invalid NBT specified.
+commands.ge.common.not_player=You must be a player to do this.
+commands.ge.common.invalid_page=Invalid page number.
+commands.ge.common.no_results=No results found.
+commands.ge.common.not_buying_or_selling=You are not buying or selling anything.
+commands.ge.common.untradeable=This item cannot be traded on the Grand Exchange.
+commands.ge.common.not_holding_anything=Error: You aren't holding anything.
+
+commands.ge.usage=/ge <command> [parameters]
+
+commands.ge.common.offer_fulfilled_balance=Offer succeeded. Your balance is now: %s
+commands.ge.common.offer_made_balance=Offer succeeded. Your balance is now: %s
+commands.ge.common.offer_made=Offer succeeded.
+
+commands.ge.buy.usage=/ge buy <item> <meta> <amount> <price> [nbt]
+commands.ge.buy.success_completed=Purchase succeeded. Your balance is now: %s. You can collect your items with /ge collect
+
+commands.ge.buyoffers.usage=/ge buyoffers [filter] [page]
+commands.ge.buyoffers.none=Nobody is buying anything.
+
+commands.ge.canceloffer.usage=/ge canceloffer <offer number>
+commands.ge.canceloffer.invalid_number=Invalid offer number.
+commands.ge.canceloffer.success_buy=Offer cancelled.
+commands.ge.canceloffer.success_sell=Offer cancelled. You can collect your items with /ge collect
+
+commands.ge.collect.usage=/ge collect
+commands.ge.collect.no_more_room=You have run out of room for collection. Make room in your inventory and try again.
+commands.ge.collect.success=Collection successful.
+commands.ge.collect.nothing_to_collect=You don't have anything to collect.
+
+commands.ge.identify.usage=/ge identify
+commands.ge.identify.success=This item is: %s
+
+commands.ge.myoffers.usage=/ge myoffers [filter] [page]
+commands.ge.myoffers.no_buy_results=No buy results found.
+commands.ge.myoffers.no_sell_results=No sell results found.
+
+commands.ge.sell.usage=/ge sell <item> <meta> <amount> <price> [nbt]
+commands.ge.sell.not_enough_items=Error: You do not have enough of that item in your inventory to make this offer.
+commands.ge.sell.failed=Error: Something went wrong when removing items from your inventory.
+
+commands.ge.selloffers.usage=/ge selloffers [filter] [page]
+commands.ge.selloffers.none=Nobody is selling anything.
+
+commands.ge.sellthis.usage=/ge sellthis <amount> <price>
+
+ge.buyoffer=%s %s %s wanted for %s %s each.
+ge.buyoffer_nbt=%s %s %s with NBT %s wanted for %s %s each.
+
+ge.selloffer=%s %s %s being sold for %s %s each.
+ge.selloffer_nbt=%s %s %s with NBT %s being sold for %s %s each.

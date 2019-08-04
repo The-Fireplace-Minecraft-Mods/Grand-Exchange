@@ -1,1 +1,3 @@
-Fix dupe bug
+Offers can now be filtered by item, regex accepted (Eleksploded & The_Fireplace)
+Offer lists now have proper pagination that looks nice and works great (Eleksploded)
+Grand Exchange can now be translated (The_Fireplace)

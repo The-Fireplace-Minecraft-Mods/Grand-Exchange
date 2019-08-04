@@ -5,14 +5,15 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentTranslation;
 import the_fireplace.grandeconomy.api.GrandEconomyApi;
 import the_fireplace.grandexchange.market.SellOffer;
 import the_fireplace.grandexchange.util.TransactionDatabase;
+import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -30,7 +31,7 @@ public class CommandSellThis extends CommandBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "/ge sellthis <price> <amount>";
+        return "";
     }
 
     @SuppressWarnings("Duplicates")
@@ -40,14 +41,14 @@ public class CommandSellThis extends CommandBase {
             if(sender instanceof EntityPlayerMP) {
                 boolean isValidRequest = !((EntityPlayerMP) sender).getHeldItemMainhand().isEmpty() || !((EntityPlayerMP) sender).getHeldItemOffhand().isEmpty();
                 if(!isValidRequest)
-                    throw new CommandException("Error: You aren't holding anything");
+                    throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayer) sender).getUniqueID(), "commands.ge.common.not_holding_anything"));
                 ItemStack selling = ((EntityPlayerMP) sender).getHeldItemMainhand().isEmpty() ? ((EntityPlayerMP) sender).getHeldItemOffhand() : ((EntityPlayerMP) sender).getHeldItemMainhand();
-                int amount = parseInt(args[1]);
+                int amount = parseInt(args[0]);
                 if(amount <= 0)
-                    throw new CommandException("Error: Amount cannot be less than 1");
-                long price = parseLong(args[0]);
+                    throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_amount"));
+                long price = parseLong(args[1]);
                 if (price < 0)
-                    throw new CommandException("You cannot pay someone negative amount. That would be rude.");
+                    throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_price"));
                 int itemCount = 0;
                 for(ItemStack stack: ((EntityPlayerMP) sender).inventory.mainInventory) {
                     //noinspection ConstantConditions
@@ -59,7 +60,7 @@ public class CommandSellThis extends CommandBase {
                     }
                 }
                 if(itemCount < amount)
-                    throw new CommandException("Error: You do not have enough of that item in your inventory to make this offer.");
+                    throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.sell.not_enough_items"));
                 int i = 0;
                 for(ItemStack stack: ((EntityPlayerMP) sender).inventory.mainInventory) {
                     //noinspection ConstantConditions
@@ -75,17 +76,17 @@ public class CommandSellThis extends CommandBase {
                     i++;
                 }
                 if(itemCount > 0)
-                    throw new CommandException("Error: Something went wrong when removing items from your inventory.");
+                    throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.sell.failed"));
 
                 boolean madePurchase = TransactionDatabase.getInstance().makeOffer(new SellOffer(selling.getItem().getRegistryName().toString(), selling.getMetadata(), amount, price, ((EntityPlayerMP) sender).getUniqueID(), selling.hasTagCompound() ? Objects.requireNonNull(selling.getTagCompound()).toString() : null));
 
                 if(madePurchase)
-                    sender.sendMessage(new TextComponentTranslation("Offer completed! Your balance is now: %s", GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID())));
+                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.offer_fulfilled_balance", GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID())));
                 else
-                    sender.sendMessage(new TextComponentTranslation("Offer succeeded!"));
+                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.offer_made"));
                 return;
             } else
-                throw new CommandException("You must be a player to do this");
+                throw new CommandException(TranslationUtil.getRawTranslationString(sender, "commands.ge.common.not_player"));
         }
         throw new WrongUsageException(getUsage(sender));
     }

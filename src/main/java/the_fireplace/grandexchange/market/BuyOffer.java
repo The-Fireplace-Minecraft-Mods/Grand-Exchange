@@ -2,9 +2,9 @@ package the_fireplace.grandexchange.market;
 
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
 import the_fireplace.grandeconomy.api.GrandEconomyApi;
 import the_fireplace.grandexchange.util.TextStyles;
+import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
@@ -18,6 +18,9 @@ public class BuyOffer extends Offer implements Serializable {
 
 	@Override
 	public ITextComponent getOfferChatMessage(ICommandSender sender) {
-		return new TextComponentString(getAmount() + ' ' + getItemResourceName() + ' ' + getItemMeta() + (getNbt() != null ? " with NBT "+getNbt() : "") + " wanted for " + getPrice() + ' ' + GrandEconomyApi.getCurrencyName(getPrice()) + " each").setStyle(TextStyles.BLUE);
+		if(getNbt() != null)
+			return TranslationUtil.getTranslation(sender, "ge.buyoffer_nbt", getAmount(), getItemResourceName(), getItemMeta(), getNbt(), getPrice(), GrandEconomyApi.getCurrencyName(getPrice())).setStyle(TextStyles.BLUE);
+		else
+			return TranslationUtil.getTranslation(sender, "ge.buyoffer", getAmount(), getItemResourceName(), getItemMeta(), getPrice(), GrandEconomyApi.getCurrencyName(getPrice())).setStyle(TextStyles.BLUE);
 	}
 }

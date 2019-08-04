@@ -4,11 +4,11 @@ import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import the_fireplace.grandexchange.util.TransactionDatabase;
+import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -24,29 +24,26 @@ public class CommandIdentify extends CommandBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "/ge identify";
+        return TranslationUtil.getRawTranslationString(sender, "commands.ge.identify.usage");
     }
 
     @Override
     public void execute(@Nullable MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if (sender instanceof EntityPlayer) {
-            ItemStack held = ((EntityPlayer) sender).getHeldItemMainhand();
-            if(!held.isEmpty()) {
-                if(TransactionDatabase.canTransactItem(held)){
-                    @SuppressWarnings("ConstantConditions")
-                    String regName = held.getItem().getRegistryName().toString();
-                    if(regName.startsWith("minecraft:"))
-                        regName = regName.substring(10);
-                    notifyCommandListener(sender, this, "This item is: %s", regName+' '+held.getMetadata()+' '+(held.hasTagCompound() ? Objects.requireNonNull(held.getTagCompound()).toString() : ""));
-                } else {
-                    notifyCommandListener(sender, this, "This item cannot be traded on the Grand Exchange.");
-                }
-            } else {
-                notifyCommandListener(sender, this, "You aren't holding anything in your main hand!");
-            }
-            return;
-        }
-        throw new WrongUsageException(getUsage(sender));
+            boolean isValidRequest = !((EntityPlayer) sender).getHeldItemMainhand().isEmpty() || !((EntityPlayer) sender).getHeldItemOffhand().isEmpty();
+            if(!isValidRequest)
+                throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayer) sender).getUniqueID(), "commands.ge.common.not_holding_anything"));
+            ItemStack held = ((EntityPlayer) sender).getHeldItemMainhand().isEmpty() ? ((EntityPlayer) sender).getHeldItemOffhand() : ((EntityPlayer) sender).getHeldItemMainhand();
+            if(TransactionDatabase.canTransactItem(held)){
+                @SuppressWarnings("ConstantConditions")
+                String regName = held.getItem().getRegistryName().toString();
+                if(regName.startsWith("minecraft:"))
+                    regName = regName.substring(10);
+                sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayer) sender).getUniqueID(), "commands.ge.identify.success", regName+' '+held.getMetadata()+' '+(held.hasTagCompound() ? Objects.requireNonNull(held.getTagCompound()).toString() : "")));
+            } else
+                sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayer) sender).getUniqueID(), "commands.ge.common.untradeable"));
+        } else
+            throw new CommandException(TranslationUtil.getRawTranslationString(sender, "commands.ge.common.not_player"));
     }
 
     @Override

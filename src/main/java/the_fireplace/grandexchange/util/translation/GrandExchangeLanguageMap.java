@@ -4,6 +4,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import org.apache.commons.io.IOUtils;
+import the_fireplace.grandexchange.GrandExchange;
 
 import javax.annotation.Nullable;
 import java.io.ByteArrayInputStream;
@@ -21,7 +22,7 @@ public class GrandExchangeLanguageMap {
     private static final Pattern NUMERIC_VARIABLE_PATTERN = Pattern.compile("%(\\d+\\$)?[\\d\\.]*[df]");
     /** A Splitter that splits a string on the first "=".  For example, "a=b=c" would split into ["a", "b=c"]. */
     private static final Splitter EQUAL_SIGN_SPLITTER = Splitter.on('=').limit(2);
-    private static final GrandExchangeLanguageMap instance = new GrandExchangeLanguageMap("en_us");//TODO GrandExchange.cfg.locale
+    private static final GrandExchangeLanguageMap instance = new GrandExchangeLanguageMap(GrandExchange.cfg.locale);
     private final Map<String, String> languageList = Maps.newHashMap();
 
     GrandExchangeLanguageMap(String locale) {
