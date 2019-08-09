@@ -24,8 +24,8 @@ commands.ge.buyoffers.none=Nobody is buying anything.
 
 commands.ge.canceloffer.usage=/ge canceloffer <buy|sell|any> <filter> [meta] [price]
 commands.ge.canceloffer.invalid_criteria=No offers were found that match your criteria.
-commands.ge.canceloffer.success_buy=Offer cancelled.
-commands.ge.canceloffer.success_sell=Offer cancelled. You can collect your items with /ge collect
+commands.ge.canceloffer.success_buy=Offer cancelled: %s.
+commands.ge.canceloffer.success_sell=Offer cancelled: %s. You can collect your items with /ge collect
 
 commands.ge.collect.usage=/ge collect
 commands.ge.collect.no_more_room=You have run out of room for collection. Make room in your inventory and try again.

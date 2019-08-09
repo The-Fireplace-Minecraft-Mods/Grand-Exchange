@@ -79,7 +79,7 @@ public class CommandCancelOffer extends CommandBase {
                     for (BuyOffer offer : buyOffers) {
                         if (offer.getItemResourceName().matches(filter) && (meta == null || meta == offer.getItemMeta()) && (price == null || price == offer.getPrice())) {
                             TransactionDatabase.getInstance().cancelOffer(offer);
-                            sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.canceloffer.success_buy"));
+                            sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.canceloffer.success_buy", offer.getOfferChatMessage(sender).getFormattedText()));
                         }
                     }
 
@@ -87,7 +87,7 @@ public class CommandCancelOffer extends CommandBase {
                     for (SellOffer offer : sellOffers) {
                         if (offer.getItemResourceName().matches(filter) && (meta == null || meta == offer.getItemMeta()) && (price == null || price == offer.getPrice())) {
                             TransactionDatabase.getInstance().cancelOffer(offer);
-                            sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.canceloffer.success_sell"));
+                            sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.canceloffer.success_sell", offer.getOfferChatMessage(sender).getFormattedText()));
                         }
                     }
 
