@@ -1,3 +1,4 @@
 Offers can now be filtered by item, regex accepted (Eleksploded & The_Fireplace)
 Offer lists now have proper pagination that looks nice and works great (Eleksploded)
 Grand Exchange can now be translated (The_Fireplace)
+Reworked /ge canceloffer so indices are no longer needed to determine which offer to cancel. Instead, you can now tell it exactly which offer you want to cancel using the new criteria: /ge canceloffer <buy|sell|any> <filter> [meta] [price]

@@ -22,8 +22,8 @@ commands.ge.buy.success_completed=Purchase succeeded. Your balance is now: %s. Y
 commands.ge.buyoffers.usage=/ge buyoffers [filter] [page]
 commands.ge.buyoffers.none=Nobody is buying anything.
 
-commands.ge.canceloffer.usage=/ge canceloffer <offer number>
-commands.ge.canceloffer.invalid_number=Invalid offer number.
+commands.ge.canceloffer.usage=/ge canceloffer <buy|sell|any> <filter> [meta] [price]
+commands.ge.canceloffer.invalid_criteria=No offers were found that match your criteria.
 commands.ge.canceloffer.success_buy=Offer cancelled.
 commands.ge.canceloffer.success_sell=Offer cancelled. You can collect your items with /ge collect
 

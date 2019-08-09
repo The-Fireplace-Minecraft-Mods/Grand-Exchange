@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import the_fireplace.grandexchange.market.BuyOffer;
@@ -40,32 +41,60 @@ public class CommandCancelOffer extends CommandBase {
             buyOffers.removeIf(offer -> !offer.getOwner().equals(((EntityPlayerMP) sender).getUniqueID()));
             sellOffers.removeIf(offer -> !offer.getOwner().equals(((EntityPlayerMP) sender).getUniqueID()));
 
-            int cancelIndex = 0;
-            if (args != null && args.length == 1)
-                try {
-                    cancelIndex = Integer.parseInt(args[0]);
-                } catch (NumberFormatException e) {
-                    throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.canceloffer.invalid_number"));
+            if (args != null && args.length >= 2) {
+                boolean enableBuySearch = false, enableSellSearch = false;
+                String filter = args[1];
+                Integer meta = null, price = null;
+                switch(args[0].toLowerCase()) {
+                    case "buy":
+                    case "b":
+                        enableBuySearch = true;
+                        break;
+                    case "sell":
+                    case "s":
+                        enableSellSearch = true;
+                        break;
+                    case "any":
+                    case "a":
+                    case "*":
+                        enableBuySearch = enableSellSearch = true;
+                        break;
+                    default:
+                        throw new WrongUsageException(getUsage(sender));
                 }
-            int curIndex = 0;
-            for (BuyOffer offer : buyOffers) {
-                if(curIndex++ == cancelIndex) {
-                    TransactionDatabase.getInstance().cancelOffer(offer);
-                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.canceloffer.success_buy"));
-                    break;
-                }
-            }
 
-            for (SellOffer offer : sellOffers) {
-                if(curIndex++ == cancelIndex) {
-                    TransactionDatabase.getInstance().cancelOffer(offer);
-                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.canceloffer.success_sell"));
-                    break;
-                }
-            }
+                if(filter.matches("^[a-zA-Z_]*$")) filter = "minecraft:"+ filter;
+                else if(filter.equals("any") || filter.equals("*")) filter = ".*";
 
-            if(buyOffers.isEmpty() && sellOffers.isEmpty())
-                sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.not_buying_or_selling"));
+                if(args.length >= 3) {
+                    meta = parseInt(args[2]);
+                    if(meta < 0)
+                        throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_meta"));
+                }
+
+                if(args.length >= 4)
+                    price = parseInt(args[3]);
+
+                if(enableBuySearch)
+                    for (BuyOffer offer : buyOffers) {
+                        if (offer.getItemResourceName().matches(filter) && (meta == null || meta == offer.getItemMeta()) && (price == null || price == offer.getPrice())) {
+                            TransactionDatabase.getInstance().cancelOffer(offer);
+                            sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.canceloffer.success_buy"));
+                        }
+                    }
+
+                if(enableSellSearch)
+                    for (SellOffer offer : sellOffers) {
+                        if (offer.getItemResourceName().matches(filter) && (meta == null || meta == offer.getItemMeta()) && (price == null || price == offer.getPrice())) {
+                            TransactionDatabase.getInstance().cancelOffer(offer);
+                            sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.canceloffer.success_sell"));
+                        }
+                    }
+
+                if (buyOffers.isEmpty() && sellOffers.isEmpty())
+                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.not_buying_or_selling"));
+            } else
+                throw new WrongUsageException(getUsage(sender));
         } else
             throw new CommandException(TranslationUtil.getRawTranslationString(sender, "commands.ge.common.not_player"));
     }
