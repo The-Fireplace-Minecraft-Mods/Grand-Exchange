@@ -48,36 +48,22 @@ public class CommandBuyOffers extends CommandBase {
                 }
             
             String buysearch;
-            List<String> buyresults = Lists.newArrayList();
             if(args.length >= 1){
                 buysearch = args[0]==null ? ".*" : args[0];
                 if(buysearch.matches("^[a-zA-Z_]*$")) buysearch = "minecraft:"+ buysearch;
                 else if(buysearch.equals("any") || buysearch.equals("*")) buysearch = ".*";
-                buyresults = Utils.getListOfStringsMatchingString(buysearch, Utils.getBuyNames(offers));
-                final List<String> finalBuyResults = buyresults;
+                final List<String> buyResults = Utils.getListOfStringsMatchingString(buysearch, Utils.getBuyNames(offers));
 
-                offers.removeIf(offer -> !finalBuyResults.contains(offer.getItemResourceName()));
+                offers.removeIf(offer -> !buyResults.contains(offer.getItemResourceName()));
             } else {
             	buysearch = ".*";
             }
 
             ArrayList<ITextComponent> messages = Lists.newArrayList();
-            boolean result=false;
-            for (BuyOffer offer : offers) {
-                if(args.length >= 1)
-                {
-                    if(buyresults.contains(offer.getItemResourceName())){
-                    	result=true;
-                        messages.add(offer.getOfferChatMessage(sender));
-                    }
-                } else {
-                    messages.add(offer.getOfferChatMessage(sender));
-                }
-            }
-            if(!result && args.length >= 1 && !offers.isEmpty())
+            for (BuyOffer offer : offers)
+                messages.add(offer.getOfferChatMessage(sender));
+            if(offers.isEmpty())
             	sender.sendMessage(TranslationUtil.getTranslation(sender, "commands.ge.common.no_results").setStyle(TextStyles.RED));
-            else if(offers.isEmpty())
-                sender.sendMessage(TranslationUtil.getTranslation(sender, "commands.ge.buyoffers.none"));
             else
                 ChatPageUtil.showPaginatedChat(sender, "/ge buyoffers " + buysearch + " %s", messages, page);
         } else

@@ -72,40 +72,20 @@ public class CommandMyOffers extends CommandBase {
             
             boolean buyresult = false;
             for (Offer offer : buyOffers) {
-                if(args != null && args.length >= 1)
-                {
-                    if(buyresults.contains(offer.getItemResourceName())){
-                    	buyresult=true;
-                    	messages.add(offer.getOfferChatMessage(sender));
-                    }
-                } else {
-                	messages.add(offer.getOfferChatMessage(sender));
-                }
+                messages.add(offer.getOfferChatMessage(sender));
             }
             
-            if(args != null && !buyresult && args.length >= 1){
+            if(buyOffers.isEmpty())
             	sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.myoffers.no_buy_results").setStyle(TextStyles.RED));
-            }
 
             final List<String> sellresults = Utils.getListOfStringsMatchingString(search, Utils.getSellNames(sellOffers));
             sellOffers.removeIf(offer -> !sellresults.contains(offer.getItemResourceName()));
 
-            boolean sellresult=false;
             for (SellOffer offer : sellOffers) {
-                if(args != null && args.length >= 1)
-                {
-                    if(sellresults.contains(offer.getItemResourceName())){
-                    	sellresult=true;
-                    	messages.add(offer.getOfferChatMessage(sender));
-                    }
-                } else {
-                	messages.add(offer.getOfferChatMessage(sender));
-                }
+                messages.add(offer.getOfferChatMessage(sender));
             }
-            if(args != null && !sellresult && args.length >= 1){
+            if(sellOffers.isEmpty())
                 sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.myoffers.no_sell_results").setStyle(TextStyles.RED));
-            }
-            
 
             if(buyOffers.isEmpty() && sellOffers.isEmpty())
                 sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.not_buying_or_selling"));

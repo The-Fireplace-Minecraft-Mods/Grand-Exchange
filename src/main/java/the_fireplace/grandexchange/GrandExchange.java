@@ -14,8 +14,6 @@ public final class GrandExchange {
     public static final String MODID = "grandexchange";
     public static final String MODNAME = "Grand Exchange";
     public static final String VERSION = "${version}";
-    @Mod.Instance(MODID)
-    public static GrandExchange instance;
 
     @Mod.EventHandler
     public void onServerStart(FMLServerStartingEvent event) {

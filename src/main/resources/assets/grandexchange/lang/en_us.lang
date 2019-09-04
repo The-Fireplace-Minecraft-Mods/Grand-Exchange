@@ -53,3 +53,7 @@ ge.buyoffer_nbt=%s %s %s with NBT %s wanted for %s %s each.
 
 ge.selloffer=%s %s %s being sold for %s %s each.
 ge.selloffer_nbt=%s %s %s with NBT %s being sold for %s %s each.
+
+ge.chat.page.next=[Next]
+ge.chat.page.prev=[Previous]
+ge.chat.page.num=Page: %s/%s

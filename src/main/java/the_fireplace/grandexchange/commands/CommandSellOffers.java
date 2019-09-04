@@ -47,38 +47,23 @@ public class CommandSellOffers extends CommandBase {
                     throw new CommandException(TranslationUtil.getRawTranslationString(sender, "commands.ge.common.invalid_page"));
                 }
 
-            List<String> sellresults = Lists.newArrayList();
-            
             String sellsearch;
             if(args.length >= 1){
                 sellsearch = args[0];
                 if(sellsearch.matches("^[a-zA-Z_]*$")) sellsearch = "minecraft:"+ sellsearch;
                 else if(sellsearch.equals("any") || sellsearch.equals("*")) sellsearch = ".*";
-                sellresults = Utils.getListOfStringsMatchingString(sellsearch, Utils.getSellNames(offers));
-                
-                final List<String> finalSellResults = sellresults;
+                final List<String> sellResults = Utils.getListOfStringsMatchingString(sellsearch, Utils.getSellNames(offers));
 
-                offers.removeIf(offer -> !finalSellResults.contains(offer.getItemResourceName()));
+                offers.removeIf(offer -> !sellResults.contains(offer.getItemResourceName()));
             } else {
             	sellsearch = ".*";
             }
 
             ArrayList<ITextComponent> messages = Lists.newArrayList();
-            
-            boolean result = false;
-            for (SellOffer offer : offers) {
-            	if(args.length >= 1)
-                {
-                    if(sellsearch.contains(offer.getItemResourceName())){
-                    	result=true;
-                        messages.add(offer.getOfferChatMessage(sender));
-                    }
-                } else {
-                    messages.add(offer.getOfferChatMessage(sender));
-                }
-            }
-            if(!result && args.length >= 1)
-                sender.sendMessage(TranslationUtil.getTranslation(sender, "commands.ge.common.no_results").setStyle(TextStyles.RED));
+
+            for (SellOffer offer : offers)
+                messages.add(offer.getOfferChatMessage(sender));
+
             if(offers.isEmpty())
                 sender.sendMessage(TranslationUtil.getTranslation(sender, "commands.ge.selloffers.none"));
             else

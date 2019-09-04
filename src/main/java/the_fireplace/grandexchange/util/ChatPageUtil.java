@@ -6,24 +6,26 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.event.ClickEvent;
+import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
+import java.util.Collection;
 import java.util.List;
 
 public class ChatPageUtil {
+    public static final int RESULTS_PER_PAGE = 7;
 
-    public static void showPaginatedChat(ICommandSender sender, String command, List<ITextComponent> items, int page) {
-        int resultsOnPage = 7;
+    public static void showPaginatedChat(ICommandSender sender, String command, Collection<ITextComponent> items, int page) {
         int current = page;
-        int totalPageCount = items.size() % resultsOnPage > 0 ? (items.size()/resultsOnPage)+1 : items.size()/resultsOnPage;
+        int totalPageCount = items.size() % RESULTS_PER_PAGE > 0 ? (items.size()/ RESULTS_PER_PAGE)+1 : items.size()/ RESULTS_PER_PAGE;
 
-        ITextComponent counter = new TextComponentString("Page: " + current + "/" + totalPageCount);
+        ITextComponent counter = TranslationUtil.getTranslation(sender, "ge.chat.page.num", current, totalPageCount);
         ITextComponent top = new TextComponentString("-----------------").setStyle(TextStyles.GREEN).appendSibling(counter).appendText("-------------------").setStyle(TextStyles.GREEN);
 
         //Expand page to be the first entry on the page
-        page *= resultsOnPage;
+        page *= RESULTS_PER_PAGE;
         //Subtract result count because the first page starts with entry 0
-        page -= resultsOnPage;
-        int termLength = resultsOnPage;
+        page -= RESULTS_PER_PAGE;
+        int termLength = RESULTS_PER_PAGE;
         List<ITextComponent> printItems = Lists.newArrayList();
 
         for (ITextComponent item: items) {
@@ -34,8 +36,8 @@ public class ChatPageUtil {
             printItems.add(item);
         }
 
-        ITextComponent nextButton = current < totalPageCount ? new TextComponentString("[Next]").setStyle(new Style().setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format(command, current+1)))) : new TextComponentString("-----");
-        ITextComponent prevButton = current > 1 ? new TextComponentString("[Previous]").setStyle(new Style().setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format(command, current-1)))) : new TextComponentString("------");
+        ITextComponent nextButton = current < totalPageCount ? TranslationUtil.getTranslation(sender, "ge.chat.page.next").setStyle(new Style().setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format(command, current+1)))) : new TextComponentString("-----");
+        ITextComponent prevButton = current > 1 ? TranslationUtil.getTranslation(sender, "ge.chat.page.prev").setStyle(new Style().setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format(command, current-1)))) : new TextComponentString("------");
         ITextComponent bottom = new TextComponentString("---------------").setStyle(TextStyles.GREEN).appendSibling(prevButton).appendText("---").setStyle(TextStyles.GREEN).appendSibling(nextButton).appendText("-------------").setStyle(TextStyles.GREEN);
 
         sender.sendMessage(top);
@@ -46,7 +48,7 @@ public class ChatPageUtil {
         sender.sendMessage(bottom);
     }
 
-    public static void showPaginatedChat(ICommandSender target, String command, List<ITextComponent> items) {
+    public static void showPaginatedChat(ICommandSender target, String command, Collection<ITextComponent> items) {
         showPaginatedChat(target, command, items, 1);
     }
 }

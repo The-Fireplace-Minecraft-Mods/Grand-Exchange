@@ -31,7 +31,7 @@ public class CommandSellThis extends CommandBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "";
+        return TranslationUtil.getRawTranslationString(sender, "commands.ge.sellthis.usage");
     }
 
     @SuppressWarnings("Duplicates")

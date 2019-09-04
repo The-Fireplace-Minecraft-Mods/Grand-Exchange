@@ -114,107 +114,116 @@ public final class TransactionDatabase implements Serializable {
 		int maxStackSize = sizeCheckStack.getMaxStackSize();
 		sortOffers();
 		if(offer instanceof BuyOffer){
-			if(sellOffers.containsKey(offer.getItemPair()) && !sellOffers.get(offer.getItemPair()).isEmpty()){
-				List<SellOffer> possibleSellOffers = sellOffers.get(offer.getItemPair());
-				possibleSellOffers.removeIf(o1 -> o1.getPrice() > offer.getPrice());
-				List<SellOffer> removeOffers = Lists.newArrayList();
-				boolean offerComplete = false;
-				for(SellOffer sellOffer: possibleSellOffers){
-					Entity seller = FMLCommonHandler.instance().getMinecraftServerInstance().getEntityFromUuid(sellOffer.getOwner());
-					if(offer.getAmount() > sellOffer.getAmount()){
-						int givingAmount = sellOffer.getAmount();
-						GrandEconomyApi.addToBalance(sellOffer.getOwner(), givingAmount*sellOffer.getPrice(), false);
-						if(seller != null)
-							seller.sendMessage(new TextComponentTranslation("Sell Offer fulfilled: %s %s %s at %s each.", givingAmount, offer.getItemResourceName(), offer.getItemMeta(), offer.getPrice()).setStyle(TextStyles.DARK_PURPLE));
-						while(givingAmount > maxStackSize) {
-							//noinspection ConstantConditions
-							payouts.get(offer.getOwner()).add(SerializationUtils.stackToString(isOfferBlock ? new ItemStack(Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(offerResource)), maxStackSize, offer.getItemMeta(), SerializationUtils.getNbt(offer.getNbt())) : new ItemStack(ForgeRegistries.ITEMS.getValue(offerResource), maxStackSize, offer.getItemMeta(), SerializationUtils.getNbt(offer.getNbt()))));
-							givingAmount -= maxStackSize;
-						}
-						//noinspection ConstantConditions
-						payouts.get(offer.getOwner()).add(SerializationUtils.stackToString(isOfferBlock ? new ItemStack(Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(offerResource)), givingAmount, offer.getItemMeta(), SerializationUtils.getNbt(offer.getNbt())) : new ItemStack(ForgeRegistries.ITEMS.getValue(offerResource), givingAmount, offer.getItemMeta(), SerializationUtils.getNbt(offer.getNbt()))));
-						offer.decrementAmount(sellOffer.getAmount());
-						removeOffers.add(sellOffer);
-					} else {
-						int givingAmount = offer.getAmount();
-						GrandEconomyApi.addToBalance(sellOffer.getOwner(), givingAmount*sellOffer.getPrice(), false);
-						while(givingAmount > maxStackSize) {
-							//noinspection ConstantConditions
-							payouts.get(offer.getOwner()).add(SerializationUtils.stackToString(isOfferBlock ? new ItemStack(Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(offerResource)), maxStackSize, offer.getItemMeta(), SerializationUtils.getNbt(offer.getNbt())) : new ItemStack(ForgeRegistries.ITEMS.getValue(offerResource), maxStackSize, offer.getItemMeta(), SerializationUtils.getNbt(offer.getNbt()))));
-							givingAmount -= maxStackSize;
-						}
-						//noinspection ConstantConditions
-						payouts.get(offer.getOwner()).add(SerializationUtils.stackToString(isOfferBlock ? new ItemStack(Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(offerResource)), givingAmount, offer.getItemMeta(), SerializationUtils.getNbt(offer.getNbt())) : new ItemStack(ForgeRegistries.ITEMS.getValue(offerResource), givingAmount, offer.getItemMeta(), SerializationUtils.getNbt(offer.getNbt()))));
-						if(offer.getAmount() == sellOffer.getAmount()) {
-							removeOffers.add(sellOffer);
-							if(seller != null)
-								seller.sendMessage(new TextComponentTranslation("Sell Offer fulfilled: %s %s %s at %s each.", offer.getAmount(), offer.getItemResourceName(), offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : ""), sellOffer.getPrice()).setStyle(TextStyles.DARK_PURPLE));
-						} else {
-							sellOffer.decrementAmount(offer.getAmount());
-							if(seller != null)
-								seller.sendMessage(new TextComponentTranslation("Sell Offer partially fulfilled: %s %s %s at %s each.", offer.getAmount(), offer.getItemResourceName(), offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : ""), sellOffer.getPrice()).setStyle(TextStyles.DARK_PURPLE));
-						}
-						offerComplete = true;
-						break;
+			return tryFulfillBuyOffer((BuyOffer)offer, offerResource, isOfferBlock, maxStackSize);
+		} else if(offer instanceof SellOffer) {
+			return tryFulfillSellOffer((SellOffer)offer, offerResource, isOfferBlock, maxStackSize);
+		}
+		return false;
+	}
+
+	private boolean tryFulfillSellOffer(SellOffer offer, ResourceLocation offerResource, boolean isOfferBlock, int maxStackSize) {
+		if(buyOffers.containsKey(offer.getItemPair()) && !buyOffers.get(offer.getItemPair()).isEmpty()){
+			List<BuyOffer> possibleBuyOffers = buyOffers.get(offer.getItemPair());
+			possibleBuyOffers.removeIf(o1 -> o1.getPrice() < offer.getPrice());
+			List<BuyOffer> removeOffers = Lists.newArrayList();
+			boolean offerComplete = false;
+			for(BuyOffer buyOffer: possibleBuyOffers){
+				Entity buyer = FMLCommonHandler.instance().getMinecraftServerInstance().getEntityFromUuid(buyOffer.getOwner());
+				if(!payouts.containsKey(buyOffer.getOwner()))
+					payouts.put(buyOffer.getOwner(), Lists.newArrayList());
+				if(offer.getAmount() > buyOffer.getAmount()){
+					int givingAmount = buyOffer.getAmount();
+					GrandEconomyApi.addToBalance(offer.getOwner(), givingAmount*buyOffer.getPrice(), false);
+					while(givingAmount > maxStackSize) {
+						payouts.get(buyOffer.getOwner()).add(SerializationUtils.stackToString(getStack(offerResource, isOfferBlock, maxStackSize, offer)));
+						givingAmount -= maxStackSize;
 					}
-				}
-				sellOffers.get(offer.getItemPair()).removeAll(removeOffers);
-				saveToFile();
-				return offerComplete;
-			}
-		} else {
-			if(buyOffers.containsKey(offer.getItemPair()) && !buyOffers.get(offer.getItemPair()).isEmpty()){
-				List<BuyOffer> possibleBuyOffers = buyOffers.get(offer.getItemPair());
-				possibleBuyOffers.removeIf(o1 -> o1.getPrice() < offer.getPrice());
-				List<BuyOffer> removeOffers = Lists.newArrayList();
-				boolean offerComplete = false;
-				for(BuyOffer buyOffer: possibleBuyOffers){
-					Entity buyer = FMLCommonHandler.instance().getMinecraftServerInstance().getEntityFromUuid(buyOffer.getOwner());
-					if(!payouts.containsKey(buyOffer.getOwner()))
-						payouts.put(buyOffer.getOwner(), Lists.newArrayList());
-					if(offer.getAmount() > buyOffer.getAmount()){
-						int givingAmount = buyOffer.getAmount();
-						GrandEconomyApi.addToBalance(offer.getOwner(), givingAmount*buyOffer.getPrice(), false);
-						while(givingAmount > maxStackSize) {
-							//noinspection ConstantConditions
-							payouts.get(buyOffer.getOwner()).add(SerializationUtils.stackToString(isOfferBlock ? new ItemStack(Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(offerResource)), maxStackSize, offer.getItemMeta(), SerializationUtils.getNbt(buyOffer.getNbt())) : new ItemStack(ForgeRegistries.ITEMS.getValue(offerResource), maxStackSize, offer.getItemMeta(), SerializationUtils.getNbt(buyOffer.getNbt()))));
-							givingAmount -= maxStackSize;
-						}
-						//noinspection ConstantConditions
-						payouts.get(buyOffer.getOwner()).add(SerializationUtils.stackToString(isOfferBlock ? new ItemStack(Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(offerResource)), givingAmount, offer.getItemMeta(), SerializationUtils.getNbt(buyOffer.getNbt())) : new ItemStack(ForgeRegistries.ITEMS.getValue(offerResource), givingAmount, offer.getItemMeta(), SerializationUtils.getNbt(buyOffer.getNbt()))));
-						offer.decrementAmount(buyOffer.getAmount());
+					payouts.get(buyOffer.getOwner()).add(SerializationUtils.stackToString(getStack(offerResource, isOfferBlock, givingAmount, offer)));
+					offer.decrementAmount(buyOffer.getAmount());
+					removeOffers.add(buyOffer);
+					if(buyer != null)
+						buyer.sendMessage(new TextComponentTranslation("Buy Offer fulfilled: %s %s %s at %s each.", buyOffer.getAmount(), buyOffer.getItemResourceName(), buyOffer.getItemMeta() + (buyOffer.getNbt() != null ? " with NBT "+buyOffer.getNbt() : ""), buyOffer.getPrice()).setStyle(TextStyles.BLUE));
+				} else {
+					int givingAmount = offer.getAmount();
+					GrandEconomyApi.addToBalance(offer.getOwner(), givingAmount*buyOffer.getPrice(), false);
+					while(givingAmount > maxStackSize) {
+						payouts.get(buyOffer.getOwner()).add(SerializationUtils.stackToString(getStack(offerResource, isOfferBlock, maxStackSize, offer)));
+						givingAmount -= maxStackSize;
+					}
+					payouts.get(buyOffer.getOwner()).add(SerializationUtils.stackToString(getStack(offerResource, isOfferBlock, givingAmount, offer)));
+					if(offer.getAmount() == buyOffer.getAmount()) {
 						removeOffers.add(buyOffer);
 						if(buyer != null)
 							buyer.sendMessage(new TextComponentTranslation("Buy Offer fulfilled: %s %s %s at %s each.", buyOffer.getAmount(), buyOffer.getItemResourceName(), buyOffer.getItemMeta() + (buyOffer.getNbt() != null ? " with NBT "+buyOffer.getNbt() : ""), buyOffer.getPrice()).setStyle(TextStyles.BLUE));
 					} else {
-						int givingAmount = offer.getAmount();
-						GrandEconomyApi.addToBalance(offer.getOwner(), givingAmount*buyOffer.getPrice(), false);
-						while(givingAmount > maxStackSize) {
-							//noinspection ConstantConditions
-							payouts.get(buyOffer.getOwner()).add(SerializationUtils.stackToString(isOfferBlock ? new ItemStack(Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(offerResource)), maxStackSize, offer.getItemMeta(), SerializationUtils.getNbt(buyOffer.getNbt())) : new ItemStack(ForgeRegistries.ITEMS.getValue(offerResource), maxStackSize, offer.getItemMeta(), SerializationUtils.getNbt(buyOffer.getNbt()))));
-							givingAmount -= maxStackSize;
-						}
-						//noinspection ConstantConditions
-						payouts.get(buyOffer.getOwner()).add(SerializationUtils.stackToString(isOfferBlock ? new ItemStack(Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(offerResource)), givingAmount, offer.getItemMeta(), SerializationUtils.getNbt(buyOffer.getNbt())) : new ItemStack(ForgeRegistries.ITEMS.getValue(offerResource), givingAmount, offer.getItemMeta(), SerializationUtils.getNbt(buyOffer.getNbt()))));
-						if(offer.getAmount() == buyOffer.getAmount()) {
-							removeOffers.add(buyOffer);
-							if(buyer != null)
-								buyer.sendMessage(new TextComponentTranslation("Buy Offer fulfilled: %s %s %s at %s each.", buyOffer.getAmount(), buyOffer.getItemResourceName(), buyOffer.getItemMeta() + (buyOffer.getNbt() != null ? " with NBT "+buyOffer.getNbt() : ""), buyOffer.getPrice()).setStyle(TextStyles.BLUE));
-						} else {
-							buyOffer.decrementAmount(offer.getAmount());
-							if(buyer != null)
-								buyer.sendMessage(new TextComponentTranslation("Buy Offer partially fulfilled: %s %s %s at %s each.", offer.getAmount(), buyOffer.getItemResourceName(), buyOffer.getItemMeta() + (buyOffer.getNbt() != null ? " with NBT "+buyOffer.getNbt() : ""), buyOffer.getPrice()).setStyle(TextStyles.BLUE));
-						}
-						offerComplete = true;
-						break;
+						buyOffer.decrementAmount(offer.getAmount());
+						if(buyer != null)
+							buyer.sendMessage(new TextComponentTranslation("Buy Offer partially fulfilled: %s %s %s at %s each.", offer.getAmount(), buyOffer.getItemResourceName(), buyOffer.getItemMeta() + (buyOffer.getNbt() != null ? " with NBT "+buyOffer.getNbt() : ""), buyOffer.getPrice()).setStyle(TextStyles.BLUE));
 					}
+					offerComplete = true;
+					break;
 				}
-				buyOffers.get(offer.getItemPair()).removeAll(removeOffers);
-				saveToFile();
-				return offerComplete;
 			}
+			buyOffers.get(offer.getItemPair()).removeAll(removeOffers);
+			saveToFile();
+			return offerComplete;
 		}
 		return false;
+	}
+
+	private boolean tryFulfillBuyOffer(BuyOffer offer, ResourceLocation offerResource, boolean isOfferBlock, int maxStackSize) {
+		if(sellOffers.containsKey(offer.getItemPair()) && !sellOffers.get(offer.getItemPair()).isEmpty()){
+			List<SellOffer> possibleSellOffers = sellOffers.get(offer.getItemPair());
+			possibleSellOffers.removeIf(o1 -> o1.getPrice() > offer.getPrice());
+			List<SellOffer> removeOffers = Lists.newArrayList();
+			boolean offerComplete = false;
+			for(SellOffer sellOffer: possibleSellOffers){
+				Entity seller = FMLCommonHandler.instance().getMinecraftServerInstance().getEntityFromUuid(sellOffer.getOwner());
+				if(offer.getAmount() > sellOffer.getAmount()){
+					int givingAmount = sellOffer.getAmount();
+					GrandEconomyApi.addToBalance(sellOffer.getOwner(), givingAmount*sellOffer.getPrice(), false);
+					if(seller != null)
+						seller.sendMessage(new TextComponentTranslation("Sell Offer fulfilled: %s %s %s at %s each.", givingAmount, offer.getItemResourceName(), offer.getItemMeta(), offer.getPrice()).setStyle(TextStyles.DARK_PURPLE));
+					while(givingAmount > maxStackSize) {
+						payouts.get(offer.getOwner()).add(SerializationUtils.stackToString(getStack(offerResource, isOfferBlock, maxStackSize, offer)));
+						givingAmount -= maxStackSize;
+					}
+					payouts.get(offer.getOwner()).add(SerializationUtils.stackToString(getStack(offerResource, isOfferBlock, givingAmount, offer)));
+					offer.decrementAmount(sellOffer.getAmount());
+					removeOffers.add(sellOffer);
+				} else {
+					int givingAmount = offer.getAmount();
+					GrandEconomyApi.addToBalance(sellOffer.getOwner(), givingAmount*sellOffer.getPrice(), false);
+					while(givingAmount > maxStackSize) {
+						payouts.get(offer.getOwner()).add(SerializationUtils.stackToString(getStack(offerResource, isOfferBlock, maxStackSize, offer)));
+						givingAmount -= maxStackSize;
+					}
+					payouts.get(offer.getOwner()).add(SerializationUtils.stackToString(getStack(offerResource, isOfferBlock, givingAmount, offer)));
+					if(offer.getAmount() == sellOffer.getAmount()) {
+						removeOffers.add(sellOffer);
+						if(seller != null)
+							seller.sendMessage(new TextComponentTranslation("Sell Offer fulfilled: %s %s %s at %s each.", offer.getAmount(), offer.getItemResourceName(), offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : ""), sellOffer.getPrice()).setStyle(TextStyles.DARK_PURPLE));
+					} else {
+						sellOffer.decrementAmount(offer.getAmount());
+						if(seller != null)
+							seller.sendMessage(new TextComponentTranslation("Sell Offer partially fulfilled: %s %s %s at %s each.", offer.getAmount(), offer.getItemResourceName(), offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : ""), sellOffer.getPrice()).setStyle(TextStyles.DARK_PURPLE));
+					}
+					offerComplete = true;
+					break;
+				}
+			}
+			sellOffers.get(offer.getItemPair()).removeAll(removeOffers);
+			saveToFile();
+			return offerComplete;
+		}
+		return false;
+	}
+
+	private static ItemStack getStack(ResourceLocation offerResource, boolean isOfferBlock, int amount, Offer offer) {
+		//noinspection ConstantConditions
+		ItemStack stack =  isOfferBlock ? new ItemStack(Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(offerResource)), amount, offer.getItemMeta()) : new ItemStack(ForgeRegistries.ITEMS.getValue(offerResource), amount, offer.getItemMeta());
+		stack.setTagCompound(SerializationUtils.getNbt(offer.getNbt()));
+		return stack;
 	}
 
 	private void sortOffers(){
