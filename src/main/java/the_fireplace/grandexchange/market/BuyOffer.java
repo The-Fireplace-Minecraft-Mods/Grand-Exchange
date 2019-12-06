@@ -19,8 +19,8 @@ public class BuyOffer extends Offer implements Serializable {
 	@Override
 	public ITextComponent getOfferChatMessage(ICommandSender sender) {
 		if(getNbt() != null)
-			return TranslationUtil.getTranslation(sender, "ge.buyoffer_nbt", getAmount(), getItemResourceName(), getItemMeta(), getNbt(), getPrice(), GrandEconomyApi.getCurrencyName(getPrice())).setStyle(TextStyles.BLUE);
+			return TranslationUtil.getTranslation(sender, "ge.buyoffer_nbt", getAmount(), getItemResourceName(), getItemMeta(), getNbt(), GrandEconomyApi.toString(getPrice())).setStyle(TextStyles.BLUE);
 		else
-			return TranslationUtil.getTranslation(sender, "ge.buyoffer", getAmount(), getItemResourceName(), getItemMeta(), getPrice(), GrandEconomyApi.getCurrencyName(getPrice())).setStyle(TextStyles.BLUE);
+			return TranslationUtil.getTranslation(sender, "ge.buyoffer", getAmount(), getItemResourceName(), getItemMeta(), GrandEconomyApi.toString(getPrice())).setStyle(TextStyles.BLUE);
 	}
 }

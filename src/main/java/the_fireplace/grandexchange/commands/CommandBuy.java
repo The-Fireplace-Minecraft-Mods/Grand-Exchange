@@ -55,16 +55,16 @@ public class CommandBuy extends CommandBase {
                     throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_price"));
                 if(args.length == 5 && !args[4].isEmpty() && !SerializationUtils.isValidNBT(args[4]))
                     throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_nbt"));
-                if (GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID()) < price*amount)
+                if (GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID(), true) < price*amount)
                     throw new InsufficientCreditException();
 
                 boolean madePurchase = TransactionDatabase.getInstance().makeOffer(new BuyOffer(offerResource.toString(), meta, amount, price, ((EntityPlayerMP) sender).getUniqueID(), args.length == 5 ? args[4] : null));
-                GrandEconomyApi.takeFromBalance(((EntityPlayerMP) sender).getUniqueID(), price*amount, false);
+                GrandEconomyApi.takeFromBalance(((EntityPlayerMP) sender).getUniqueID(), price*amount, true);
 
                 if(madePurchase)
-                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.buy.success_completed", GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID())));
+                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.buy.success_completed", GrandEconomyApi.toString(GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID(), true))));
                 else
-                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.offer_made_balance", GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID())));
+                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.offer_made_balance", GrandEconomyApi.toString(GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID(), true))));
                 return;
             } else {
                 throw new CommandException(TranslationUtil.getRawTranslationString(sender, "commands.ge.common.not_player"));

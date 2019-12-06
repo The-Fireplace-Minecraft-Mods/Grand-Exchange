@@ -12,12 +12,12 @@ commands.ge.common.not_holding_anything=Error: You aren't holding anything.
 
 commands.ge.usage=/ge <command> [parameters]
 
-commands.ge.common.offer_fulfilled_balance=Offer succeeded. Your balance is now: %s
-commands.ge.common.offer_made_balance=Offer succeeded. Your balance is now: %s
+commands.ge.common.offer_fulfilled_balance=Offer succeeded. Your balance is now %s
+commands.ge.common.offer_made_balance=Offer succeeded. Your balance is now %s
 commands.ge.common.offer_made=Offer succeeded.
 
 commands.ge.buy.usage=/ge buy <item> <meta> <amount> <price> [nbt]
-commands.ge.buy.success_completed=Purchase succeeded. Your balance is now: %s. You can collect your items with /ge collect
+commands.ge.buy.success_completed=Purchase succeeded. Your balance is now %s. You can collect your items with /ge collect
 
 commands.ge.buyoffers.usage=/ge buyoffers [filter] [page]
 commands.ge.buyoffers.none=Nobody is buying anything.
@@ -48,11 +48,11 @@ commands.ge.selloffers.none=Nobody is selling anything.
 
 commands.ge.sellthis.usage=/ge sellthis <amount> <price>
 
-ge.buyoffer=%s %s %s wanted for %s %s each.
-ge.buyoffer_nbt=%s %s %s with NBT %s wanted for %s %s each.
+ge.buyoffer=%s %s %s wanted for %s each.
+ge.buyoffer_nbt=%s %s %s with NBT %s wanted for %s each.
 
-ge.selloffer=%s %s %s being sold for %s %s each.
-ge.selloffer_nbt=%s %s %s with NBT %s being sold for %s %s each.
+ge.selloffer=%s %s %s being sold for %s each.
+ge.selloffer_nbt=%s %s %s with NBT %s being sold for %s each.
 
 ge.chat.page.next=[Next]
 ge.chat.page.prev=[Previous]

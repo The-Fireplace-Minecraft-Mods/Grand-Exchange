@@ -133,7 +133,7 @@ public final class TransactionDatabase implements Serializable {
 					payouts.put(buyOffer.getOwner(), Lists.newArrayList());
 				if(offer.getAmount() > buyOffer.getAmount()){
 					int givingAmount = buyOffer.getAmount();
-					GrandEconomyApi.addToBalance(offer.getOwner(), givingAmount*buyOffer.getPrice(), false);
+					GrandEconomyApi.addToBalance(offer.getOwner(), givingAmount*buyOffer.getPrice(), true);
 					while(givingAmount > maxStackSize) {
 						payouts.get(buyOffer.getOwner()).add(SerializationUtils.stackToString(getStack(offerResource, isOfferBlock, maxStackSize, offer)));
 						givingAmount -= maxStackSize;
@@ -145,7 +145,7 @@ public final class TransactionDatabase implements Serializable {
 						buyer.sendMessage(new TextComponentTranslation("Buy Offer fulfilled: %s %s %s at %s each.", buyOffer.getAmount(), buyOffer.getItemResourceName(), buyOffer.getItemMeta() + (buyOffer.getNbt() != null ? " with NBT "+buyOffer.getNbt() : ""), buyOffer.getPrice()).setStyle(TextStyles.BLUE));
 				} else {
 					int givingAmount = offer.getAmount();
-					GrandEconomyApi.addToBalance(offer.getOwner(), givingAmount*buyOffer.getPrice(), false);
+					GrandEconomyApi.addToBalance(offer.getOwner(), givingAmount*buyOffer.getPrice(), true);
 					while(givingAmount > maxStackSize) {
 						payouts.get(buyOffer.getOwner()).add(SerializationUtils.stackToString(getStack(offerResource, isOfferBlock, maxStackSize, offer)));
 						givingAmount -= maxStackSize;
@@ -181,7 +181,7 @@ public final class TransactionDatabase implements Serializable {
 				Entity seller = FMLCommonHandler.instance().getMinecraftServerInstance().getEntityFromUuid(sellOffer.getOwner());
 				if(offer.getAmount() > sellOffer.getAmount()){
 					int givingAmount = sellOffer.getAmount();
-					GrandEconomyApi.addToBalance(sellOffer.getOwner(), givingAmount*sellOffer.getPrice(), false);
+					GrandEconomyApi.addToBalance(sellOffer.getOwner(), givingAmount*sellOffer.getPrice(), true);
 					if(seller != null)
 						seller.sendMessage(new TextComponentTranslation("Sell Offer fulfilled: %s %s %s at %s each.", givingAmount, offer.getItemResourceName(), offer.getItemMeta(), offer.getPrice()).setStyle(TextStyles.DARK_PURPLE));
 					while(givingAmount > maxStackSize) {
@@ -193,7 +193,7 @@ public final class TransactionDatabase implements Serializable {
 					removeOffers.add(sellOffer);
 				} else {
 					int givingAmount = offer.getAmount();
-					GrandEconomyApi.addToBalance(sellOffer.getOwner(), givingAmount*sellOffer.getPrice(), false);
+					GrandEconomyApi.addToBalance(sellOffer.getOwner(), givingAmount*sellOffer.getPrice(), true);
 					while(givingAmount > maxStackSize) {
 						payouts.get(offer.getOwner()).add(SerializationUtils.stackToString(getStack(offerResource, isOfferBlock, maxStackSize, offer)));
 						givingAmount -= maxStackSize;
