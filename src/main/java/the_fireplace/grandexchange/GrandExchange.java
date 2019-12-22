@@ -9,7 +9,7 @@ import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import the_fireplace.grandexchange.commands.CommandGe;
 
 @SuppressWarnings("WeakerAccess")
-@Mod(modid = GrandExchange.MODID, name = GrandExchange.MODNAME, version = GrandExchange.VERSION, acceptedMinecraftVersions = "[1.12,1.13)", acceptableRemoteVersions = "*", dependencies="required-after:grandeconomy@[1.2.0,)")
+@Mod(modid = GrandExchange.MODID, name = GrandExchange.MODNAME, version = GrandExchange.VERSION, acceptedMinecraftVersions = "[1.12,1.13)", acceptableRemoteVersions = "*", dependencies="required-after:grandeconomy@[1.3.1,)")
 public final class GrandExchange {
     public static final String MODID = "grandexchange";
     public static final String MODNAME = "Grand Exchange";
