@@ -1,1 +1,1 @@
-Fix translations not loading.
+Fix ge buy not working without NBT

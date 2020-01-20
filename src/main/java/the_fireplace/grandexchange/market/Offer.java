@@ -48,6 +48,7 @@ public abstract class Offer implements Serializable {
 	public final long getTimestamp(){
 		return timestamp;
 	}
+	@Nullable
 	public final String getNbt(){
 		return nbt;
 	}

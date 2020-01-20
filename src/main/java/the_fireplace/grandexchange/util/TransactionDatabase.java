@@ -222,7 +222,8 @@ public final class TransactionDatabase implements Serializable {
 	private static ItemStack getStack(ResourceLocation offerResource, boolean isOfferBlock, int amount, Offer offer) {
 		//noinspection ConstantConditions
 		ItemStack stack =  isOfferBlock ? new ItemStack(Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(offerResource)), amount, offer.getItemMeta()) : new ItemStack(ForgeRegistries.ITEMS.getValue(offerResource), amount, offer.getItemMeta());
-		stack.setTagCompound(SerializationUtils.getNbt(offer.getNbt()));
+		if(offer.getNbt() != null)
+			stack.setTagCompound(SerializationUtils.getNbt(offer.getNbt()));
 		return stack;
 	}
 
