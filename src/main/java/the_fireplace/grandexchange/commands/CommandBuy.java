@@ -12,9 +12,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import the_fireplace.grandeconomy.api.GrandEconomyApi;
 import the_fireplace.grandeconomy.econhandlers.ge.InsufficientCreditException;
-import the_fireplace.grandexchange.market.BuyOffer;
+import the_fireplace.grandexchange.market.ExchangeManager;
+import the_fireplace.grandexchange.market.OfferType;
 import the_fireplace.grandexchange.util.SerializationUtils;
-import the_fireplace.grandexchange.util.TransactionDatabase;
 import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
 import javax.annotation.Nullable;
@@ -58,7 +58,7 @@ public class CommandBuy extends CommandBase {
                 if (GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID(), true) < price*amount)
                     throw new InsufficientCreditException();
 
-                boolean madePurchase = TransactionDatabase.getInstance().makeOffer(new BuyOffer(offerResource.toString(), meta, amount, price, ((EntityPlayerMP) sender).getUniqueID(), args.length == 5 ? args[4] : null));
+                boolean madePurchase = ExchangeManager.makeOffer(OfferType.BUY, offerResource, meta, amount, price, ((EntityPlayerMP) sender).getUniqueID(), args.length == 5 ? args[4] : null);
                 GrandEconomyApi.takeFromBalance(((EntityPlayerMP) sender).getUniqueID(), price*amount, true);
 
                 if(madePurchase)

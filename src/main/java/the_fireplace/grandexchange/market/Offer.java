@@ -1,5 +1,6 @@
 package the_fireplace.grandexchange.market;
 
+import com.google.gson.JsonObject;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.text.ITextComponent;
 import org.apache.commons.lang3.tuple.Pair;
@@ -9,6 +10,7 @@ import java.io.Serializable;
 import java.util.UUID;
 
 @SuppressWarnings("WeakerAccess")
+@Deprecated
 public abstract class Offer implements Serializable {
     private static final long serialVersionUID = 0x42069;
 
@@ -59,4 +61,18 @@ public abstract class Offer implements Serializable {
 	}
 
 	public abstract ITextComponent getOfferChatMessage(ICommandSender sender);
+
+	public JsonObject toJsonObject() {
+		JsonObject ret = new JsonObject();
+		ret.addProperty("item", item);
+		ret.addProperty("type", offertype);
+		if(nbt != null)
+			ret.addProperty("nbt", nbt);
+		ret.addProperty("amount", amount);
+		ret.addProperty("meta", meta);
+		ret.addProperty("price", price);
+		ret.addProperty("owner", owner.toString());
+		ret.addProperty("timestamp", timestamp);
+		return ret;
+	}
 }

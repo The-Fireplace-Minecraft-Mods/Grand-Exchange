@@ -9,7 +9,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import the_fireplace.grandexchange.market.BuyOffer;
 import the_fireplace.grandexchange.market.SellOffer;
-import the_fireplace.grandexchange.util.TransactionDatabase;
 import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
 import javax.annotation.Nonnull;
@@ -33,10 +32,10 @@ public class CommandCancelOffer extends CommandBase {
     public void execute(@Nullable MinecraftServer server, @Nonnull ICommandSender sender, @Nullable String[] args) throws CommandException {
         if(sender instanceof EntityPlayerMP) {
             List<BuyOffer> buyOffers = Lists.newArrayList();
-            for (List<BuyOffer> offerList : TransactionDatabase.getBuyOffers().values())
+            for (List<BuyOffer> offerList : ExchangeManager.getBuyOffers().values())
                 buyOffers.addAll(offerList);
             List<SellOffer> sellOffers = Lists.newArrayList();
-            for (List<SellOffer> offerList : TransactionDatabase.getSellOffers().values())
+            for (List<SellOffer> offerList : ExchangeManager.getSellOffers().values())
                 sellOffers.addAll(offerList);
             buyOffers.removeIf(offer -> !offer.getOwner().equals(((EntityPlayerMP) sender).getUniqueID()));
             sellOffers.removeIf(offer -> !offer.getOwner().equals(((EntityPlayerMP) sender).getUniqueID()));
@@ -78,7 +77,7 @@ public class CommandCancelOffer extends CommandBase {
                 if(enableBuySearch)
                     for (BuyOffer offer : buyOffers) {
                         if (offer.getItemResourceName().matches(filter) && (meta == null || meta == offer.getItemMeta()) && (price == null || price == offer.getPrice())) {
-                            TransactionDatabase.getInstance().cancelOffer(offer);
+                            ExchangeManager.getInstance().cancelOffer(offer);
                             sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.canceloffer.success_buy", offer.getOfferChatMessage(sender).getFormattedText()));
                         }
                     }
@@ -86,7 +85,7 @@ public class CommandCancelOffer extends CommandBase {
                 if(enableSellSearch)
                     for (SellOffer offer : sellOffers) {
                         if (offer.getItemResourceName().matches(filter) && (meta == null || meta == offer.getItemMeta()) && (price == null || price == offer.getPrice())) {
-                            TransactionDatabase.getInstance().cancelOffer(offer);
+                            ExchangeManager.getInstance().cancelOffer(offer);
                             sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.canceloffer.success_sell", offer.getOfferChatMessage(sender).getFormattedText()));
                         }
                     }

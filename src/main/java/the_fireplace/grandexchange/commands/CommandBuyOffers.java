@@ -11,7 +11,6 @@ import net.minecraft.util.text.ITextComponent;
 import the_fireplace.grandexchange.market.BuyOffer;
 import the_fireplace.grandexchange.util.ChatPageUtil;
 import the_fireplace.grandexchange.util.TextStyles;
-import the_fireplace.grandexchange.util.TransactionDatabase;
 import the_fireplace.grandexchange.util.Utils;
 import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
@@ -37,7 +36,7 @@ public class CommandBuyOffers extends CommandBase {
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if(args.length <= 2) {
             List<BuyOffer> offers = Lists.newArrayList();
-            for (List<BuyOffer> offerList : TransactionDatabase.getBuyOffers().values())
+            for (List<BuyOffer> offerList : ExchangeManager.getBuyOffers().values())
                 offers.addAll(offerList);
             int page = 1;
             if (args.length == 2)

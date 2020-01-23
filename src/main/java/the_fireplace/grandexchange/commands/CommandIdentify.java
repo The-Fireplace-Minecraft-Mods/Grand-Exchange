@@ -7,7 +7,6 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
-import the_fireplace.grandexchange.util.TransactionDatabase;
 import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
 import javax.annotation.Nullable;
@@ -34,7 +33,7 @@ public class CommandIdentify extends CommandBase {
             if(!isValidRequest)
                 throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayer) sender).getUniqueID(), "commands.ge.common.not_holding_anything"));
             ItemStack held = ((EntityPlayer) sender).getHeldItemMainhand().isEmpty() ? ((EntityPlayer) sender).getHeldItemOffhand() : ((EntityPlayer) sender).getHeldItemMainhand();
-            if(TransactionDatabase.canTransactItem(held)){
+            if(ExchangeManager.canTransactItem(held)){
                 @SuppressWarnings("ConstantConditions")
                 String regName = held.getItem().getRegistryName().toString();
                 if(regName.startsWith("minecraft:"))

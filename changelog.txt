@@ -1,1 +1,1 @@
-Fix ge buy not working without NBT
+Major database rewrite into json format - updates and fixes will come quicker, and the data can be easily read and modified by server owners

@@ -7,6 +7,7 @@ import net.minecraftforge.common.config.Config;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import the_fireplace.grandexchange.commands.CommandGe;
+import the_fireplace.grandexchange.util.TransactionDatabase;
 
 @SuppressWarnings("WeakerAccess")
 @Mod(modid = GrandExchange.MODID, name = GrandExchange.MODNAME, version = GrandExchange.VERSION, acceptedMinecraftVersions = "[1.12,1.13)", acceptableRemoteVersions = "*", dependencies="required-after:grandeconomy@[1.3.1,)")
@@ -21,6 +22,8 @@ public final class GrandExchange {
         ICommandManager command = server.getCommandManager();
         ServerCommandManager manager = (ServerCommandManager) command;
         manager.registerCommand(new CommandGe());
+        //TODO Remove this old code when porting to 1.14+
+        TransactionDatabase.getInstance();
     }
 
     @Config(modid=MODID, name=MODNAME)

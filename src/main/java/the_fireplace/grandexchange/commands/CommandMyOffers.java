@@ -12,7 +12,6 @@ import the_fireplace.grandexchange.market.Offer;
 import the_fireplace.grandexchange.market.SellOffer;
 import the_fireplace.grandexchange.util.ChatPageUtil;
 import the_fireplace.grandexchange.util.TextStyles;
-import the_fireplace.grandexchange.util.TransactionDatabase;
 import the_fireplace.grandexchange.util.Utils;
 import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
@@ -38,11 +37,11 @@ public class CommandMyOffers extends CommandBase {
     public void execute(@Nullable MinecraftServer server, @Nonnull ICommandSender sender, @Nullable String[] args) throws CommandException {
         if(sender instanceof EntityPlayerMP) {
             List<BuyOffer> buyOffers = Lists.newArrayList();
-            for (List<BuyOffer> offerList : TransactionDatabase.getBuyOffers().values())
+            for (List<BuyOffer> offerList : ExchangeManager.getBuyOffers().values())
                 buyOffers.addAll(offerList);
 
             List<SellOffer> sellOffers = Lists.newArrayList();
-            for (List<SellOffer> offerList : TransactionDatabase.getSellOffers().values())
+            for (List<SellOffer> offerList : ExchangeManager.getSellOffers().values())
                 sellOffers.addAll(offerList);
 
             buyOffers.removeIf(offer -> !offer.getOwner().equals(((EntityPlayerMP) sender).getUniqueID()));

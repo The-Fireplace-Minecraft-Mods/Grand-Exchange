@@ -8,8 +8,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
-import the_fireplace.grandexchange.util.SerializationUtils;
-import the_fireplace.grandexchange.util.TransactionDatabase;
+import the_fireplace.grandexchange.market.ExchangeManager;
 import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -31,15 +30,14 @@ public class CommandCollect extends CommandBase {
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if (sender instanceof EntityPlayer) {
-            if(TransactionDatabase.hasPayout(((EntityPlayer) sender).getUniqueID())){
-                List<String> removeItems = Lists.newArrayList();
-                for(String stackStr: TransactionDatabase.getPayout(((EntityPlayer) sender).getUniqueID())) {
-                    ItemStack stack = SerializationUtils.stackFromString(stackStr);
-                    if(stack != null && ((EntityPlayer) sender).addItemStackToInventory(stack))
-                        removeItems.add(stackStr);
+            if(ExchangeManager.hasPayout(((EntityPlayer) sender).getUniqueID())) {
+                List<ItemStack> removeItems = Lists.newArrayList();
+                for(ItemStack stack: ExchangeManager.getPayout(((EntityPlayer) sender).getUniqueID())) {
+                    if(stack != null && ((EntityPlayer) sender).addItemStackToInventory(stack.copy()))//Use a copy because in addItemStackToInventory, the stack's count gets set to 0 and that could be a problem when removing payouts
+                        removeItems.add(stack);
                 }
-                TransactionDatabase.getInstance().removePayouts(((EntityPlayer) sender).getUniqueID(), removeItems);
-                if(TransactionDatabase.hasPayout(((EntityPlayer) sender).getUniqueID()))
+                ExchangeManager.removePayouts(((EntityPlayer) sender).getUniqueID(), removeItems.toArray(new ItemStack[]{}));
+                if(ExchangeManager.hasPayout(((EntityPlayer) sender).getUniqueID()))
                     sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayer) sender).getUniqueID(), "commands.ge.collect.no_more_room"));
                 else
                     sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayer) sender).getUniqueID(), "commands.ge.collect.success"));

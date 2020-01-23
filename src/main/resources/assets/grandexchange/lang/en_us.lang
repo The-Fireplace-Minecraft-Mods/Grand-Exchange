@@ -47,12 +47,23 @@ commands.ge.selloffers.usage=/ge selloffers [filter] [page]
 commands.ge.selloffers.none=Nobody is selling anything.
 
 commands.ge.sellthis.usage=/ge sellthis <amount> <price>
-
+#TODO replace all the %s %s %s with one %s which has the formatted data
 ge.buyoffer=%s %s %s wanted for %s each.
 ge.buyoffer_nbt=%s %s %s with NBT %s wanted for %s each.
+ge.buyoffer.fulfilled=Buy Offer fulfilled: %s %s %s at %s each.
+ge.buyoffer.fulfilled_nbt=Buy Offer fulfilled: %s %s %s with NBT %s at %s each.
+ge.buyoffer.fulfilled_partial=Buy Offer partially fulfilled: %s %s %s at %s each.
+ge.buyoffer.fulfilled_partial_nbt=Buy Offer partially fulfilled: %s %s %s with NBT %s at %s each.
 
 ge.selloffer=%s %s %s being sold for %s each.
 ge.selloffer_nbt=%s %s %s with NBT %s being sold for %s each.
+ge.selloffer.fulfilled=Sell Offer fulfilled: %s %s %s at %s each.
+ge.selloffer.fulfilled_nbt=Sell Offer fulfilled: %s %s %s with NBT %s at %s each.
+ge.selloffer.fulfilled_partial=Sell Offer partially fulfilled: %s %s %s at %s each.
+ge.selloffer.fulfilled_partial_nbt=Sell Offer partially fulfilled: %s %s %s with NBT %s at %s each.
+
+ge.invalidoffer=Invalid offer: %s %s %s for %s each.
+ge.invalidoffer_nbt=Invalid offer: %s %s %s with NBT %s for %s each.
 
 ge.chat.page.next=[Next]
 ge.chat.page.prev=[Previous]

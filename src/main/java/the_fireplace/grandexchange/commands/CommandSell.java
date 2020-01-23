@@ -14,7 +14,6 @@ import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import the_fireplace.grandeconomy.api.GrandEconomyApi;
 import the_fireplace.grandexchange.market.SellOffer;
 import the_fireplace.grandexchange.util.SerializationUtils;
-import the_fireplace.grandexchange.util.TransactionDatabase;
 import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
 import javax.annotation.Nullable;
@@ -58,7 +57,7 @@ public class CommandSell extends CommandBase {
                 int itemCount = 0;
                 for(ItemStack stack: ((EntityPlayerMP) sender).inventory.mainInventory) {
                     //noinspection ConstantConditions
-                    if(!stack.isEmpty() && stack.getItem().getRegistryName().equals(offerResource) && stack.getMetadata() == meta && ((!stack.hasTagCompound() && args.length == 4) || stack.getTagCompound().toString().equals(args[4])) && TransactionDatabase.canTransactItem(stack)){
+                    if(!stack.isEmpty() && stack.getItem().getRegistryName().equals(offerResource) && stack.getMetadata() == meta && ((!stack.hasTagCompound() && args.length == 4) || stack.getTagCompound().toString().equals(args[4])) && ExchangeManager.canTransactItem(stack)){
                         if(stack.getCount() + itemCount >= amount)
                             itemCount = amount;
                         else
@@ -70,7 +69,7 @@ public class CommandSell extends CommandBase {
                 int i = 0;
                 for(ItemStack stack: ((EntityPlayerMP) sender).inventory.mainInventory) {
                     //noinspection ConstantConditions
-                    while(!stack.isEmpty() && stack.getItem().getRegistryName().equals(offerResource) && stack.getMetadata() == meta && ((!stack.hasTagCompound() && args.length == 4) || stack.getTagCompound().toString().equals(args[4])) && itemCount > 0 && TransactionDatabase.canTransactItem(stack)){
+                    while(!stack.isEmpty() && stack.getItem().getRegistryName().equals(offerResource) && stack.getMetadata() == meta && ((!stack.hasTagCompound() && args.length == 4) || stack.getTagCompound().toString().equals(args[4])) && itemCount > 0 && ExchangeManager.canTransactItem(stack)){
                         itemCount--;
                         if(stack.getCount() > 1)
                             stack.setCount(stack.getCount() - 1);
@@ -84,7 +83,7 @@ public class CommandSell extends CommandBase {
                 if(itemCount > 0)
                     throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.sell.failed"));
 
-                boolean madePurchase = TransactionDatabase.getInstance().makeOffer(new SellOffer(offerResource.toString(), meta, amount, price, ((EntityPlayerMP) sender).getUniqueID(), args.length == 5 ? args[4] : null));
+                boolean madePurchase = ExchangeManager.getInstance().makeOffer(new SellOffer(offerResource.toString(), meta, amount, price, ((EntityPlayerMP) sender).getUniqueID(), args.length == 5 ? args[4] : null));
 
                 if(madePurchase)
                     sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.offer_fulfilled_balance", GrandEconomyApi.toString(GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID(), true))));
