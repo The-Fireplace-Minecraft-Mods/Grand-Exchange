@@ -57,6 +57,11 @@ public class NewOffer extends Offer {
         return type;
     }
 
+    public long getIdentifier() {
+        return identifier;
+    }
+
+    @Override
     public JsonObject toJsonObject() {
         JsonObject ret = super.toJsonObject();
         ret.addProperty("identifier", identifier);

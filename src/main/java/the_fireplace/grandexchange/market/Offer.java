@@ -55,11 +55,6 @@ public abstract class Offer implements Serializable {
 		return nbt;
 	}
 
-	public void decrementAmount(int reduceBy){
-		timestamp = System.currentTimeMillis();
-		amount -= reduceBy;
-	}
-
 	public abstract ITextComponent getOfferChatMessage(ICommandSender sender);
 
 	public JsonObject toJsonObject() {
