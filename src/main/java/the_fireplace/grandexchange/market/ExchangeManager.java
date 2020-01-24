@@ -11,6 +11,7 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import org.apache.commons.lang3.tuple.Pair;
 import the_fireplace.grandeconomy.api.GrandEconomyApi;
+import the_fireplace.grandexchange.GrandExchange;
 import the_fireplace.grandexchange.util.SerializationUtils;
 import the_fireplace.grandexchange.util.TextStyles;
 import the_fireplace.grandexchange.util.translation.TranslationUtil;
@@ -51,10 +52,13 @@ public final class ExchangeManager {
      * True if the offer was fulfilled, false otherwise.
      */
     public static boolean makeOffer(OfferType type, String item, int meta, int amount, long price, UUID owner, @Nullable String nbt) {
-        boolean offerFulfilled = tryFulfillOffer(offer);
-        if(!offerFulfilled)
-            getDatabase().addOffer(type, item, meta, amount, price, owner, nbt);
-        return offerFulfilled;
+        //TODO make tryFulfillOffer return the remaining amount, because otherwise the offer will be partially fulfilled then get added with the original amount
+        int amountUnfulfilled = tryFulfillOffer(type, item, meta, amount, price, owner, nbt);
+        if(amountUnfulfilled > 0)
+            getDatabase().addOffer(type, item, meta, amountUnfulfilled, price, owner, nbt);
+        else if(amountUnfulfilled < 0)
+            GrandExchange.LOGGER.error("Amount unfulfilled was {}! This is not good.", amountUnfulfilled);
+        return amountUnfulfilled <= 0;
     }
     public static boolean makeOffer(OfferType type, ResourceLocation item, int meta, int amount, long price, UUID owner, @Nullable String nbt) {
         return makeOffer(type, item.toString(), meta, amount, price, owner, nbt);
@@ -95,6 +99,20 @@ public final class ExchangeManager {
     public static boolean hasPayout(UUID player) {
         return getDatabase().countPayouts(player) > 0;
     }
+
+    /**
+     * Get all offers of a type for an item with the specified minimum or maximum price
+     * @param type
+     * The offer type to retrieve
+     * @param itemPair
+     * A pair with the item id and metadata
+     * @param minMaxPrice
+     * The minimum price when looking for buy offers, or the maximum price when looking for sell offers
+     * @param nbt
+     * A NBT tag to search for, if any. Null should return any NBT, not just offers without NBT.
+     * @return
+     * A collection of offers matching the criteria
+     */
     public static Collection<NewOffer> getOffers(OfferType type, Pair<String, Integer> itemPair, long minMaxPrice, @Nullable String nbt) {
         return getDatabase().getOffers(type, itemPair, minMaxPrice, nbt);
     }
@@ -122,7 +140,10 @@ public final class ExchangeManager {
         }
     }
 
-    private static boolean tryFulfillOffer(OfferType type, String item, int meta, int amount, long price, UUID owner, @Nullable String nbt) {
+    /**
+     * Attempts to fulfill an offer meeting the criteria and returns the remaining amount after fulfilling as much as possible
+     */
+    private static int tryFulfillOffer(OfferType type, String item, int meta, int amount, long price, UUID owner, @Nullable String nbt) {
         ResourceLocation offerResource = new ResourceLocation(item);
         boolean isOfferBlock = !ForgeRegistries.ITEMS.containsKey(offerResource);
         @SuppressWarnings("ConstantConditions")
@@ -133,14 +154,13 @@ public final class ExchangeManager {
         } else if(type.equals(OfferType.SELL)) {
             return tryFulfillSellOffer(item, meta, amount, price, owner, nbt, isOfferBlock, maxStackSize);
         }
-        return false;
+        return amount;
     }
 
-    private static boolean tryFulfillSellOffer(String item, int meta, int amount, long price, UUID owner, @Nullable String nbt, boolean isOfferBlock, int maxStackSize) {
+    private static int tryFulfillSellOffer(String item, int meta, int amount, long price, UUID owner, @Nullable String nbt, boolean isOfferBlock, int maxStackSize) {
         Collection<NewOffer> possibleBuyOffers = getOffers(OfferType.BUY, Pair.of(item, meta), price, nbt);
         if(!possibleBuyOffers.isEmpty()) {
-            List<NewOffer> removeOffers = Lists.newArrayList();
-            boolean offerComplete = false;
+            List<Long> removeOfferIds = Lists.newArrayList();
             for(NewOffer buyOffer: possibleBuyOffers) {
                 Entity buyer = FMLCommonHandler.instance().getMinecraftServerInstance().getEntityFromUuid(buyOffer.getOwner());
                 ResourceLocation offerResource = new ResourceLocation(item);
@@ -153,8 +173,8 @@ public final class ExchangeManager {
                     }
                     addPayout(buyOffer.getOwner(), getStack(isOfferBlock, offerResource, givingAmount, meta, nbt));
                     amount -= buyOffer.getAmount();
-                    removeOffers.add(buyOffer);
-                    if(buyer != null) {
+                    removeOfferIds.add(buyOffer.getIdentifier());
+                    if(buyer != null) {//TODO Replace this with a system to send the player a message when they are next online
                         if(buyOffer.getNbt() == null)
                             buyer.sendMessage(TranslationUtil.getTranslation(buyOffer.getOwner(), "ge.buyoffer.fulfilled", buyOffer.getAmount(), buyOffer.getItemResourceName(), buyOffer.getItemMeta(), buyOffer.getPrice()).setStyle(TextStyles.BLUE));
                         else
@@ -170,8 +190,8 @@ public final class ExchangeManager {
                     }
                     addPayout(buyOffer.getOwner(), getStack(isOfferBlock, offerResource, givingAmount, meta, nbt));
                     if(amount == buyOffer.getAmount()) {
-                        removeOffers.add(buyOffer);
-                        if(buyer != null) {
+                        removeOfferIds.add(buyOffer.getIdentifier());
+                        if(buyer != null) {//TODO Replace this with a system to send the player a message when they are next online
                             if(buyOffer.getNbt() == null)
                                 buyer.sendMessage(TranslationUtil.getTranslation(buyOffer.getOwner(), "ge.buyoffer.fulfilled", buyOffer.getAmount(), buyOffer.getItemResourceName(), buyOffer.getItemMeta(), buyOffer.getPrice()).setStyle(TextStyles.BLUE));
                             else
@@ -179,68 +199,69 @@ public final class ExchangeManager {
                         }
                     } else {
                         updateCount(buyOffer.getIdentifier(), buyOffer.getAmount() - amount);
-                        if(buyer != null) {
+                        if(buyer != null) {//TODO Replace this with a system to send the player a message when they are next online
                             if(buyOffer.getNbt() == null)
                                 buyer.sendMessage(TranslationUtil.getTranslation(buyOffer.getOwner(), "ge.buyoffer.fulfilled_partial", amount, buyOffer.getItemResourceName(), buyOffer.getItemMeta(), buyOffer.getPrice()).setStyle(TextStyles.BLUE));
                             else
                                 buyer.sendMessage(TranslationUtil.getTranslation(buyOffer.getOwner(), "ge.buyoffer.fulfilled_partial_nbt", amount, buyOffer.getItemResourceName(), buyOffer.getItemMeta(), buyOffer.getNbt(), buyOffer.getPrice()).setStyle(TextStyles.BLUE));
                         }
                     }
-                    offerComplete = true;
+                    amount = 0;
                     break;
                 }
             }
-            buyOffers.get(offer.getItemPair()).removeAll(removeOffers);
-            return offerComplete;
+            for(long offerId: removeOfferIds)
+                removeOffer(offerId);
+            return amount;
         }
-        return false;
+        return amount;
     }
 
-    private static boolean tryFulfillBuyOffer(String item, int meta, int amount, long price, UUID owner, @Nullable String nbt, boolean isOfferBlock, int maxStackSize) {
-        if(sellOffers.containsKey(offer.getItemPair()) && !sellOffers.get(offer.getItemPair()).isEmpty()){
-            List<NewOffer> possibleSellOffers = sellOffers.get(offer.getItemPair());
-            possibleSellOffers.removeIf(o1 -> o1.getPrice() > offer.getPrice());
-            List<NewOffer> removeOffers = Lists.newArrayList();
-            boolean offerComplete = false;
+    private static int tryFulfillBuyOffer(String item, int meta, int amount, long price, UUID owner, @Nullable String nbt, boolean isOfferBlock, int maxStackSize) {
+        Collection<NewOffer> possibleSellOffers = getOffers(OfferType.SELL, Pair.of(item, meta), price, nbt);
+        if(!possibleSellOffers.isEmpty()) {
+            List<Long> removeOfferIds = Lists.newArrayList();
             for(NewOffer sellOffer: possibleSellOffers){
                 Entity seller = FMLCommonHandler.instance().getMinecraftServerInstance().getEntityFromUuid(sellOffer.getOwner());
-                if(offer.getAmount() > sellOffer.getAmount()){
+                ResourceLocation offerResource = new ResourceLocation(item);
+                if(amount > sellOffer.getAmount()){
                     int givingAmount = sellOffer.getAmount();
                     GrandEconomyApi.addToBalance(sellOffer.getOwner(), givingAmount*sellOffer.getPrice(), true);
-                    if(seller != null)
-                        seller.sendMessage(new TextComponentTranslation("ge.selloffer.fulfilled", givingAmount, offer.getItemResourceName(), offer.getItemMeta(), offer.getPrice()).setStyle(TextStyles.DARK_PURPLE));
+                    if(seller != null)//TODO Replace this with a system to send the player a message when they are next online
+                        seller.sendMessage(new TextComponentTranslation("ge.selloffer.fulfilled", givingAmount, item, meta, price).setStyle(TextStyles.DARK_PURPLE));
                     while(givingAmount > maxStackSize) {
-                        payouts.get(offer.getOwner()).add(getStack(offerResource, isOfferBlock, maxStackSize, offer));
+                        addPayout(owner, getStack(isOfferBlock, offerResource, maxStackSize, meta, nbt));
                         givingAmount -= maxStackSize;
                     }
-                    payouts.get(offer.getOwner()).add(getStack(offerResource, isOfferBlock, givingAmount, offer));
-                    offer.decrementAmount(sellOffer.getAmount());
-                    removeOffers.add(sellOffer);
+                    addPayout(owner, getStack(isOfferBlock, offerResource, givingAmount, meta, nbt));
+                    amount -= sellOffer.getAmount();
+                    removeOfferIds.add(sellOffer.getIdentifier());
                 } else {
-                    int givingAmount = offer.getAmount();
+                    int givingAmount = amount;
                     GrandEconomyApi.addToBalance(sellOffer.getOwner(), givingAmount*sellOffer.getPrice(), true);
                     while(givingAmount > maxStackSize) {
-                        payouts.get(offer.getOwner()).add(getStack(offerResource, isOfferBlock, maxStackSize, offer));
+                        addPayout(owner, getStack(isOfferBlock, offerResource, maxStackSize, meta, nbt));
                         givingAmount -= maxStackSize;
                     }
-                    payouts.get(offer.getOwner()).add(getStack(offerResource, isOfferBlock, givingAmount, offer));
-                    if(offer.getAmount() == sellOffer.getAmount()) {
-                        removeOffers.add(sellOffer);
-                        if(seller != null)
-                            seller.sendMessage(new TextComponentTranslation("ge.selloffer.fulfilled", offer.getAmount(), offer.getItemResourceName(), offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : ""), sellOffer.getPrice()).setStyle(TextStyles.DARK_PURPLE));
+                    addPayout(owner, getStack(isOfferBlock, offerResource, givingAmount, meta, nbt));
+                    if(amount == sellOffer.getAmount()) {
+                        removeOfferIds.add(sellOffer.getIdentifier());
+                        if(seller != null)//TODO Replace this with a system to send the player a message when they are next online
+                            seller.sendMessage(new TextComponentTranslation("ge.selloffer.fulfilled", amount, item, meta + (nbt != null ? " with NBT "+nbt : ""), sellOffer.getPrice()).setStyle(TextStyles.DARK_PURPLE));
                     } else {
-                        sellOffer.decrementAmount(offer.getAmount());
-                        if(seller != null)
-                            seller.sendMessage(new TextComponentTranslation("ge.selloffer.fulfilled_partial", offer.getAmount(), offer.getItemResourceName(), offer.getItemMeta() + (offer.getNbt() != null ? " with NBT "+offer.getNbt() : ""), sellOffer.getPrice()).setStyle(TextStyles.DARK_PURPLE));
+                        updateCount(sellOffer.getIdentifier(), sellOffer.getAmount() - amount);
+                        if(seller != null)//TODO Replace this with a system to send the player a message when they are next online
+                            seller.sendMessage(new TextComponentTranslation("ge.selloffer.fulfilled_partial", amount, item, meta + (nbt != null ? " with NBT "+nbt : ""), sellOffer.getPrice()).setStyle(TextStyles.DARK_PURPLE));
                     }
-                    offerComplete = true;
+                    amount = 0;
                     break;
                 }
             }
-            sellOffers.get(offer.getItemPair()).removeAll(removeOffers);
-            return offerComplete;
+            for(long offerId: removeOfferIds)
+                removeOffer(offerId);
+            return amount;
         }
-        return false;
+        return amount;
     }
 
     private static ItemStack getStack(boolean isOfferBlock, ResourceLocation offerResource, int amount, int meta, @Nullable String nbt) {

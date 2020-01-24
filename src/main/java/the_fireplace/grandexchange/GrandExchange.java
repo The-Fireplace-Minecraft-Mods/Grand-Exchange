@@ -6,6 +6,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import the_fireplace.grandexchange.commands.CommandGe;
 import the_fireplace.grandexchange.util.TransactionDatabase;
 
@@ -15,6 +17,7 @@ public final class GrandExchange {
     public static final String MODID = "grandexchange";
     public static final String MODNAME = "Grand Exchange";
     public static final String VERSION = "${version}";
+    public static final Logger LOGGER = LogManager.getLogger(MODID);
 
     @Mod.EventHandler
     public void onServerStart(FMLServerStartingEvent event) {
