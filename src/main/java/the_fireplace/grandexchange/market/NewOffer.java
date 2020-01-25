@@ -12,10 +12,12 @@ import java.util.UUID;
 
 public class NewOffer extends Offer {
     private long identifier;
+    private int originalAmount;
     private OfferType type;
     protected NewOffer(long id, String offertype, String item, int meta, int amount, long price, UUID owner, @Nullable String nbt) {
         super(offertype, item, meta, amount, price, owner, nbt);
         identifier = id;
+        originalAmount = amount;
         type = offertype.equals("buy") ? OfferType.BUY : OfferType.SELL;
     }
 
@@ -23,19 +25,19 @@ public class NewOffer extends Offer {
     public ITextComponent getOfferChatMessage(ICommandSender sender) {
         if(isBuyOffer()) {
             if(getNbt() != null)
-                return TranslationUtil.getTranslation(sender, "ge.buyoffer_nbt", getAmount(), getItemResourceName(), getItemMeta(), getNbt(), GrandEconomyApi.toString(getPrice())).setStyle(TextStyles.BLUE);
+                return TranslationUtil.getTranslation(sender, "ge.buyoffer_nbt", getAmount(), OfferStatusMessager.getFormatted(getItemResourceName(), getItemMeta()), getNbt(), GrandEconomyApi.toString(getPrice())).setStyle(TextStyles.BLUE);
             else
-                return TranslationUtil.getTranslation(sender, "ge.buyoffer", getAmount(), getItemResourceName(), getItemMeta(), GrandEconomyApi.toString(getPrice())).setStyle(TextStyles.BLUE);
+                return TranslationUtil.getTranslation(sender, "ge.buyoffer", getAmount(), OfferStatusMessager.getFormatted(getItemResourceName(), getItemMeta()), GrandEconomyApi.toString(getPrice())).setStyle(TextStyles.BLUE);
         } else if(isSellOffer()) {
             if(getNbt() != null)
-                return TranslationUtil.getTranslation(sender, "ge.selloffer_nbt", getAmount(), getItemResourceName(), getItemMeta(), getNbt(), GrandEconomyApi.toString(getPrice())).setStyle(TextStyles.DARK_PURPLE);
+                return TranslationUtil.getTranslation(sender, "ge.selloffer_nbt", getAmount(), OfferStatusMessager.getFormatted(getItemResourceName(), getItemMeta()), getNbt(), GrandEconomyApi.toString(getPrice())).setStyle(TextStyles.DARK_PURPLE);
             else
-                return TranslationUtil.getTranslation(sender, "ge.selloffer", getAmount(), getItemResourceName(), getItemMeta(), GrandEconomyApi.toString(getPrice())).setStyle(TextStyles.DARK_PURPLE);
+                return TranslationUtil.getTranslation(sender, "ge.selloffer", getAmount(), OfferStatusMessager.getFormatted(getItemResourceName(), getItemMeta()), GrandEconomyApi.toString(getPrice())).setStyle(TextStyles.DARK_PURPLE);
         } else {
             if(getNbt() != null)
-                return TranslationUtil.getTranslation(sender, "ge.invalidoffer_nbt", getAmount(), getItemResourceName(), getItemMeta(), getNbt(), GrandEconomyApi.toString(getPrice())).setStyle(TextStyles.RED);
+                return TranslationUtil.getTranslation(sender, "ge.invalidoffer_nbt", getAmount(), OfferStatusMessager.getFormatted(getItemResourceName(), getItemMeta()), getNbt(), GrandEconomyApi.toString(getPrice())).setStyle(TextStyles.RED);
             else
-                return TranslationUtil.getTranslation(sender, "ge.invalidoffer", getAmount(), getItemResourceName(), getItemMeta(), GrandEconomyApi.toString(getPrice())).setStyle(TextStyles.RED);
+                return TranslationUtil.getTranslation(sender, "ge.invalidoffer", getAmount(), OfferStatusMessager.getFormatted(getItemResourceName(), getItemMeta()), GrandEconomyApi.toString(getPrice())).setStyle(TextStyles.RED);
         }
     }
 
@@ -43,6 +45,7 @@ public class NewOffer extends Offer {
         super(object.get("offertype").getAsString(), object.get("item").getAsString(), object.get("meta").getAsInt(), object.get("amount").getAsInt(), object.get("price").getAsInt(), UUID.fromString(object.get("owner").getAsString()), object.has("nbt") ? object.get("nbt").getAsString() : null);
         identifier = object.has("identifier") ? object.get("identifier").getAsLong() : ((JsonTransactionDatabase)ExchangeManager.getDatabase()).getNewIdentifier();//TODO This usage of getNewIdentifier isn't long term, they will all have identifier by the time I update to have other database types and this will be removed then
         type = object.get("offertype").getAsString().equals("buy") ? OfferType.BUY : OfferType.SELL;
+        originalAmount = object.has("original_amount") ? object.get("original_amount").getAsInt() : object.get("amount").getAsInt();
     }
 
     public boolean isBuyOffer() {
@@ -61,10 +64,20 @@ public class NewOffer extends Offer {
         return identifier;
     }
 
+    public int getOriginalAmount() {
+        return originalAmount;
+    }
+
+    public NewOffer copy() {
+        //TODO do this more efficiently
+        return new NewOffer(toJsonObject());
+    }
+
     @Override
     public JsonObject toJsonObject() {
         JsonObject ret = super.toJsonObject();
         ret.addProperty("identifier", identifier);
+        ret.addProperty("original_amount", originalAmount);
         return ret;
     }
 }

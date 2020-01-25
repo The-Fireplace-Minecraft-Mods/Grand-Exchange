@@ -12,8 +12,8 @@ import java.util.UUID;
 public class OfferStatusMessager {
     private static Map<UUID, Map<Long, Pair<String, Object[]>>> offerStatusMessages = Maps.newHashMap();
 
-    public static String getFormatted(int amount, String item, int meta) {
-        return String.format("%s %s %s", amount, item, meta);
+    public static String getFormatted(String item, int meta) {
+        return String.format("%s:%s", item, meta);
     }
 
     public static void updateStatus(UUID player, long offerId, String unlocalizedMessage, Object... args) {

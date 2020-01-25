@@ -6,15 +6,12 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import org.apache.commons.lang3.tuple.Pair;
 import the_fireplace.grandeconomy.api.GrandEconomyApi;
 import the_fireplace.grandexchange.GrandExchange;
 import the_fireplace.grandexchange.util.SerializationUtils;
-import the_fireplace.grandexchange.util.TextStyles;
-import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -52,10 +49,17 @@ public final class ExchangeManager {
      * True if the offer was fulfilled, false otherwise.
      */
     public static boolean makeOffer(OfferType type, String item, int meta, int amount, long price, UUID owner, @Nullable String nbt) {
-        //TODO make tryFulfillOffer return the remaining amount, because otherwise the offer will be partially fulfilled then get added with the original amount
         int amountUnfulfilled = tryFulfillOffer(type, item, meta, amount, price, owner, nbt);
-        if(amountUnfulfilled > 0)
-            getDatabase().addOffer(type, item, meta, amountUnfulfilled, price, owner, nbt);
+        if(amountUnfulfilled > 0) {
+            long newOfferId = getDatabase().addOffer(type, item, meta, amountUnfulfilled, price, owner, nbt);
+            //Notify the user if it immediately gets partially fulfilled
+            if(amountUnfulfilled < amount) {
+                if(nbt == null)
+                    OfferStatusMessager.updateStatus(owner, newOfferId, "ge."+type.toString().toLowerCase()+"offer.fulfilled_partial", amount-amountUnfulfilled, amount, OfferStatusMessager.getFormatted(item, meta));
+                else
+                    OfferStatusMessager.updateStatus(owner, newOfferId, "ge."+type.toString().toLowerCase()+"offer.fulfilled_partial_nbt", amount-amountUnfulfilled, amount, OfferStatusMessager.getFormatted(item, meta), nbt);
+            }
+        }
         else if(amountUnfulfilled < 0)
             GrandExchange.LOGGER.error("Amount unfulfilled was {}! This is not good.", amountUnfulfilled);
         return amountUnfulfilled <= 0;
@@ -174,13 +178,10 @@ public final class ExchangeManager {
                     addPayout(buyOffer.getOwner(), getStack(isOfferBlock, offerResource, givingAmount, meta, nbt));
                     amount -= buyOffer.getAmount();
                     removeOfferIds.add(buyOffer.getIdentifier());
-                    if(buyer != null) {//TODO Replace this with a system to send the player a message when they are next online
-                        if(buyOffer.getNbt() == null)
-                            buyer.sendMessage(TranslationUtil.getTranslation(buyOffer.getOwner(), "ge.buyoffer.fulfilled", buyOffer.getAmount(), buyOffer.getItemResourceName(), buyOffer.getItemMeta(), buyOffer.getPrice()).setStyle(TextStyles.BLUE));
-                        else
-                            buyer.sendMessage(TranslationUtil.getTranslation(buyOffer.getOwner(), "ge.buyoffer.fulfilled_nbt", buyOffer.getAmount(), buyOffer.getItemResourceName(), buyOffer.getItemMeta(), buyOffer.getNbt(), buyOffer.getPrice()).setStyle(TextStyles.BLUE));
-                    }
-                    //TODO if the offer gets partially fulfilled immediately, be sure to send a message saying how much got done
+                    if(buyOffer.getNbt() == null)
+                        OfferStatusMessager.updateStatus(buyOffer.getOwner(), buyOffer.getIdentifier(), "ge.buyoffer.fulfilled", buyOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(buyOffer.getItemResourceName(), buyOffer.getItemMeta()), buyOffer.getPrice());
+                    else
+                        OfferStatusMessager.updateStatus(buyOffer.getOwner(), buyOffer.getIdentifier(), "ge.buyoffer.fulfilled_nbt", buyOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(buyOffer.getItemResourceName(), buyOffer.getItemMeta()), buyOffer.getNbt(), buyOffer.getPrice());
                 } else {
                     int givingAmount = amount;
                     GrandEconomyApi.addToBalance(owner, givingAmount*buyOffer.getPrice(), true);
@@ -191,20 +192,16 @@ public final class ExchangeManager {
                     addPayout(buyOffer.getOwner(), getStack(isOfferBlock, offerResource, givingAmount, meta, nbt));
                     if(amount == buyOffer.getAmount()) {
                         removeOfferIds.add(buyOffer.getIdentifier());
-                        if(buyer != null) {//TODO Replace this with a system to send the player a message when they are next online
-                            if(buyOffer.getNbt() == null)
-                                buyer.sendMessage(TranslationUtil.getTranslation(buyOffer.getOwner(), "ge.buyoffer.fulfilled", buyOffer.getAmount(), buyOffer.getItemResourceName(), buyOffer.getItemMeta(), buyOffer.getPrice()).setStyle(TextStyles.BLUE));
-                            else
-                                buyer.sendMessage(TranslationUtil.getTranslation(buyOffer.getOwner(), "ge.buyoffer.fulfilled_nbt", buyOffer.getAmount(), buyOffer.getItemResourceName(), buyOffer.getItemMeta(), buyOffer.getNbt(), buyOffer.getPrice()).setStyle(TextStyles.BLUE));
-                        }
+                        if(buyOffer.getNbt() == null)
+                            OfferStatusMessager.updateStatus(buyOffer.getOwner(), buyOffer.getIdentifier(), "ge.buyoffer.fulfilled", buyOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(buyOffer.getItemResourceName(), buyOffer.getItemMeta()), buyOffer.getPrice());
+                        else
+                            OfferStatusMessager.updateStatus(buyOffer.getOwner(), buyOffer.getIdentifier(), "ge.buyoffer.fulfilled_nbt", buyOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(buyOffer.getItemResourceName(), buyOffer.getItemMeta()), buyOffer.getNbt(), buyOffer.getPrice());
                     } else {
                         updateCount(buyOffer.getIdentifier(), buyOffer.getAmount() - amount);
-                        if(buyer != null) {//TODO Replace this with a system to send the player a message when they are next online
-                            if(buyOffer.getNbt() == null)
-                                buyer.sendMessage(TranslationUtil.getTranslation(buyOffer.getOwner(), "ge.buyoffer.fulfilled_partial", amount, buyOffer.getItemResourceName(), buyOffer.getItemMeta(), buyOffer.getPrice()).setStyle(TextStyles.BLUE));
-                            else
-                                buyer.sendMessage(TranslationUtil.getTranslation(buyOffer.getOwner(), "ge.buyoffer.fulfilled_partial_nbt", amount, buyOffer.getItemResourceName(), buyOffer.getItemMeta(), buyOffer.getNbt(), buyOffer.getPrice()).setStyle(TextStyles.BLUE));
-                        }
+                        if(buyOffer.getNbt() == null)
+                            OfferStatusMessager.updateStatus(buyOffer.getOwner(), buyOffer.getIdentifier(), "ge.buyoffer.fulfilled_partial", buyOffer.getOriginalAmount()-buyOffer.getAmount()-amount, buyOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(buyOffer.getItemResourceName(), buyOffer.getItemMeta()));
+                        else
+                            OfferStatusMessager.updateStatus(buyOffer.getOwner(), buyOffer.getIdentifier(), "ge.buyoffer.fulfilled_partial_nbt", buyOffer.getOriginalAmount()-buyOffer.getAmount()-amount, buyOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(buyOffer.getItemResourceName(), buyOffer.getItemMeta()), buyOffer.getNbt());
                     }
                     amount = 0;
                     break;
@@ -222,15 +219,14 @@ public final class ExchangeManager {
         if(!possibleSellOffers.isEmpty()) {
             List<Long> removeOfferIds = Lists.newArrayList();
             for(NewOffer sellOffer: possibleSellOffers){
-                Entity seller = FMLCommonHandler.instance().getMinecraftServerInstance().getEntityFromUuid(sellOffer.getOwner());
                 ResourceLocation offerResource = new ResourceLocation(item);
                 if(amount > sellOffer.getAmount()){
                     int givingAmount = sellOffer.getAmount();
                     GrandEconomyApi.addToBalance(sellOffer.getOwner(), givingAmount*sellOffer.getPrice(), true);
                     if(nbt == null)
-                        OfferStatusMessager.updateStatus(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled", givingAmount, item, meta, price);
+                        OfferStatusMessager.updateStatus(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled", sellOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(item, meta), price);
                     else
-                        OfferStatusMessager.updateStatus(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled_nbt", givingAmount, item, meta, nbt, price);
+                        OfferStatusMessager.updateStatus(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled_nbt", sellOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(item, meta), nbt, price);
                     while(givingAmount > maxStackSize) {
                         addPayout(owner, getStack(isOfferBlock, offerResource, maxStackSize, meta, nbt));
                         givingAmount -= maxStackSize;
@@ -248,12 +244,16 @@ public final class ExchangeManager {
                     addPayout(owner, getStack(isOfferBlock, offerResource, givingAmount, meta, nbt));
                     if(amount == sellOffer.getAmount()) {
                         removeOfferIds.add(sellOffer.getIdentifier());
-                        if(seller != null)//TODO Replace this with a system to send the player a message when they are next online
-                            seller.sendMessage(new TextComponentTranslation("ge.selloffer.fulfilled", amount, item, meta + (nbt != null ? " with NBT "+nbt : ""), sellOffer.getPrice()).setStyle(TextStyles.DARK_PURPLE));
+                        if(nbt == null)
+                            OfferStatusMessager.updateStatus(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled", sellOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(item, meta), price);
+                        else
+                            OfferStatusMessager.updateStatus(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled_nbt", sellOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(item, meta), nbt, price);
                     } else {
                         updateCount(sellOffer.getIdentifier(), sellOffer.getAmount() - amount);
-                        if(seller != null)//TODO Replace this with a system to send the player a message when they are next online
-                            seller.sendMessage(new TextComponentTranslation("ge.selloffer.fulfilled_partial", amount, item, meta + (nbt != null ? " with NBT "+nbt : ""), sellOffer.getPrice()).setStyle(TextStyles.DARK_PURPLE));
+                        if(nbt == null)
+                            OfferStatusMessager.updateStatus(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled_partial", sellOffer.getOriginalAmount()-sellOffer.getAmount()-amount, sellOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(item, meta));
+                        else
+                            OfferStatusMessager.updateStatus(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled_partial_nbt", sellOffer.getOriginalAmount()-sellOffer.getAmount()-amount, sellOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(item, meta), nbt);
                     }
                     amount = 0;
                     break;

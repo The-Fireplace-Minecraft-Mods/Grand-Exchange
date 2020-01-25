@@ -1,1 +1,10 @@
+Additions:
+
+Changes:
+Players will now be notified if offers have been completed when they were offline
+Updated most messages sent by the mod
+All messages are now able to be localized
 Major database rewrite into json format - updates and fixes will come quicker, and the data can be easily read and modified by server owners
+
+Fixes:
+Players are now notified if an offer is partially completed when they make it

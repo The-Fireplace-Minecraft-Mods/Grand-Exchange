@@ -10,8 +10,9 @@ import java.util.UUID;
 public interface ITransactionDatabase {
     /**
      * Add an offer to the database
+     * @return the offer id
      */
-    void addOffer(OfferType type, String item, int meta, int amount, long price, UUID owner, @Nullable String nbt);
+    long addOffer(OfferType type, String item, int meta, int amount, long price, UUID owner, @Nullable String nbt);
 
     /**
      * Remove the offer with the matching ID from the database.
