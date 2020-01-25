@@ -23,7 +23,7 @@ import java.util.UUID;
 public final class ExchangeManager {
     private static ITransactionDatabase db = null;
 
-    protected static ITransactionDatabase getDatabase() {
+    public static ITransactionDatabase getDatabase() {
         if(db == null)
             db = new JsonTransactionDatabase();
         return db;

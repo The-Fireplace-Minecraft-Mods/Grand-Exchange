@@ -48,4 +48,6 @@ public interface ITransactionDatabase {
      * Gets all offers of a type with the specified owner
      */
     Collection<NewOffer> getOffers(OfferType type, UUID owner);
+
+    void onServerStop();
 }

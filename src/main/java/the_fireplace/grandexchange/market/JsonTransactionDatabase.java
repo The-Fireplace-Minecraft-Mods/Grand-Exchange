@@ -2,18 +2,19 @@ package the_fireplace.grandexchange.market;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.commons.lang3.tuple.Pair;
 import the_fireplace.grandexchange.util.SerializationUtils;
 
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 @SuppressWarnings("WeakerAccess")
@@ -159,6 +160,8 @@ public class JsonTransactionDatabase implements ITransactionDatabase {
                     this.payouts.putIfAbsent(UUID.fromString(obj.get("user").getAsString()), Lists.newArrayList());
                     this.payouts.get(UUID.fromString(obj.get("user").getAsString())).addAll(userPayouts);
                 }
+
+                nextIdentifier = db.get("next_identifier").getAsLong();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -169,6 +172,52 @@ public class JsonTransactionDatabase implements ITransactionDatabase {
     public void save() {
         if(!isChanged)
             return;
-        //TODO write db
+        JsonObject db = new JsonObject();
+
+        JsonArray offers = new JsonArray();
+        for(NewOffer offer: this.offers.values())
+            offers.add(offer.toJsonObject());
+        db.add("offers", offers);
+
+        JsonArray payouts = new JsonArray();
+        for(Map.Entry<UUID, List<ItemStack>> entry: this.payouts.entrySet()) {
+            JsonObject element = new JsonObject();
+            element.addProperty("user", entry.getKey().toString());
+            JsonArray items = new JsonArray();
+            for(ItemStack stack: entry.getValue())
+                items.add(SerializationUtils.stackToString(stack));
+            element.add("items", items);
+            payouts.add(element);
+        }
+        db.add("payouts", payouts);
+
+        db.addProperty("next_identifier", nextIdentifier);
+
+        try {
+            FileWriter file = new FileWriter(exchangeDataFile);
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            String json = gson.toJson(db);
+            file.write(json);
+            file.close();
+        } catch(IOException e) {
+            e.printStackTrace();
+            return;
+        }
+        isChanged = false;
+    }
+
+    private short tickCount = 3;
+
+    @SubscribeEvent
+    public void onServerTick(TickEvent.ServerTickEvent e) {
+        //TODO Potentially monitor average load on the server and wait for points of lower load to do the save?
+        if(tickCount++ % (20 * 60 * 2 + 29) == 0) {//Check if save needed once every 2 minutes 29 seconds assuming a server is running at full speed. The number is that specific only to help offset these saves from those done by other things.
+            tickCount = 0;
+            save();
+        }
+    }
+
+    public void onServerStop() {
+        save();
     }
 }

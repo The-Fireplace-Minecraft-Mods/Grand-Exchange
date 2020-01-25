@@ -6,9 +6,11 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import the_fireplace.grandexchange.commands.CommandGe;
+import the_fireplace.grandexchange.market.ExchangeManager;
 import the_fireplace.grandexchange.util.TransactionDatabase;
 
 @SuppressWarnings("WeakerAccess")
@@ -27,6 +29,11 @@ public final class GrandExchange {
         manager.registerCommand(new CommandGe());
         //TODO Remove this old code when porting to 1.14+
         TransactionDatabase.getInstance();
+    }
+
+    @Mod.EventHandler
+    public void onServerStop(FMLServerStoppingEvent event) {
+        ExchangeManager.getDatabase().onServerStop();
     }
 
     @Config(modid=MODID, name=MODNAME)
