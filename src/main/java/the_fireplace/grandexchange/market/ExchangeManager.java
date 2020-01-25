@@ -227,8 +227,10 @@ public final class ExchangeManager {
                 if(amount > sellOffer.getAmount()){
                     int givingAmount = sellOffer.getAmount();
                     GrandEconomyApi.addToBalance(sellOffer.getOwner(), givingAmount*sellOffer.getPrice(), true);
-                    if(seller != null)//TODO Replace this with a system to send the player a message when they are next online
-                        seller.sendMessage(new TextComponentTranslation("ge.selloffer.fulfilled", givingAmount, item, meta, price).setStyle(TextStyles.DARK_PURPLE));
+                    if(nbt == null)
+                        OfferStatusMessager.updateStatus(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled", givingAmount, item, meta, price);
+                    else
+                        OfferStatusMessager.updateStatus(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled_nbt", givingAmount, item, meta, nbt, price);
                     while(givingAmount > maxStackSize) {
                         addPayout(owner, getStack(isOfferBlock, offerResource, maxStackSize, meta, nbt));
                         givingAmount -= maxStackSize;
