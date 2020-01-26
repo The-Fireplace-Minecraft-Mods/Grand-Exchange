@@ -100,6 +100,11 @@ public class JsonTransactionDatabase implements ITransactionDatabase {
     }
 
     @Override
+    public NewOffer getOffer(long offerId) {
+        return offers.get(offerId);
+    }
+
+    @Override
     public long addOffer(OfferType type, String item, int meta, int amount, long price, UUID owner, @Nullable String nbt) {
         long id = getNewIdentifier();
         NewOffer offer = new NewOffer(id, type.toString().toLowerCase(), item, meta, amount, price, owner, nbt);

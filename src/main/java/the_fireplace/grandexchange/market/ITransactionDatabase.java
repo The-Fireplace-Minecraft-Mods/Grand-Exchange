@@ -49,5 +49,7 @@ public interface ITransactionDatabase {
      */
     Collection<NewOffer> getOffers(OfferType type, UUID owner);
 
+    NewOffer getOffer(long offerId);
+
     void onServerStop();
 }

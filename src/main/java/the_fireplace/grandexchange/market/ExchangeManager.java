@@ -54,10 +54,7 @@ public final class ExchangeManager {
             long newOfferId = getDatabase().addOffer(type, item, meta, amountUnfulfilled, price, owner, nbt);
             //Notify the user if it immediately gets partially fulfilled
             if(amountUnfulfilled < amount) {
-                if(nbt == null)
-                    OfferStatusMessager.updateStatus(owner, newOfferId, "ge."+type.toString().toLowerCase()+"offer.fulfilled_partial", amount-amountUnfulfilled, amount, OfferStatusMessager.getFormatted(item, meta));
-                else
-                    OfferStatusMessager.updateStatus(owner, newOfferId, "ge."+type.toString().toLowerCase()+"offer.fulfilled_partial_nbt", amount-amountUnfulfilled, amount, OfferStatusMessager.getFormatted(item, meta), nbt);
+                OfferStatusMessager.updateStatusPartial(owner, newOfferId);
             }
         }
         else if(amountUnfulfilled < 0)
@@ -102,6 +99,9 @@ public final class ExchangeManager {
     }
     public static boolean hasPayout(UUID player) {
         return getDatabase().countPayouts(player) > 0;
+    }
+    public static NewOffer getOffer(long offerId) {
+        return getDatabase().getOffer(offerId);
     }
 
     /**
@@ -179,9 +179,9 @@ public final class ExchangeManager {
                     amount -= buyOffer.getAmount();
                     removeOfferIds.add(buyOffer.getIdentifier());
                     if(buyOffer.getNbt() == null)
-                        OfferStatusMessager.updateStatus(buyOffer.getOwner(), buyOffer.getIdentifier(), "ge.buyoffer.fulfilled", buyOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(buyOffer.getItemResourceName(), buyOffer.getItemMeta()), buyOffer.getPrice());
+                        OfferStatusMessager.updateStatusComplete(buyOffer.getOwner(), buyOffer.getIdentifier(), "ge.buyoffer.fulfilled", buyOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(buyOffer.getItemResourceName(), buyOffer.getItemMeta()), buyOffer.getPrice(), null);
                     else
-                        OfferStatusMessager.updateStatus(buyOffer.getOwner(), buyOffer.getIdentifier(), "ge.buyoffer.fulfilled_nbt", buyOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(buyOffer.getItemResourceName(), buyOffer.getItemMeta()), buyOffer.getNbt(), buyOffer.getPrice());
+                        OfferStatusMessager.updateStatusComplete(buyOffer.getOwner(), buyOffer.getIdentifier(), "ge.buyoffer.fulfilled_nbt", buyOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(buyOffer.getItemResourceName(), buyOffer.getItemMeta()), buyOffer.getPrice(), buyOffer.getNbt());
                 } else {
                     int givingAmount = amount;
                     GrandEconomyApi.addToBalance(owner, givingAmount*buyOffer.getPrice(), true);
@@ -193,15 +193,12 @@ public final class ExchangeManager {
                     if(amount == buyOffer.getAmount()) {
                         removeOfferIds.add(buyOffer.getIdentifier());
                         if(buyOffer.getNbt() == null)
-                            OfferStatusMessager.updateStatus(buyOffer.getOwner(), buyOffer.getIdentifier(), "ge.buyoffer.fulfilled", buyOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(buyOffer.getItemResourceName(), buyOffer.getItemMeta()), buyOffer.getPrice());
+                            OfferStatusMessager.updateStatusComplete(buyOffer.getOwner(), buyOffer.getIdentifier(), "ge.buyoffer.fulfilled", buyOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(buyOffer.getItemResourceName(), buyOffer.getItemMeta()), buyOffer.getPrice(), null);
                         else
-                            OfferStatusMessager.updateStatus(buyOffer.getOwner(), buyOffer.getIdentifier(), "ge.buyoffer.fulfilled_nbt", buyOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(buyOffer.getItemResourceName(), buyOffer.getItemMeta()), buyOffer.getNbt(), buyOffer.getPrice());
+                            OfferStatusMessager.updateStatusComplete(buyOffer.getOwner(), buyOffer.getIdentifier(), "ge.buyoffer.fulfilled_nbt", buyOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(buyOffer.getItemResourceName(), buyOffer.getItemMeta()), buyOffer.getPrice(), buyOffer.getNbt());
                     } else {
                         updateCount(buyOffer.getIdentifier(), buyOffer.getAmount() - amount);
-                        if(buyOffer.getNbt() == null)
-                            OfferStatusMessager.updateStatus(buyOffer.getOwner(), buyOffer.getIdentifier(), "ge.buyoffer.fulfilled_partial", buyOffer.getOriginalAmount()-buyOffer.getAmount()-amount, buyOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(buyOffer.getItemResourceName(), buyOffer.getItemMeta()));
-                        else
-                            OfferStatusMessager.updateStatus(buyOffer.getOwner(), buyOffer.getIdentifier(), "ge.buyoffer.fulfilled_partial_nbt", buyOffer.getOriginalAmount()-buyOffer.getAmount()-amount, buyOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(buyOffer.getItemResourceName(), buyOffer.getItemMeta()), buyOffer.getNbt());
+                        OfferStatusMessager.updateStatusPartial(buyOffer.getOwner(), buyOffer.getIdentifier());
                     }
                     amount = 0;
                     break;
@@ -224,9 +221,9 @@ public final class ExchangeManager {
                     int givingAmount = sellOffer.getAmount();
                     GrandEconomyApi.addToBalance(sellOffer.getOwner(), givingAmount*sellOffer.getPrice(), true);
                     if(nbt == null)
-                        OfferStatusMessager.updateStatus(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled", sellOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(item, meta), price);
+                        OfferStatusMessager.updateStatusComplete(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled", sellOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(item, meta), price, null);
                     else
-                        OfferStatusMessager.updateStatus(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled_nbt", sellOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(item, meta), nbt, price);
+                        OfferStatusMessager.updateStatusComplete(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled_nbt", sellOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(item, meta), price, nbt);
                     while(givingAmount > maxStackSize) {
                         addPayout(owner, getStack(isOfferBlock, offerResource, maxStackSize, meta, nbt));
                         givingAmount -= maxStackSize;
@@ -245,15 +242,12 @@ public final class ExchangeManager {
                     if(amount == sellOffer.getAmount()) {
                         removeOfferIds.add(sellOffer.getIdentifier());
                         if(nbt == null)
-                            OfferStatusMessager.updateStatus(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled", sellOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(item, meta), price);
+                            OfferStatusMessager.updateStatusComplete(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled", sellOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(item, meta), price, null);
                         else
-                            OfferStatusMessager.updateStatus(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled_nbt", sellOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(item, meta), nbt, price);
+                            OfferStatusMessager.updateStatusComplete(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled_nbt", sellOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(item, meta), price, nbt);
                     } else {
                         updateCount(sellOffer.getIdentifier(), sellOffer.getAmount() - amount);
-                        if(nbt == null)
-                            OfferStatusMessager.updateStatus(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled_partial", sellOffer.getOriginalAmount()-sellOffer.getAmount()-amount, sellOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(item, meta));
-                        else
-                            OfferStatusMessager.updateStatus(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled_partial_nbt", sellOffer.getOriginalAmount()-sellOffer.getAmount()-amount, sellOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(item, meta), nbt);
+                        OfferStatusMessager.updateStatusPartial(sellOffer.getOwner(), sellOffer.getIdentifier());
                     }
                     amount = 0;
                     break;
