@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.text.ITextComponent;
 import the_fireplace.grandeconomy.api.GrandEconomyApi;
+import the_fireplace.grandexchange.db.JsonDatabase;
 import the_fireplace.grandexchange.util.TextStyles;
 import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
@@ -14,7 +15,7 @@ public class NewOffer extends Offer {
     private long identifier;
     private int originalAmount;
     private OfferType type;
-    protected NewOffer(long id, String offertype, String item, int meta, int amount, long price, UUID owner, @Nullable String nbt) {
+    public NewOffer(long id, String offertype, String item, int meta, int amount, long price, UUID owner, @Nullable String nbt) {
         super(offertype, item, meta, amount, price, owner, nbt);
         identifier = id;
         originalAmount = amount;
@@ -43,7 +44,7 @@ public class NewOffer extends Offer {
 
     public NewOffer(JsonObject object) {
         super(object.get("offertype").getAsString(), object.get("item").getAsString(), object.get("meta").getAsInt(), object.get("amount").getAsInt(), object.get("price").getAsInt(), UUID.fromString(object.get("owner").getAsString()), object.has("nbt") ? object.get("nbt").getAsString() : null);
-        identifier = object.has("identifier") ? object.get("identifier").getAsLong() : ((JsonTransactionDatabase)ExchangeManager.getDatabase()).getNewIdentifier();//TODO This usage of getNewIdentifier isn't long term, they will all have identifier by the time I update to have other database types and this will be removed then
+        identifier = object.has("identifier") ? object.get("identifier").getAsLong() : ((JsonDatabase)ExchangeManager.getDatabase()).getNewIdentifier();//TODO This usage of getNewIdentifier isn't long term, they will all have identifier by the time I update to have other database types and this will be removed then
         type = object.get("offertype").getAsString().equals("buy") ? OfferType.BUY : OfferType.SELL;
         originalAmount = object.has("original_amount") ? object.get("original_amount").getAsInt() : object.get("amount").getAsInt();
     }
@@ -66,6 +67,10 @@ public class NewOffer extends Offer {
 
     public int getOriginalAmount() {
         return originalAmount;
+    }
+
+    public void setAmount(int newAmount) {
+        this.amount = newAmount;
     }
 
     public NewOffer copy() {

@@ -24,6 +24,11 @@ public class OfferStatusMessager {
     private static Map<UUID, List<Long>> partialOfferStatusMessages = Maps.newHashMap();
     private static Map<UUID, List<MessageObj>> completeOfferStatusMessages = Maps.newHashMap();
 
+    private static void markChanged() {
+        if(!isChanged)
+            isChanged = true;
+    }
+
     public static String getFormatted(String item, int meta) {
         return String.format("%s:%s", item, meta);
     }
@@ -31,6 +36,7 @@ public class OfferStatusMessager {
     public static void updateStatusPartial(UUID player, long offerId) {
         partialOfferStatusMessages.putIfAbsent(player, Lists.newArrayList());
         partialOfferStatusMessages.get(player).add(offerId);
+        markChanged();
     }
 
     public static void updateStatusComplete(UUID player, long offerId, String message, int amount, String name, long price, @Nullable String nbt) {
@@ -38,6 +44,7 @@ public class OfferStatusMessager {
             partialOfferStatusMessages.get(player).remove(offerId);
         completeOfferStatusMessages.putIfAbsent(player, Lists.newArrayList());
         completeOfferStatusMessages.get(player).add(new MessageObj(offerId, message, amount, name, price, nbt));
+        markChanged();
     }
 
     public static void sendStatusUpdates(EntityPlayerMP player) {
@@ -50,6 +57,7 @@ public class OfferStatusMessager {
                     player.sendMessage(TranslationUtil.getTranslation(player.getUniqueID(), "ge."+offer.getType().toString().toLowerCase()+"offer.fulfilled_partial", offer.getOriginalAmount()-offer.getAmount(), offer.getOriginalAmount(), OfferStatusMessager.getFormatted(offer.getItemResourceName(), offer.getItemMeta())).setStyle(TextStyles.BLUE));
                 else
                     player.sendMessage(TranslationUtil.getTranslation(player.getUniqueID(), "ge."+offer.getType().toString().toLowerCase()+"offer.fulfilled_partial_nbt", offer.getOriginalAmount()-offer.getAmount(), offer.getOriginalAmount(), OfferStatusMessager.getFormatted(offer.getItemResourceName(), offer.getItemMeta()), offer.getNbt()).setStyle(TextStyles.BLUE));
+                markChanged();
             }
         if(completeOfferStatusMessages.containsKey(player.getUniqueID()))
             for(MessageObj message: completeOfferStatusMessages.remove(player.getUniqueID())) {
@@ -57,6 +65,7 @@ public class OfferStatusMessager {
                     player.sendMessage(TranslationUtil.getTranslation(player.getUniqueID(), message.message, message.amount, message.name, message.price).setStyle(TextStyles.BLUE));
                 else
                     player.sendMessage(TranslationUtil.getTranslation(player.getUniqueID(), message.message, message.amount, message.name, message.price, message.nbt).setStyle(TextStyles.BLUE));
+                markChanged();
             }
     }
 
@@ -67,7 +76,13 @@ public class OfferStatusMessager {
         sendStatusUpdates((EntityPlayerMP)event.player);
     }
 
-    //TODO save and load
+    public static void save() {
+
+    }
+
+    public static void load() {
+
+    }
 
     private static class MessageObj {
         private String message, name;

@@ -1,4 +1,4 @@
-package the_fireplace.grandexchange.market;
+package the_fireplace.grandexchange.db;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -8,6 +8,8 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.commons.lang3.tuple.Pair;
+import the_fireplace.grandexchange.market.NewOffer;
+import the_fireplace.grandexchange.market.OfferType;
 import the_fireplace.grandexchange.util.SerializationUtils;
 
 import javax.annotation.Nullable;
@@ -18,7 +20,7 @@ import java.io.IOException;
 import java.util.*;
 
 @SuppressWarnings("WeakerAccess")
-public class JsonTransactionDatabase implements ITransactionDatabase {
+public class JsonDatabase implements IDatabaseHandler {
     private File exchangeDataFile;
     private boolean isChanged;
 
@@ -29,13 +31,13 @@ public class JsonTransactionDatabase implements ITransactionDatabase {
     private HashMap<Pair<String, Integer>, List<NewOffer>> sellOffers = Maps.newHashMap();
     private HashMap<UUID, List<ItemStack>> payouts = Maps.newHashMap();
 
-    protected JsonTransactionDatabase() {
+    public JsonDatabase() {
         exchangeDataFile = new File(FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(0).getSaveHandler().getWorldDirectory(), "exchange_database.json");
         isChanged = false;
         load();
     }
 
-    protected long getNewIdentifier() {
+    public long getNewIdentifier() {
         return nextIdentifier++;
     }
 
@@ -66,7 +68,7 @@ public class JsonTransactionDatabase implements ITransactionDatabase {
 
     @Override
     public void updateCount(long offerId, int newAmount) {
-        offers.get(offerId).amount = newAmount;
+        offers.get(offerId).setAmount(newAmount);
     }
 
     @Override
@@ -79,11 +81,11 @@ public class JsonTransactionDatabase implements ITransactionDatabase {
         List<NewOffer> resultList = Lists.newArrayList();
         if(type.equals(OfferType.BUY)) {
             for(NewOffer offer: buyOffers.get(itemPair))
-                if(offer.getPrice() >= minMaxPrice && (nbt == null || nbt.equals(offer.nbt)))
+                if(offer.getPrice() >= minMaxPrice && (nbt == null || nbt.equals(offer.getNbt())))
                     resultList.add(offer.copy());
         } else if(type.equals(OfferType.SELL)) {
             for(NewOffer offer: sellOffers.get(itemPair))
-                if(offer.getPrice() <= minMaxPrice && (nbt == null || nbt.equals(offer.nbt)))
+                if(offer.getPrice() <= minMaxPrice && (nbt == null || nbt.equals(offer.getNbt())))
                     resultList.add(offer.copy());
         }
         resultList.sort(Comparator.comparing(NewOffer::getTimestamp));

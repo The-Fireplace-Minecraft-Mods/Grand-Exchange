@@ -1,13 +1,15 @@
-package the_fireplace.grandexchange.market;
+package the_fireplace.grandexchange.db;
 
 import net.minecraft.item.ItemStack;
 import org.apache.commons.lang3.tuple.Pair;
+import the_fireplace.grandexchange.market.NewOffer;
+import the_fireplace.grandexchange.market.OfferType;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.UUID;
 
-public interface ITransactionDatabase {
+public interface IDatabaseHandler {
     /**
      * Add an offer to the database
      * @return the offer id
