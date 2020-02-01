@@ -13,6 +13,7 @@ import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import the_fireplace.grandeconomy.api.GrandEconomyApi;
 import the_fireplace.grandeconomy.econhandlers.ge.InsufficientCreditException;
 import the_fireplace.grandexchange.market.ExchangeManager;
+import the_fireplace.grandexchange.market.NewOffer;
 import the_fireplace.grandexchange.market.OfferType;
 import the_fireplace.grandexchange.util.SerializationUtils;
 import the_fireplace.grandexchange.util.translation.TranslationUtil;
@@ -69,7 +70,7 @@ public class CommandBuy extends CommandBase {
                 if(nbt != null && !SerializationUtils.isValidNBT(nbt))
                     throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_nbt"));
                 if(GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID(), true) < price*amount)
-                    throw new InsufficientCreditException();
+                    throw new InsufficientCreditException(((EntityPlayerMP) sender).getUniqueID());
 
                 boolean madePurchase = ExchangeManager.makeOffer(OfferType.BUY, offerResource, meta, amount, price, ((EntityPlayerMP) sender).getUniqueID(), nbt);
                 GrandEconomyApi.takeFromBalance(((EntityPlayerMP) sender).getUniqueID(), price*amount, true);
@@ -82,6 +83,30 @@ public class CommandBuy extends CommandBase {
             } else {
                 throw new CommandException(TranslationUtil.getRawTranslationString(sender, "commands.ge.common.not_player"));
             }
+        } else if(args.length == 1 || args.length == 2) {
+            long offerId = parseLong(args[0]);
+            Integer amount = args.length == 2 ? parseInt(args[1]) : null;
+
+            NewOffer offer = ExchangeManager.getOffer(offerId);
+            if(offer != null) {
+                if(offer.isBuyOffer()) {
+                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.wrong_offer_type"));
+                    return;
+                }
+                if(amount == null || amount > offer.getAmount())
+                    amount = offer.getAmount();
+                if(GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID(), true) < offer.getPrice()*amount)
+                    throw new InsufficientCreditException(((EntityPlayerMP) sender).getUniqueID());
+                GrandEconomyApi.takeFromBalance(((EntityPlayerMP) sender).getUniqueID(), offer.getPrice() * amount, true);
+                if(amount == offer.getAmount())
+                    ExchangeManager.removeOffer(offerId);
+                else
+                    ExchangeManager.updateCount(offerId, offer.getAmount() - amount);
+                GrandEconomyApi.addToBalance(offer.getOwner(), amount * offer.getPrice(), true);
+                ExchangeManager.addPayouts(((EntityPlayerMP) sender).getUniqueID(), offer.getItemResourceName(), offer.getItemMeta(), amount, offer.getNbt());
+                sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.buy.success_completed", GrandEconomyApi.toString(GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID(), true))));
+            } else
+                sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_offer_number"));
         }
         throw new WrongUsageException(getUsage(sender));
     }
