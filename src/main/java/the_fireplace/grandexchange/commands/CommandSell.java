@@ -13,6 +13,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import the_fireplace.grandeconomy.api.GrandEconomyApi;
 import the_fireplace.grandexchange.market.ExchangeManager;
+import the_fireplace.grandexchange.market.NewOffer;
 import the_fireplace.grandexchange.market.OfferType;
 import the_fireplace.grandexchange.util.SerializationUtils;
 import the_fireplace.grandexchange.util.translation.TranslationUtil;
@@ -38,8 +39,8 @@ public class CommandSell extends CommandBase {
     @SuppressWarnings("Duplicates")
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        if (args.length >= 3 && args.length <= 5) {
-            if(sender instanceof EntityPlayerMP) {
+        if(sender instanceof EntityPlayerMP) {
+            if (args.length >= 3 && args.length <= 5) {
                 String resourceName = args[0];
                 int meta = parseInt(args[1]);
                 int amount = parseInt(args[2]);
@@ -67,34 +68,9 @@ public class CommandSell extends CommandBase {
                     throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_price"));
                 if(nbt != null && !SerializationUtils.isValidNBT(nbt))
                     throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_nbt"));
-                int itemCount = 0;
-                for(ItemStack stack: ((EntityPlayerMP) sender).inventory.mainInventory) {
-                    //noinspection ConstantConditions
-                    if(!stack.isEmpty() && stack.getItem().getRegistryName().equals(offerResource) && stack.getMetadata() == meta && ((!stack.hasTagCompound() && nbt == null) || stack.getTagCompound().toString().equals(nbt)) && ExchangeManager.canTransactItem(stack)){
-                        if(stack.getCount() + itemCount >= amount)
-                            itemCount = amount;
-                        else
-                            itemCount += stack.getCount();
-                    }
-                }
-                if(itemCount < amount)
+                if(!verifyItemCount((EntityPlayerMP) sender, offerResource, meta, amount, nbt))
                     throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.sell.not_enough_items"));
-                int i = 0;
-                for(ItemStack stack: ((EntityPlayerMP) sender).inventory.mainInventory) {
-                    //noinspection ConstantConditions
-                    while(!stack.isEmpty() && stack.getItem().getRegistryName().equals(offerResource) && stack.getMetadata() == meta && ((!stack.hasTagCompound() && nbt == null) || stack.getTagCompound().toString().equals(nbt)) && itemCount > 0 && ExchangeManager.canTransactItem(stack)){
-                        itemCount--;
-                        if(stack.getCount() > 1)
-                            stack.setCount(stack.getCount() - 1);
-                        else {
-                            ((EntityPlayerMP) sender).inventory.mainInventory.set(i, ItemStack.EMPTY);
-                            break;
-                        }
-                    }
-                    i++;
-                }
-                if(itemCount > 0)
-                    throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.sell.failed"));
+                removeItems((EntityPlayerMP) sender, offerResource, meta, amount, nbt);
 
                 boolean madePurchase = ExchangeManager.makeOffer(OfferType.SELL, offerResource.toString(), meta, amount, price, ((EntityPlayerMP) sender).getUniqueID(), nbt);
 
@@ -103,10 +79,68 @@ public class CommandSell extends CommandBase {
                 else
                     sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.offer_made"));
                 return;
-            } else
-                throw new CommandException(TranslationUtil.getRawTranslationString(sender, "commands.ge.common.not_player"));
+            } else if(args.length == 1 || args.length == 2) {
+                long offerId = parseLong(args[0]);
+                Integer amount = args.length == 2 ? parseInt(args[1]) : null;
+
+                NewOffer offer = ExchangeManager.getOffer(offerId);
+                if(offer != null) {
+                    if(offer.isSellOffer()) {
+                        sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.wrong_offer_type"));
+                        return;
+                    }
+                    if(amount == null || amount > offer.getAmount())
+                        amount = offer.getAmount();
+                    if(!verifyItemCount((EntityPlayerMP) sender, new ResourceLocation(offer.getItemResourceName()), offer.getItemMeta(), amount, offer.getNbt()))
+                        throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.sell.not_enough_items"));
+                    removeItems((EntityPlayerMP) sender, new ResourceLocation(offer.getItemResourceName()), offer.getItemMeta(), amount, offer.getNbt());
+                    if(amount == offer.getAmount())
+                        ExchangeManager.removeOffer(offerId);
+                    else
+                        ExchangeManager.updateCount(offerId, offer.getAmount() - amount);
+
+                    GrandEconomyApi.addToBalance(((EntityPlayerMP) sender).getUniqueID(), amount * offer.getPrice(), true);
+                    ExchangeManager.addPayouts(offer.getOwner(), offer.getItemResourceName(), offer.getItemMeta(), amount, offer.getNbt());
+                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.offer_fulfilled_balance", GrandEconomyApi.toString(GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID(), true))));
+                } else
+                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_offer_number"));
+            }
+            throw new WrongUsageException(getUsage(sender));
+        } else
+            throw new CommandException(TranslationUtil.getRawTranslationString(sender, "commands.ge.common.not_player"));
+    }
+
+    public static boolean verifyItemCount(EntityPlayerMP sender, ResourceLocation offerResource, int meta, int amount, @Nullable String nbt) {
+        int itemCount = 0;
+        for(ItemStack stack: sender.inventory.mainInventory) {
+            //noinspection ConstantConditions
+            if(!stack.isEmpty() && stack.getItem().getRegistryName().equals(offerResource) && stack.getMetadata() == meta && ((!stack.hasTagCompound() && nbt == null) || stack.getTagCompound().toString().equals(nbt)) && ExchangeManager.canTransactItem(stack)){
+                if(stack.getCount() + itemCount >= amount)
+                    itemCount = amount;
+                else
+                    itemCount += stack.getCount();
+            }
         }
-        throw new WrongUsageException(getUsage(sender));
+        return itemCount >= amount;
+    }
+
+    public static void removeItems(EntityPlayerMP sender, ResourceLocation offerResource, int meta, int amount, @Nullable String nbt) throws CommandException {
+        int slotIndex = 0;
+        for(ItemStack stack: sender.inventory.mainInventory) {
+            //noinspection ConstantConditions
+            while(!stack.isEmpty() && stack.getItem().getRegistryName().equals(offerResource) && stack.getMetadata() == meta && ((!stack.hasTagCompound() && nbt == null) || stack.getTagCompound().toString().equals(nbt)) && amount > 0 && ExchangeManager.canTransactItem(stack)){
+                amount--;
+                if(stack.getCount() > 1)
+                    stack.setCount(stack.getCount() - 1);
+                else {
+                    sender.inventory.mainInventory.set(slotIndex, ItemStack.EMPTY);
+                    break;
+                }
+            }
+            slotIndex++;
+        }
+        if(amount > 0)
+            throw new CommandException(TranslationUtil.getRawTranslationString(sender.getUniqueID(), "commands.ge.sell.failed"));
     }
 
     @Override
