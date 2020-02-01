@@ -9,6 +9,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.commons.lang3.tuple.Pair;
 import the_fireplace.grandexchange.market.NewOffer;
+import the_fireplace.grandexchange.market.OfferStatusMessager;
 import the_fireplace.grandexchange.market.OfferType;
 import the_fireplace.grandexchange.util.SerializationUtils;
 
@@ -31,6 +32,9 @@ public class JsonDatabase implements IDatabaseHandler {
     private HashMap<Pair<String, Integer>, List<NewOffer>> sellOffers = Maps.newHashMap();
     private HashMap<UUID, List<ItemStack>> payouts = Maps.newHashMap();
 
+    private static Map<UUID, List<Long>> partialOfferStatusMessages = Maps.newHashMap();
+    private static Map<UUID, List<OfferStatusMessager.MessageObj>> completeOfferStatusMessages = Maps.newHashMap();
+
     public JsonDatabase() {
         exchangeDataFile = new File(FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(0).getSaveHandler().getWorldDirectory(), "exchange_database.json");
         isChanged = false;
@@ -42,7 +46,8 @@ public class JsonDatabase implements IDatabaseHandler {
     }
 
     private void markChanged() {
-        isChanged = true;
+        if(!isChanged)
+            isChanged = true;
     }
 
     @Override
@@ -104,6 +109,54 @@ public class JsonDatabase implements IDatabaseHandler {
     @Override
     public NewOffer getOffer(long offerId) {
         return offers.get(offerId);
+    }
+
+    @Override
+    public void updateOfferStatusPartial(UUID player, long offerId) {
+        partialOfferStatusMessages.putIfAbsent(player, Lists.newArrayList());
+        if(!partialOfferStatusMessages.get(player).contains(offerId)) {
+            partialOfferStatusMessages.get(player).add(offerId);
+            markChanged();
+        }
+    }
+
+    @Override
+    public void removeOfferStatusPartial(UUID player, long offerId) {
+        if(partialOfferStatusMessages.getOrDefault(player, Collections.emptyList()).remove(offerId))
+            markChanged();
+    }
+
+    @Override
+    public void updateOfferStatusComplete(UUID player, long offerId, String message, int amount, String name, long price, @Nullable String nbt) {
+        completeOfferStatusMessages.putIfAbsent(player, Lists.newArrayList());
+        completeOfferStatusMessages.get(player).add(new OfferStatusMessager.MessageObj(offerId, message, amount, name, price, nbt));
+        markChanged();
+    }
+
+    @Override
+    public void removeOfferStatusComplete(UUID player, long offerId) {
+        if(completeOfferStatusMessages.get(player).removeIf(messageObj -> messageObj.getOfferId() == offerId))
+            markChanged();
+    }
+
+    @Override
+    public boolean hasPartialOfferUpdates(UUID player) {
+        return partialOfferStatusMessages.containsKey(player) && !partialOfferStatusMessages.get(player).isEmpty();
+    }
+
+    @Override
+    public boolean hasCompleteOfferUpdates(UUID player) {
+        return completeOfferStatusMessages.containsKey(player) && !completeOfferStatusMessages.get(player).isEmpty();
+    }
+
+    @Override
+    public List<Long> getPartialOfferUpdates(UUID player) {
+        return Collections.unmodifiableList(partialOfferStatusMessages.get(player));
+    }
+
+    @Override
+    public List<OfferStatusMessager.MessageObj> getCompleteOfferUpdates(UUID player) {
+        return Collections.unmodifiableList(completeOfferStatusMessages.get(player));
     }
 
     @Override
@@ -169,6 +222,9 @@ public class JsonDatabase implements IDatabaseHandler {
                 }
 
                 nextIdentifier = db.get("next_identifier").getAsLong();
+
+                JsonArray partialOfferStatusUpdates = db.getAsJsonArray("partial_offer_status_updates");
+                //TODO finish load for offer statuses
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -199,6 +255,8 @@ public class JsonDatabase implements IDatabaseHandler {
         db.add("payouts", payouts);
 
         db.addProperty("next_identifier", nextIdentifier);
+
+        //TODO save offer statuses
 
         try {
             FileWriter file = new FileWriter(exchangeDataFile);

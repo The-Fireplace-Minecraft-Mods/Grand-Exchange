@@ -3,10 +3,12 @@ package the_fireplace.grandexchange.db;
 import net.minecraft.item.ItemStack;
 import org.apache.commons.lang3.tuple.Pair;
 import the_fireplace.grandexchange.market.NewOffer;
+import the_fireplace.grandexchange.market.OfferStatusMessager;
 import the_fireplace.grandexchange.market.OfferType;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 public interface IDatabaseHandler {
@@ -23,6 +25,7 @@ public interface IDatabaseHandler {
      * @return
      * The offer that was removed, or null if not found.
      */
+    @Nullable
     NewOffer removeOffer(long offerId);
     void addPayout(UUID player, ItemStack payout);
     void removePayout(UUID player, ItemStack payout);
@@ -50,8 +53,16 @@ public interface IDatabaseHandler {
      * Gets all offers of a type with the specified owner
      */
     Collection<NewOffer> getOffers(OfferType type, UUID owner);
-
     NewOffer getOffer(long offerId);
+
+    void updateOfferStatusPartial(UUID player, long offerId);
+    void removeOfferStatusPartial(UUID player, long offerId);
+    void updateOfferStatusComplete(UUID player, long offerId, String message, int amount, String name, long price, @Nullable String nbt);
+    void removeOfferStatusComplete(UUID player, long offerId);
+    boolean hasPartialOfferUpdates(UUID player);
+    boolean hasCompleteOfferUpdates(UUID player);
+    List<Long> getPartialOfferUpdates(UUID player);
+    List<OfferStatusMessager.MessageObj> getCompleteOfferUpdates(UUID player);
 
     void onServerStop();
 }

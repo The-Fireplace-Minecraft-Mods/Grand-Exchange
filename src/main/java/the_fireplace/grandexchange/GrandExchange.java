@@ -10,7 +10,8 @@ import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import the_fireplace.grandexchange.commands.CommandGe;
-import the_fireplace.grandexchange.market.ExchangeManager;
+import the_fireplace.grandexchange.db.IDatabaseHandler;
+import the_fireplace.grandexchange.db.JsonDatabase;
 import the_fireplace.grandexchange.util.TransactionDatabase;
 
 @SuppressWarnings("WeakerAccess")
@@ -20,6 +21,13 @@ public final class GrandExchange {
     public static final String MODNAME = "Grand Exchange";
     public static final String VERSION = "${version}";
     public static final Logger LOGGER = LogManager.getLogger(MODID);
+    private static IDatabaseHandler db = null;
+
+    public static IDatabaseHandler getDatabase() {
+        if(db == null)//TODO Check config for database type once implemented
+            db = new JsonDatabase();
+        return db;
+    }
 
     @Mod.EventHandler
     public void onServerStart(FMLServerStartingEvent event) {
@@ -33,7 +41,7 @@ public final class GrandExchange {
 
     @Mod.EventHandler
     public void onServerStop(FMLServerStoppingEvent event) {
-        ExchangeManager.getDatabase().onServerStop();
+        getDatabase().onServerStop();
     }
 
     @Config(modid=MODID, name=MODNAME)
