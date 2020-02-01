@@ -50,15 +50,15 @@ commands.ge.selloffers.none=Nobody is selling anything.
 
 commands.ge.sellthis.usage=/ge sellthis <amount> <price>
 
-ge.buyoffer=%s x %s wanted for %s each.
-ge.buyoffer_nbt=%s x %s with NBT %s wanted for %s each.
+ge.buyoffer=[ID: %s] %s x %s wanted for %s each.
+ge.buyoffer_nbt=[ID: %s] %s x %s with NBT %s wanted for %s each.
 ge.buyoffer.fulfilled=Grand Exchange: Finished buying %s x %s at %s each.
 ge.buyoffer.fulfilled_nbt=Grand Exchange: Finished buying %s x %s with NBT %s at %s each.
 ge.buyoffer.fulfilled_partial=Grand Exchange: Bought %s/%s x %s.
 ge.buyoffer.fulfilled_partial_nbt=Grand Exchange: Bought %s/%s x %s with NBT %s.
 
-ge.selloffer=%s x %s being sold for %s each.
-ge.selloffer_nbt=%s x %s with NBT %s being sold for %s each.
+ge.selloffer=[ID: %s] %s x %s being sold for %s each.
+ge.selloffer_nbt=[ID: %s] %s x %s with NBT %s being sold for %s each.
 ge.selloffer.fulfilled=Grand Exchange: Finished selling %s x %s at %s each.
 ge.selloffer.fulfilled_nbt=Grand Exchange: Finished selling %s x %s with NBT %s at %s each.
 ge.selloffer.fulfilled_partial=Grand Exchange: Sold %s/%s x %s.

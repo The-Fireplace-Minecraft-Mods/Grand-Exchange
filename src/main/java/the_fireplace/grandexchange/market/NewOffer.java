@@ -27,14 +27,14 @@ public class NewOffer extends Offer {
     public ITextComponent getOfferChatMessage(ICommandSender sender) {
         if(isBuyOffer()) {
             if(getNbt() != null)
-                return TranslationUtil.getTranslation(sender, "ge.buyoffer_nbt", getAmount(), OfferStatusMessager.getFormatted(getItemResourceName(), getItemMeta()), getNbt(), GrandEconomyApi.toString(getPrice())).setStyle(TextStyles.BLUE);
+                return TranslationUtil.getTranslation(sender, "ge.buyoffer_nbt", getIdentifier(), getAmount(), OfferStatusMessager.getFormatted(getItemResourceName(), getItemMeta()), getNbt(), GrandEconomyApi.toString(getPrice())).setStyle(TextStyles.BLUE);
             else
-                return TranslationUtil.getTranslation(sender, "ge.buyoffer", getAmount(), OfferStatusMessager.getFormatted(getItemResourceName(), getItemMeta()), GrandEconomyApi.toString(getPrice())).setStyle(TextStyles.BLUE);
+                return TranslationUtil.getTranslation(sender, "ge.buyoffer", getIdentifier(), getAmount(), OfferStatusMessager.getFormatted(getItemResourceName(), getItemMeta()), GrandEconomyApi.toString(getPrice())).setStyle(TextStyles.BLUE);
         } else if(isSellOffer()) {
             if(getNbt() != null)
-                return TranslationUtil.getTranslation(sender, "ge.selloffer_nbt", getAmount(), OfferStatusMessager.getFormatted(getItemResourceName(), getItemMeta()), getNbt(), GrandEconomyApi.toString(getPrice())).setStyle(TextStyles.DARK_PURPLE);
+                return TranslationUtil.getTranslation(sender, "ge.selloffer_nbt", getIdentifier(), getAmount(), OfferStatusMessager.getFormatted(getItemResourceName(), getItemMeta()), getNbt(), GrandEconomyApi.toString(getPrice())).setStyle(TextStyles.DARK_PURPLE);
             else
-                return TranslationUtil.getTranslation(sender, "ge.selloffer", getAmount(), OfferStatusMessager.getFormatted(getItemResourceName(), getItemMeta()), GrandEconomyApi.toString(getPrice())).setStyle(TextStyles.DARK_PURPLE);
+                return TranslationUtil.getTranslation(sender, "ge.selloffer", getIdentifier(), getAmount(), OfferStatusMessager.getFormatted(getItemResourceName(), getItemMeta()), GrandEconomyApi.toString(getPrice())).setStyle(TextStyles.DARK_PURPLE);
         } else {
             if(getNbt() != null)
                 return TranslationUtil.getTranslation(sender, "ge.invalidoffer_nbt", getAmount(), OfferStatusMessager.getFormatted(getItemResourceName(), getItemMeta()), getNbt(), GrandEconomyApi.toString(getPrice())).setStyle(TextStyles.RED);
