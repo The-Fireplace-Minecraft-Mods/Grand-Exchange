@@ -91,6 +91,7 @@ public class CommandGe extends CommandBase {
                 sender.sendMessage(new TextComponentString("/ge commands:\n" +
                         "buy\n" +
                         "sell\n" +
+                        "sellthis\n" +
                         "identify\n" +
                         "collect\n" +
                         "buyoffers\n" +
