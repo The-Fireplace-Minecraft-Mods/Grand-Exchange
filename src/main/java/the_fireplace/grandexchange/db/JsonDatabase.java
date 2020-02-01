@@ -94,7 +94,7 @@ public class JsonDatabase implements IDatabaseHandler {
                     resultList.add(offer.copy());
         }
         resultList.sort(Comparator.comparing(NewOffer::getTimestamp));
-        return resultList;
+        return Collections.unmodifiableList(resultList);
     }
 
     @Override
@@ -103,7 +103,12 @@ public class JsonDatabase implements IDatabaseHandler {
         for(NewOffer offer: offers.values())
             if(offer.getOwner().equals(owner))
                 resultList.add(offer.copy());
-        return resultList;
+        return Collections.unmodifiableList(resultList);
+    }
+
+    @Override
+    public Collection<NewOffer> getOffers(OfferType type) {
+        return Collections.unmodifiableCollection(offers.values());
     }
 
     @Override

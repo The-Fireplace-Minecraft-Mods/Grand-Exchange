@@ -16,7 +16,7 @@ commands.ge.common.offer_fulfilled_balance=Offer succeeded. Your balance is now 
 commands.ge.common.offer_made_balance=Offer succeeded. Your balance is now %s
 commands.ge.common.offer_made=Offer succeeded.
 
-commands.ge.buy.usage=/ge buy <item> <meta> <amount> <price> [nbt]
+commands.ge.buy.usage=/ge buy <item>:<meta> <amount> <price> [nbt]
 commands.ge.buy.success_completed=Purchase succeeded. Your balance is now %s. You can collect your items with /ge collect
 
 commands.ge.buyoffers.usage=/ge buyoffers [filter] [page]

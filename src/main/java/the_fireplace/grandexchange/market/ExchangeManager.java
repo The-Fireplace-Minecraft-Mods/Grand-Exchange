@@ -75,6 +75,7 @@ public final class ExchangeManager {
      * @return
      * The offer that was removed, or null if not found.
      */
+    @Nullable
     public static NewOffer removeOffer(long offerId) {
         return getDatabase().removeOffer(offerId);
     }
@@ -113,6 +114,12 @@ public final class ExchangeManager {
      */
     public static Collection<NewOffer> getOffers(OfferType type, Pair<String, Integer> itemPair, long minMaxPrice, @Nullable String nbt) {
         return getDatabase().getOffers(type, itemPair, minMaxPrice, nbt);
+    }
+    public static Collection<NewOffer> getOffers(OfferType type, UUID owner) {
+        return getDatabase().getOffers(type, owner);
+    }
+    public static Collection<NewOffer> getOffers(OfferType type) {
+        return getDatabase().getOffers(type);
     }
     public static void updateCount(long offerId, int newAmount){
         getDatabase().updateCount(offerId, newAmount);

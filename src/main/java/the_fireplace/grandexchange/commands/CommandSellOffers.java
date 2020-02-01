@@ -8,7 +8,9 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
-import the_fireplace.grandexchange.market.SellOffer;
+import the_fireplace.grandexchange.market.ExchangeManager;
+import the_fireplace.grandexchange.market.NewOffer;
+import the_fireplace.grandexchange.market.OfferType;
 import the_fireplace.grandexchange.util.ChatPageUtil;
 import the_fireplace.grandexchange.util.Utils;
 import the_fireplace.grandexchange.util.translation.TranslationUtil;
@@ -34,9 +36,7 @@ public class CommandSellOffers extends CommandBase {
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if(args.length <= 2) {
-            List<SellOffer> offers = Lists.newArrayList();
-            for (List<SellOffer> offerList : ExchangeManager.getSellOffers().values())
-                offers.addAll(offerList);
+            List<NewOffer> offers = Lists.newArrayList(ExchangeManager.getOffers(OfferType.SELL));
             int page = 1;
             if (args.length == 2)
                 try {
@@ -50,7 +50,7 @@ public class CommandSellOffers extends CommandBase {
                 sellsearch = args[0];
                 if(sellsearch.matches("^[a-zA-Z_]*$")) sellsearch = "minecraft:"+ sellsearch;
                 else if(sellsearch.equals("any") || sellsearch.equals("*")) sellsearch = ".*";
-                final List<String> sellResults = Utils.getListOfStringsMatchingString(sellsearch, Utils.getSellNames(offers));
+                final List<String> sellResults = Utils.getListOfStringsMatchingString(sellsearch, Utils.getOfferNames(offers));
 
                 offers.removeIf(offer -> !sellResults.contains(offer.getItemResourceName()));
             } else {
@@ -59,7 +59,7 @@ public class CommandSellOffers extends CommandBase {
 
             ArrayList<ITextComponent> messages = Lists.newArrayList();
 
-            for (SellOffer offer : offers)
+            for (NewOffer offer : offers)
                 messages.add(offer.getOfferChatMessage(sender));
 
             if(offers.isEmpty())

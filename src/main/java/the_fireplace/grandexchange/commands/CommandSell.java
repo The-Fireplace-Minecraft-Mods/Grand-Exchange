@@ -12,7 +12,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import the_fireplace.grandeconomy.api.GrandEconomyApi;
-import the_fireplace.grandexchange.market.SellOffer;
+import the_fireplace.grandexchange.market.ExchangeManager;
+import the_fireplace.grandexchange.market.OfferType;
 import the_fireplace.grandexchange.util.SerializationUtils;
 import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
@@ -37,27 +38,39 @@ public class CommandSell extends CommandBase {
     @SuppressWarnings("Duplicates")
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        if (args.length == 4 || args.length == 5) {
+        if (args.length >= 3 && args.length <= 5) {
             if(sender instanceof EntityPlayerMP) {
-                ResourceLocation offerResource = new ResourceLocation(args[0]);
+                String resourceName = args[0];
+                int meta = parseInt(args[1]);
+                int amount = parseInt(args[2]);
+                long price = parseLong(args.length == 4 ? args[3] : "0");
+                String nbt = args.length == 5 ? args[4] : null;
+                if(args.length == 3 && resourceName.split(":").length < 3)
+                    throw new WrongUsageException(getUsage(sender));
+                //Parse if the command format is /ge sell domain:resource:meta amount price [nbt]
+                if(resourceName.split(":").length == 3) {
+                    resourceName = resourceName.substring(0, resourceName.lastIndexOf(":"));
+                    meta = parseInt(args[0].split(":")[2]);
+                    amount = parseInt(args[1]);
+                    price = parseLong(args[2]);
+                    nbt = args.length == 4 ? args[3] : null;
+                }
+                ResourceLocation offerResource = new ResourceLocation(resourceName);
                 boolean isValidRequest = ForgeRegistries.BLOCKS.containsKey(offerResource) || ForgeRegistries.ITEMS.containsKey(offerResource);
                 if(!isValidRequest)
                     throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_item"));
-                int meta = parseInt(args[1]);
                 if(meta < 0)
                     throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_meta"));
-                int amount = parseInt(args[2]);
                 if(amount <= 0)
                     throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_amount"));
-                long price = parseLong(args[3]);
                 if (price < 0)
                     throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_price"));
-                if(args.length == 5 && !args[4].isEmpty() && !SerializationUtils.isValidNBT(args[4]))
+                if(nbt != null && !SerializationUtils.isValidNBT(nbt))
                     throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_nbt"));
                 int itemCount = 0;
                 for(ItemStack stack: ((EntityPlayerMP) sender).inventory.mainInventory) {
                     //noinspection ConstantConditions
-                    if(!stack.isEmpty() && stack.getItem().getRegistryName().equals(offerResource) && stack.getMetadata() == meta && ((!stack.hasTagCompound() && args.length == 4) || stack.getTagCompound().toString().equals(args[4])) && ExchangeManager.canTransactItem(stack)){
+                    if(!stack.isEmpty() && stack.getItem().getRegistryName().equals(offerResource) && stack.getMetadata() == meta && ((!stack.hasTagCompound() && nbt == null) || stack.getTagCompound().toString().equals(nbt)) && ExchangeManager.canTransactItem(stack)){
                         if(stack.getCount() + itemCount >= amount)
                             itemCount = amount;
                         else
@@ -69,7 +82,7 @@ public class CommandSell extends CommandBase {
                 int i = 0;
                 for(ItemStack stack: ((EntityPlayerMP) sender).inventory.mainInventory) {
                     //noinspection ConstantConditions
-                    while(!stack.isEmpty() && stack.getItem().getRegistryName().equals(offerResource) && stack.getMetadata() == meta && ((!stack.hasTagCompound() && args.length == 4) || stack.getTagCompound().toString().equals(args[4])) && itemCount > 0 && ExchangeManager.canTransactItem(stack)){
+                    while(!stack.isEmpty() && stack.getItem().getRegistryName().equals(offerResource) && stack.getMetadata() == meta && ((!stack.hasTagCompound() && nbt == null) || stack.getTagCompound().toString().equals(nbt)) && itemCount > 0 && ExchangeManager.canTransactItem(stack)){
                         itemCount--;
                         if(stack.getCount() > 1)
                             stack.setCount(stack.getCount() - 1);
@@ -83,7 +96,7 @@ public class CommandSell extends CommandBase {
                 if(itemCount > 0)
                     throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.sell.failed"));
 
-                boolean madePurchase = ExchangeManager.getInstance().makeOffer(new SellOffer(offerResource.toString(), meta, amount, price, ((EntityPlayerMP) sender).getUniqueID(), args.length == 5 ? args[4] : null));
+                boolean madePurchase = ExchangeManager.makeOffer(OfferType.SELL, offerResource.toString(), meta, amount, price, ((EntityPlayerMP) sender).getUniqueID(), nbt);
 
                 if(madePurchase)
                     sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.offer_fulfilled_balance", GrandEconomyApi.toString(GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID(), true))));

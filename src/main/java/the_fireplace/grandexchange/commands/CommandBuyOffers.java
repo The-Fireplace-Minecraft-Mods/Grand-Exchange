@@ -8,7 +8,9 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
-import the_fireplace.grandexchange.market.BuyOffer;
+import the_fireplace.grandexchange.market.ExchangeManager;
+import the_fireplace.grandexchange.market.NewOffer;
+import the_fireplace.grandexchange.market.OfferType;
 import the_fireplace.grandexchange.util.ChatPageUtil;
 import the_fireplace.grandexchange.util.TextStyles;
 import the_fireplace.grandexchange.util.Utils;
@@ -35,9 +37,7 @@ public class CommandBuyOffers extends CommandBase {
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if(args.length <= 2) {
-            List<BuyOffer> offers = Lists.newArrayList();
-            for (List<BuyOffer> offerList : ExchangeManager.getBuyOffers().values())
-                offers.addAll(offerList);
+            List<NewOffer> offers = Lists.newArrayList(ExchangeManager.getOffers(OfferType.BUY));
             int page = 1;
             if (args.length == 2)
                 try {
@@ -51,7 +51,7 @@ public class CommandBuyOffers extends CommandBase {
                 buysearch = args[0]==null ? ".*" : args[0];
                 if(buysearch.matches("^[a-zA-Z_]*$")) buysearch = "minecraft:"+ buysearch;
                 else if(buysearch.equals("any") || buysearch.equals("*")) buysearch = ".*";
-                final List<String> buyResults = Utils.getListOfStringsMatchingString(buysearch, Utils.getBuyNames(offers));
+                final List<String> buyResults = Utils.getListOfStringsMatchingString(buysearch, Utils.getOfferNames(offers));
 
                 offers.removeIf(offer -> !buyResults.contains(offer.getItemResourceName()));
             } else {
@@ -59,7 +59,7 @@ public class CommandBuyOffers extends CommandBase {
             }
 
             ArrayList<ITextComponent> messages = Lists.newArrayList();
-            for (BuyOffer offer : offers)
+            for (NewOffer offer : offers)
                 messages.add(offer.getOfferChatMessage(sender));
             if(offers.isEmpty())
             	sender.sendMessage(TranslationUtil.getTranslation(sender, "commands.ge.common.no_results").setStyle(TextStyles.RED));

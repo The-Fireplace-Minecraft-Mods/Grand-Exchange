@@ -7,9 +7,9 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
-import the_fireplace.grandexchange.market.BuyOffer;
-import the_fireplace.grandexchange.market.Offer;
-import the_fireplace.grandexchange.market.SellOffer;
+import the_fireplace.grandexchange.market.ExchangeManager;
+import the_fireplace.grandexchange.market.NewOffer;
+import the_fireplace.grandexchange.market.OfferType;
 import the_fireplace.grandexchange.util.ChatPageUtil;
 import the_fireplace.grandexchange.util.TextStyles;
 import the_fireplace.grandexchange.util.Utils;
@@ -36,16 +36,8 @@ public class CommandMyOffers extends CommandBase {
     @Override
     public void execute(@Nullable MinecraftServer server, @Nonnull ICommandSender sender, @Nullable String[] args) throws CommandException {
         if(sender instanceof EntityPlayerMP) {
-            List<BuyOffer> buyOffers = Lists.newArrayList();
-            for (List<BuyOffer> offerList : ExchangeManager.getBuyOffers().values())
-                buyOffers.addAll(offerList);
-
-            List<SellOffer> sellOffers = Lists.newArrayList();
-            for (List<SellOffer> offerList : ExchangeManager.getSellOffers().values())
-                sellOffers.addAll(offerList);
-
-            buyOffers.removeIf(offer -> !offer.getOwner().equals(((EntityPlayerMP) sender).getUniqueID()));
-            sellOffers.removeIf(offer -> !offer.getOwner().equals(((EntityPlayerMP) sender).getUniqueID()));
+            List<NewOffer> buyOffers = Lists.newArrayList(ExchangeManager.getOffers(OfferType.BUY, ((EntityPlayerMP) sender).getUniqueID()));
+            List<NewOffer> sellOffers = Lists.newArrayList(ExchangeManager.getOffers(OfferType.SELL, ((EntityPlayerMP) sender).getUniqueID()));
 
             int page = 1;
             if (args != null && args.length == 2)
@@ -66,21 +58,20 @@ public class CommandMyOffers extends CommandBase {
 
             ArrayList<ITextComponent> messages = Lists.newArrayList();
 
-            final List<String> buyresults = Utils.getListOfStringsMatchingString(search, Utils.getBuyNames(buyOffers));
+            final List<String> buyresults = Utils.getListOfStringsMatchingString(search, Utils.getOfferNames(buyOffers));
             buyOffers.removeIf(offer -> !buyresults.contains(offer.getItemResourceName()));
-            
-            boolean buyresult = false;
-            for (Offer offer : buyOffers) {
+
+            for (NewOffer offer : buyOffers) {
                 messages.add(offer.getOfferChatMessage(sender));
             }
             
             if(buyOffers.isEmpty())
             	sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.myoffers.no_buy_results").setStyle(TextStyles.RED));
 
-            final List<String> sellresults = Utils.getListOfStringsMatchingString(search, Utils.getSellNames(sellOffers));
+            final List<String> sellresults = Utils.getListOfStringsMatchingString(search, Utils.getOfferNames(sellOffers));
             sellOffers.removeIf(offer -> !sellresults.contains(offer.getItemResourceName()));
 
-            for (SellOffer offer : sellOffers) {
+            for (NewOffer offer : sellOffers) {
                 messages.add(offer.getOfferChatMessage(sender));
             }
             if(sellOffers.isEmpty())

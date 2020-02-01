@@ -53,6 +53,7 @@ public interface IDatabaseHandler {
      * Gets all offers of a type with the specified owner
      */
     Collection<NewOffer> getOffers(OfferType type, UUID owner);
+    Collection<NewOffer> getOffers(OfferType type);
     NewOffer getOffer(long offerId);
 
     void updateOfferStatusPartial(UUID player, long offerId);

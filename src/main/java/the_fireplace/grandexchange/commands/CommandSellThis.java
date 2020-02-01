@@ -11,7 +11,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import the_fireplace.grandeconomy.api.GrandEconomyApi;
-import the_fireplace.grandexchange.market.SellOffer;
+import the_fireplace.grandexchange.market.ExchangeManager;
+import the_fireplace.grandexchange.market.OfferType;
 import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
 import javax.annotation.Nullable;
@@ -77,7 +78,7 @@ public class CommandSellThis extends CommandBase {
                 if(itemCount > 0)
                     throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.sell.failed"));
 
-                boolean madePurchase = ExchangeManager.getInstance().makeOffer(new SellOffer(selling.getItem().getRegistryName().toString(), selling.getMetadata(), amount, price, ((EntityPlayerMP) sender).getUniqueID(), selling.hasTagCompound() ? Objects.requireNonNull(selling.getTagCompound()).toString() : null));
+                boolean madePurchase = ExchangeManager.makeOffer(OfferType.SELL, selling.getItem().getRegistryName().toString(), selling.getMetadata(), amount, price, ((EntityPlayerMP) sender).getUniqueID(), selling.hasTagCompound() ? Objects.requireNonNull(selling.getTagCompound()).toString() : null);
 
                 if(madePurchase)
                     sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.offer_fulfilled_balance", GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID())));
