@@ -19,6 +19,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("WeakerAccess")
 public class JsonDatabase implements IDatabaseHandler {
@@ -100,7 +101,7 @@ public class JsonDatabase implements IDatabaseHandler {
     @Override
     public Collection<NewOffer> getOffers(OfferType type, UUID owner) {
         List<NewOffer> resultList = Lists.newArrayList();
-        for(NewOffer offer: offers.values())
+        for(NewOffer offer: offers.values().stream().filter(o -> o.getType().equals(type)).collect(Collectors.toList()))
             if(offer.getOwner().equals(owner))
                 resultList.add(offer.copy());
         return Collections.unmodifiableList(resultList);
@@ -108,7 +109,7 @@ public class JsonDatabase implements IDatabaseHandler {
 
     @Override
     public Collection<NewOffer> getOffers(OfferType type) {
-        return Collections.unmodifiableCollection(offers.values());
+        return Collections.unmodifiableCollection(offers.values().stream().filter(o -> o.getType().equals(type)).collect(Collectors.toList()));
     }
 
     @Override

@@ -18,13 +18,13 @@ commands.ge.common.offer_fulfilled_balance=Offer succeeded. Your balance is now 
 commands.ge.common.offer_made_balance=Offer succeeded. Your balance is now %s
 commands.ge.common.offer_made=Offer succeeded.
 
-commands.ge.buy.usage=/ge buy <item>:<meta> <amount> <price> [nbt]
+commands.ge.buy.usage=/ge buy <item>:<meta> <amount> <price> [nbt]\n/ge buy <offer number> [amount]
 commands.ge.buy.success_completed=Purchase succeeded. Your balance is now %s. You can collect your items with /ge collect
 
 commands.ge.buyoffers.usage=/ge buyoffers [filter] [page]
 commands.ge.buyoffers.none=Nobody is buying anything.
 
-commands.ge.canceloffer.usage=/ge canceloffer <buy|sell|any> <filter> [meta] [price]
+commands.ge.canceloffer.usage=/ge canceloffer <buy|sell|any> <filter> [meta] [price]\n/ge canceloffer <offer number>
 commands.ge.canceloffer.invalid_criteria=No offers were found that match your criteria.
 commands.ge.canceloffer.success_buy=Offer cancelled: %s.
 commands.ge.canceloffer.success_sell=Offer cancelled: %s. You can collect your items with /ge collect
@@ -41,7 +41,7 @@ commands.ge.myoffers.usage=/ge myoffers [filter] [page]
 commands.ge.myoffers.no_buy_results=No buy results found.
 commands.ge.myoffers.no_sell_results=No sell results found.
 
-commands.ge.sell.usage=/ge sell <item> <meta> <amount> <price> [nbt]
+commands.ge.sell.usage=/ge sell <item> <meta> <amount> <price> [nbt]\n/ge sell <offer number> [amount]
 commands.ge.sell.not_enough_items=Error: You do not have enough of that item in your inventory to make this offer.
 commands.ge.sell.failed=Error: Something went wrong when removing items from your inventory.
 
