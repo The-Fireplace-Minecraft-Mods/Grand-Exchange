@@ -2,9 +2,10 @@ package the_fireplace.grandexchange.market;
 
 import com.google.gson.JsonObject;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import the_fireplace.grandexchange.util.TextStyles;
 import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
@@ -21,14 +22,22 @@ public class OfferStatusMessager {
     }
 
     public static void updateStatusPartial(UUID player, long offerId) {
-        //TODO immediately push to player if they are online
-        getDatabase().updateOfferStatusPartial(player, offerId);
+        EntityPlayerMP playerEntity = FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getPlayerByUUID(player);
+        //noinspection ConstantConditions
+        if(playerEntity != null)
+            sendPartialStatusUpdate(playerEntity, offerId);
+        else
+            getDatabase().updateOfferStatusPartial(player, offerId);
     }
 
     public static void updateStatusComplete(UUID player, long offerId, String message, int amount, String name, long price, @Nullable String nbt) {
         getDatabase().removeOfferStatusPartial(player, offerId);
-        //TODO immediately push to player if they are online
-        getDatabase().updateOfferStatusComplete(player, offerId, message, amount, name, price, nbt);
+        EntityPlayerMP playerEntity = FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getPlayerByUUID(player);
+        //noinspection ConstantConditions
+        if(playerEntity != null)
+            sendCompleteStatusUpdate(playerEntity, new MessageObj(offerId, message, amount, name, price, nbt));
+        else
+            getDatabase().updateOfferStatusComplete(player, offerId, message, amount, name, price, nbt);
     }
 
     public static void sendStatusUpdates(EntityPlayerMP player) {
@@ -61,10 +70,9 @@ public class OfferStatusMessager {
         getDatabase().removeOfferStatusPartial(player.getUniqueID(), offerId);
     }
 
-    //TODO replace this with something that sends the update when they log in
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {//Send updates once every minute
-        if(event.player.world.isRemote || event.player.ticksExisted % (20 * 60) > 0 || !(event.player instanceof EntityPlayerMP))
+    public static void onPlayerTick(PlayerEvent.PlayerLoggedInEvent event) {
+        if(event.player.world.isRemote)
             return;
         sendStatusUpdates((EntityPlayerMP)event.player);
     }
