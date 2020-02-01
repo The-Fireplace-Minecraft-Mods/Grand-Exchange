@@ -32,8 +32,8 @@ public class JsonDatabase implements IDatabaseHandler {
     private HashMap<Pair<String, Integer>, List<NewOffer>> sellOffers = Maps.newHashMap();
     private HashMap<UUID, List<ItemStack>> payouts = Maps.newHashMap();
 
-    private static Map<UUID, List<Long>> partialOfferStatusMessages = Maps.newHashMap();
-    private static Map<UUID, List<OfferStatusMessager.MessageObj>> completeOfferStatusMessages = Maps.newHashMap();
+    private Map<UUID, List<Long>> partialOfferStatusMessages = Maps.newHashMap();
+    private Map<UUID, List<OfferStatusMessager.MessageObj>> completeOfferStatusMessages = Maps.newHashMap();
 
     public JsonDatabase() {
         exchangeDataFile = new File(FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(0).getSaveHandler().getWorldDirectory(), "exchange_database.json");
@@ -217,14 +217,30 @@ public class JsonDatabase implements IDatabaseHandler {
                     List<ItemStack> userPayouts = Lists.newArrayList();
                     for(JsonElement stackElement: obj.getAsJsonArray("items"))
                         userPayouts.add(SerializationUtils.stackFromString(stackElement.getAsString()));
-                    this.payouts.putIfAbsent(UUID.fromString(obj.get("user").getAsString()), Lists.newArrayList());
-                    this.payouts.get(UUID.fromString(obj.get("user").getAsString())).addAll(userPayouts);
+                    UUID user = UUID.fromString(obj.get("user").getAsString());
+                    this.payouts.putIfAbsent(user, Lists.newArrayList());
+                    this.payouts.get(user).addAll(userPayouts);
                 }
 
                 nextIdentifier = db.get("next_identifier").getAsLong();
 
                 JsonArray partialOfferStatusUpdates = db.getAsJsonArray("partial_offer_status_updates");
-                //TODO finish load for offer statuses
+                for(JsonElement e: partialOfferStatusUpdates) {
+                    JsonObject obj = e.getAsJsonObject();
+                    UUID user = UUID.fromString(obj.get("user").getAsString());
+                    this.partialOfferStatusMessages.putIfAbsent(user, Lists.newArrayList());
+                    for(JsonElement offerId: obj.getAsJsonArray("ids"))
+                        this.partialOfferStatusMessages.get(user).add(offerId.getAsLong());
+                }
+
+                JsonArray completeOfferStatusUpdates = db.getAsJsonArray("complete_offer_status_updates");
+                for(JsonElement e: completeOfferStatusUpdates) {
+                    JsonObject obj = e.getAsJsonObject();
+                    UUID user = UUID.fromString(obj.get("user").getAsString());
+                    this.completeOfferStatusMessages.putIfAbsent(user, Lists.newArrayList());
+                    for(JsonElement messageJson: obj.getAsJsonArray("messages"))
+                        this.completeOfferStatusMessages.get(user).add(new OfferStatusMessager.MessageObj(messageJson.getAsJsonObject()));
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -256,7 +272,29 @@ public class JsonDatabase implements IDatabaseHandler {
 
         db.addProperty("next_identifier", nextIdentifier);
 
-        //TODO save offer statuses
+        JsonArray partialOfferStatusUpdates = new JsonArray();
+        for(Map.Entry<UUID, List<Long>> entry: this.partialOfferStatusMessages.entrySet()) {
+            JsonObject element = new JsonObject();
+            element.addProperty("user", entry.getKey().toString());
+            JsonArray ids = new JsonArray();
+            for(Long id: entry.getValue())
+                ids.add(id);
+            element.add("ids", ids);
+            partialOfferStatusUpdates.add(element);
+        }
+        db.add("partial_offer_status_updates", partialOfferStatusUpdates);
+
+        JsonArray completeOfferStatusUpdates = new JsonArray();
+        for(Map.Entry<UUID, List<OfferStatusMessager.MessageObj>> entry: this.completeOfferStatusMessages.entrySet()) {
+            JsonObject element = new JsonObject();
+            element.addProperty("user", entry.getKey().toString());
+            JsonArray messages = new JsonArray();
+            for(OfferStatusMessager.MessageObj messageObj: entry.getValue())
+                messages.add(messageObj.toJson());
+            element.add("messages", messages);
+            completeOfferStatusUpdates.add(element);
+        }
+        db.add("complete_offer_status_updates", completeOfferStatusUpdates);
 
         try {
             FileWriter file = new FileWriter(exchangeDataFile);
