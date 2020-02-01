@@ -1,7 +1,5 @@
 package the_fireplace.grandexchange.market;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.Mod;
@@ -11,64 +9,59 @@ import the_fireplace.grandexchange.util.TextStyles;
 import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
 import javax.annotation.Nullable;
-import java.io.File;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
+
+import static the_fireplace.grandexchange.GrandExchange.getDatabase;
 
 @Mod.EventBusSubscriber
 public class OfferStatusMessager {
-    private static File offerStatusFile;
-    private static boolean isChanged;
-
-    private static Map<UUID, List<Long>> partialOfferStatusMessages = Maps.newHashMap();
-    private static Map<UUID, List<MessageObj>> completeOfferStatusMessages = Maps.newHashMap();
-
-    private static void markChanged() {
-        if(!isChanged)
-            isChanged = true;
-    }
 
     public static String getFormatted(String item, int meta) {
         return String.format("%s:%s", item, meta);
     }
 
     public static void updateStatusPartial(UUID player, long offerId) {
-        partialOfferStatusMessages.putIfAbsent(player, Lists.newArrayList());
-        partialOfferStatusMessages.get(player).add(offerId);
-        markChanged();
+        //TODO immediately push to player if they are online
+        getDatabase().updateOfferStatusPartial(player, offerId);
     }
 
     public static void updateStatusComplete(UUID player, long offerId, String message, int amount, String name, long price, @Nullable String nbt) {
-        if(partialOfferStatusMessages.containsKey(player))
-            partialOfferStatusMessages.get(player).remove(offerId);
-        completeOfferStatusMessages.putIfAbsent(player, Lists.newArrayList());
-        completeOfferStatusMessages.get(player).add(new MessageObj(offerId, message, amount, name, price, nbt));
-        markChanged();
+        getDatabase().removeOfferStatusPartial(player, offerId);
+        //TODO immediately push to player if they are online
+        getDatabase().updateOfferStatusComplete(player, offerId, message, amount, name, price, nbt);
     }
 
     public static void sendStatusUpdates(EntityPlayerMP player) {
-        if(!partialOfferStatusMessages.containsKey(player.getUniqueID()) && !completeOfferStatusMessages.containsKey(player.getUniqueID()))
+        boolean hasPartialOfferUpdates = getDatabase().hasPartialOfferUpdates(player.getUniqueID());
+        boolean hasCompleteOfferUpdates = getDatabase().hasCompleteOfferUpdates(player.getUniqueID());
+        if(!hasPartialOfferUpdates && !hasCompleteOfferUpdates)
             return;
-        if(partialOfferStatusMessages.containsKey(player.getUniqueID()))
-            for(long offerId: partialOfferStatusMessages.remove(player.getUniqueID())) {
-                NewOffer offer = ExchangeManager.getOffer(offerId);
-                if(offer.getNbt() == null)
-                    player.sendMessage(TranslationUtil.getTranslation(player.getUniqueID(), "ge."+offer.getType().toString().toLowerCase()+"offer.fulfilled_partial", offer.getOriginalAmount()-offer.getAmount(), offer.getOriginalAmount(), OfferStatusMessager.getFormatted(offer.getItemResourceName(), offer.getItemMeta())).setStyle(TextStyles.BLUE));
-                else
-                    player.sendMessage(TranslationUtil.getTranslation(player.getUniqueID(), "ge."+offer.getType().toString().toLowerCase()+"offer.fulfilled_partial_nbt", offer.getOriginalAmount()-offer.getAmount(), offer.getOriginalAmount(), OfferStatusMessager.getFormatted(offer.getItemResourceName(), offer.getItemMeta()), offer.getNbt()).setStyle(TextStyles.BLUE));
-                markChanged();
-            }
-        if(completeOfferStatusMessages.containsKey(player.getUniqueID()))
-            for(MessageObj message: completeOfferStatusMessages.remove(player.getUniqueID())) {
-                if(message.nbt == null)
-                    player.sendMessage(TranslationUtil.getTranslation(player.getUniqueID(), message.message, message.amount, message.name, message.price).setStyle(TextStyles.BLUE));
-                else
-                    player.sendMessage(TranslationUtil.getTranslation(player.getUniqueID(), message.message, message.amount, message.name, message.price, message.nbt).setStyle(TextStyles.BLUE));
-                markChanged();
-            }
+        if(hasPartialOfferUpdates)
+            for(long offerId: getDatabase().getPartialOfferUpdates(player.getUniqueID()))
+                sendPartialStatusUpdate(player, offerId);
+        if(hasCompleteOfferUpdates)
+            for(MessageObj message: getDatabase().getCompleteOfferUpdates(player.getUniqueID()))
+                sendCompleteStatusUpdate(player, message);
     }
 
+    private static void sendCompleteStatusUpdate(EntityPlayerMP player, MessageObj message) {
+        if(message.getNbt() == null)
+            player.sendMessage(TranslationUtil.getTranslation(player.getUniqueID(), message.getMessage(), message.getAmount(), message.getName(), message.getPrice()).setStyle(TextStyles.BLUE));
+        else
+            player.sendMessage(TranslationUtil.getTranslation(player.getUniqueID(), message.getMessage(), message.getAmount(), message.getName(), message.getPrice(), message.getNbt()).setStyle(TextStyles.BLUE));
+        getDatabase().removeOfferStatusComplete(player.getUniqueID(), message.offerId);
+    }
+
+    private static void sendPartialStatusUpdate(EntityPlayerMP player, long offerId) {
+        NewOffer offer = ExchangeManager.getOffer(offerId);
+        if(offer.getNbt() == null)
+            player.sendMessage(TranslationUtil.getTranslation(player.getUniqueID(), "ge."+offer.getType().toString().toLowerCase()+"offer.fulfilled_partial", offer.getOriginalAmount()-offer.getAmount(), offer.getOriginalAmount(), OfferStatusMessager.getFormatted(offer.getItemResourceName(), offer.getItemMeta())).setStyle(TextStyles.BLUE));
+        else
+            player.sendMessage(TranslationUtil.getTranslation(player.getUniqueID(), "ge."+offer.getType().toString().toLowerCase()+"offer.fulfilled_partial_nbt", offer.getOriginalAmount()-offer.getAmount(), offer.getOriginalAmount(), OfferStatusMessager.getFormatted(offer.getItemResourceName(), offer.getItemMeta()), offer.getNbt()).setStyle(TextStyles.BLUE));
+        getDatabase().removeOfferStatusPartial(player.getUniqueID(), offerId);
+    }
+
+    //TODO replace this with something that sends the update when they log in
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {//Send updates once every minute
         if(event.player.world.isRemote || event.player.ticksExisted % (20 * 60) > 0 || !(event.player instanceof EntityPlayerMP))
@@ -76,21 +69,16 @@ public class OfferStatusMessager {
         sendStatusUpdates((EntityPlayerMP)event.player);
     }
 
-    public static void save() {
-
-    }
-
-    public static void load() {
-
-    }
-
-    private static class MessageObj {
-        private String message, name;
+    public static class MessageObj {
+        private String message;
+        private String name;
         private int amount;
-        private long offerId, price;
+        private long offerId;
+        private long price;
         @Nullable
         private String nbt;
-        private MessageObj(long offerId, String message, int amount, String name, long price, @Nullable String nbt) {
+
+        public MessageObj(long offerId, String message, int amount, String name, long price, @Nullable String nbt) {
             this.offerId = offerId;
             this.message = message;
             this.amount = amount;
@@ -98,7 +86,8 @@ public class OfferStatusMessager {
             this.price = price;
             this.nbt = nbt;
         }
-        private MessageObj(JsonObject obj) {
+
+        public MessageObj(JsonObject obj) {
             message = obj.get("message").getAsString();
             name = obj.get("name").getAsString();
             amount = obj.get("amount").getAsInt();
@@ -107,7 +96,7 @@ public class OfferStatusMessager {
             nbt = obj.has("nbt") ? obj.get("nbt").getAsString() : null;
         }
 
-        private JsonObject toJson() {
+        public JsonObject toJson() {
             JsonObject obj = new JsonObject();
 
             obj.addProperty("message", message);
@@ -119,6 +108,31 @@ public class OfferStatusMessager {
                 obj.addProperty("nbt", nbt);
 
             return obj;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getAmount() {
+            return amount;
+        }
+
+        public long getOfferId() {
+            return offerId;
+        }
+
+        public long getPrice() {
+            return price;
+        }
+
+        @Nullable
+        public String getNbt() {
+            return nbt;
         }
     }
 }

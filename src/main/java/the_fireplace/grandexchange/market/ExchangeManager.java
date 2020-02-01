@@ -11,8 +11,6 @@ import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import org.apache.commons.lang3.tuple.Pair;
 import the_fireplace.grandeconomy.api.GrandEconomyApi;
 import the_fireplace.grandexchange.GrandExchange;
-import the_fireplace.grandexchange.db.IDatabaseHandler;
-import the_fireplace.grandexchange.db.JsonDatabase;
 import the_fireplace.grandexchange.util.SerializationUtils;
 
 import javax.annotation.Nonnull;
@@ -22,15 +20,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import static the_fireplace.grandexchange.GrandExchange.getDatabase;
+
 public final class ExchangeManager {
-    private static IDatabaseHandler db = null;
-
-    public static IDatabaseHandler getDatabase() {
-        if(db == null)//TODO Check config for database type once implemented
-            db = new JsonDatabase();
-        return db;
-    }
-
     /**
      * Makes an offer and attempts to fulfill it
      * @param type
