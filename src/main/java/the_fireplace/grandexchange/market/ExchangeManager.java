@@ -1,12 +1,10 @@
 package the_fireplace.grandexchange.market;
 
 import com.google.common.collect.Lists;
-import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import org.apache.commons.lang3.tuple.Pair;
 import the_fireplace.grandeconomy.api.GrandEconomyApi;
@@ -139,17 +137,27 @@ public final class ExchangeManager {
         if(offer.isBuyOffer()) {
             GrandEconomyApi.addToBalance(offer.getOwner(), offer.getPrice()*offer.getAmount(), true);
         } else if(offer.isSellOffer()) {
-            ResourceLocation offerRes = new ResourceLocation(offer.getItemResourceName());
-            boolean isOfferBlock = ForgeRegistries.BLOCKS.containsKey(offerRes);
-            int returningAmount = offer.getAmount();
-            ItemStack sizeCheckStack = isOfferBlock ? new ItemStack(Objects.requireNonNull(ForgeRegistries.BLOCKS.getValue(offerRes)), offer.getAmount(), offer.getItemMeta()) : new ItemStack(Objects.requireNonNull(ForgeRegistries.ITEMS.getValue(offerRes)), offer.getAmount(), offer.getItemMeta());
-            int maxStackSize = sizeCheckStack.getMaxStackSize();
-            while(returningAmount > maxStackSize) {
-                addPayout(offer.getOwner(), getStack(isOfferBlock, offerRes, maxStackSize, offer.getItemMeta(), offer.getNbt()));
-                returningAmount -= maxStackSize;
-            }
-            addPayout(offer.getOwner(), getStack(isOfferBlock, offerRes, returningAmount, offer.getItemMeta(), offer.getNbt()));
+            addPayouts(offer.getOwner(), offer.getItemResourceName(), offer.getItemMeta(), offer.getAmount(), offer.getNbt());
         }
+    }
+
+    public static void addPayouts(UUID payPlayer, String itemResourceName, int meta, int itemCount, @Nullable String nbt) {
+        addPayouts(payPlayer, new ResourceLocation(itemResourceName), meta, itemCount, nbt);
+    }
+
+    public static void addPayouts(UUID payPlayer, ResourceLocation offerRes, int meta, int itemCount, @Nullable String nbt) {
+        boolean isOfferBlock = ForgeRegistries.BLOCKS.containsKey(offerRes);
+        ItemStack sizeCheckStack = isOfferBlock ? new ItemStack(Objects.requireNonNull(ForgeRegistries.BLOCKS.getValue(offerRes)), 1, meta) : new ItemStack(Objects.requireNonNull(ForgeRegistries.ITEMS.getValue(offerRes)), 1, meta);
+        int maxStackSize = sizeCheckStack.getMaxStackSize();
+        addPayouts(payPlayer, offerRes, meta, itemCount, nbt, isOfferBlock, maxStackSize);
+    }
+
+    public static void addPayouts(UUID payPlayer, ResourceLocation offerRes, int meta, int itemCount, @Nullable String nbt, boolean isOfferBlock, int maxStackSize) {
+        while(itemCount > maxStackSize) {
+            addPayout(payPlayer, getStack(isOfferBlock, offerRes, maxStackSize, meta, nbt));
+            itemCount -= maxStackSize;
+        }
+        addPayout(payPlayer, getStack(isOfferBlock, offerRes, itemCount, meta, nbt));
     }
 
     /**
@@ -174,16 +182,10 @@ public final class ExchangeManager {
         if(!possibleBuyOffers.isEmpty()) {
             List<Long> removeOfferIds = Lists.newArrayList();
             for(NewOffer buyOffer: possibleBuyOffers) {
-                Entity buyer = FMLCommonHandler.instance().getMinecraftServerInstance().getEntityFromUuid(buyOffer.getOwner());
                 ResourceLocation offerResource = new ResourceLocation(item);
                 if(amount > buyOffer.getAmount()){
-                    int givingAmount = buyOffer.getAmount();
-                    GrandEconomyApi.addToBalance(owner, givingAmount*buyOffer.getPrice(), true);
-                    while(givingAmount > maxStackSize) {
-                        addPayout(buyOffer.getOwner(), getStack(isOfferBlock, offerResource, maxStackSize, meta, nbt));
-                        givingAmount -= maxStackSize;
-                    }
-                    addPayout(buyOffer.getOwner(), getStack(isOfferBlock, offerResource, givingAmount, meta, nbt));
+                    GrandEconomyApi.addToBalance(owner, buyOffer.getAmount()*buyOffer.getPrice(), true);
+                    addPayouts(buyOffer.getOwner(), offerResource, meta, buyOffer.getAmount(), nbt, isOfferBlock, maxStackSize);
                     amount -= buyOffer.getAmount();
                     removeOfferIds.add(buyOffer.getIdentifier());
                     if(buyOffer.getNbt() == null)
@@ -191,13 +193,8 @@ public final class ExchangeManager {
                     else
                         OfferStatusMessager.updateStatusComplete(buyOffer.getOwner(), buyOffer.getIdentifier(), "ge.buyoffer.fulfilled_nbt", buyOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(buyOffer.getItemResourceName(), buyOffer.getItemMeta()), buyOffer.getPrice(), buyOffer.getNbt());
                 } else {
-                    int givingAmount = amount;
-                    GrandEconomyApi.addToBalance(owner, givingAmount*buyOffer.getPrice(), true);
-                    while(givingAmount > maxStackSize) {
-                        addPayout(buyOffer.getOwner(), getStack(isOfferBlock, offerResource, maxStackSize, meta, nbt));
-                        givingAmount -= maxStackSize;
-                    }
-                    addPayout(buyOffer.getOwner(), getStack(isOfferBlock, offerResource, givingAmount, meta, nbt));
+                    GrandEconomyApi.addToBalance(owner, amount*buyOffer.getPrice(), true);
+                    addPayouts(buyOffer.getOwner(), offerResource, meta, amount, nbt, isOfferBlock, maxStackSize);
                     if(amount == buyOffer.getAmount()) {
                         removeOfferIds.add(buyOffer.getIdentifier());
                         if(buyOffer.getNbt() == null)
@@ -226,27 +223,17 @@ public final class ExchangeManager {
             for(NewOffer sellOffer: possibleSellOffers){
                 ResourceLocation offerResource = new ResourceLocation(item);
                 if(amount > sellOffer.getAmount()){
-                    int givingAmount = sellOffer.getAmount();
-                    GrandEconomyApi.addToBalance(sellOffer.getOwner(), givingAmount*sellOffer.getPrice(), true);
+                    GrandEconomyApi.addToBalance(sellOffer.getOwner(), sellOffer.getAmount()*sellOffer.getPrice(), true);
                     if(nbt == null)
                         OfferStatusMessager.updateStatusComplete(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled", sellOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(item, meta), price, null);
                     else
                         OfferStatusMessager.updateStatusComplete(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled_nbt", sellOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(item, meta), price, nbt);
-                    while(givingAmount > maxStackSize) {
-                        addPayout(owner, getStack(isOfferBlock, offerResource, maxStackSize, meta, nbt));
-                        givingAmount -= maxStackSize;
-                    }
-                    addPayout(owner, getStack(isOfferBlock, offerResource, givingAmount, meta, nbt));
+                    addPayouts(owner, offerResource, meta, sellOffer.getAmount(), nbt, isOfferBlock, maxStackSize);
                     amount -= sellOffer.getAmount();
                     removeOfferIds.add(sellOffer.getIdentifier());
                 } else {
-                    int givingAmount = amount;
-                    GrandEconomyApi.addToBalance(sellOffer.getOwner(), givingAmount*sellOffer.getPrice(), true);
-                    while(givingAmount > maxStackSize) {
-                        addPayout(owner, getStack(isOfferBlock, offerResource, maxStackSize, meta, nbt));
-                        givingAmount -= maxStackSize;
-                    }
-                    addPayout(owner, getStack(isOfferBlock, offerResource, givingAmount, meta, nbt));
+                    GrandEconomyApi.addToBalance(sellOffer.getOwner(), amount*sellOffer.getPrice(), true);
+                    addPayouts(owner, offerResource, meta, amount, nbt, isOfferBlock, maxStackSize);
                     if(amount == sellOffer.getAmount()) {
                         removeOfferIds.add(sellOffer.getIdentifier());
                         if(nbt == null)
