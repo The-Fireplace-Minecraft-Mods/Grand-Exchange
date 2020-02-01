@@ -44,9 +44,9 @@ public class NewOffer extends Offer {
     }
 
     public NewOffer(JsonObject object) {
-        super(object.get("offertype").getAsString(), object.get("item").getAsString(), object.get("meta").getAsInt(), object.get("amount").getAsInt(), object.get("price").getAsInt(), UUID.fromString(object.get("owner").getAsString()), object.has("nbt") ? object.get("nbt").getAsString() : null);
+        super(object.get("type").getAsString(), object.get("item").getAsString(), object.get("meta").getAsInt(), object.get("amount").getAsInt(), object.get("price").getAsInt(), UUID.fromString(object.get("owner").getAsString()), object.has("nbt") ? object.get("nbt").getAsString() : null);
         identifier = object.has("identifier") ? object.get("identifier").getAsLong() : ((JsonDatabase) GrandExchange.getDatabase()).getNewIdentifier();//TODO This usage of getNewIdentifier isn't long term, they will all have identifier by the time I update to have other database types and this will be removed then
-        type = object.get("offertype").getAsString().equals("buy") ? OfferType.BUY : OfferType.SELL;
+        type = object.get("type").getAsString().equals("buy") ? OfferType.BUY : OfferType.SELL;
         originalAmount = object.has("original_amount") ? object.get("original_amount").getAsInt() : object.get("amount").getAsInt();
     }
 

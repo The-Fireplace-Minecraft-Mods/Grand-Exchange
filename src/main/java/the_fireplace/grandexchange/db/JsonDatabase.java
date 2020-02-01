@@ -84,11 +84,11 @@ public class JsonDatabase implements IDatabaseHandler {
     @Override
     public Collection<NewOffer> getOffers(OfferType type, Pair<String, Integer> itemPair, long minMaxPrice, @Nullable String nbt) {
         List<NewOffer> resultList = Lists.newArrayList();
-        if(type.equals(OfferType.BUY)) {
+        if(type.equals(OfferType.BUY) && buyOffers.containsKey(itemPair)) {
             for(NewOffer offer: buyOffers.get(itemPair))
                 if(offer.getPrice() >= minMaxPrice && (nbt == null || nbt.equals(offer.getNbt())))
                     resultList.add(offer.copy());
-        } else if(type.equals(OfferType.SELL)) {
+        } else if(type.equals(OfferType.SELL) && sellOffers.containsKey(itemPair)) {
             for(NewOffer offer: sellOffers.get(itemPair))
                 if(offer.getPrice() <= minMaxPrice && (nbt == null || nbt.equals(offer.getNbt())))
                     resultList.add(offer.copy());
