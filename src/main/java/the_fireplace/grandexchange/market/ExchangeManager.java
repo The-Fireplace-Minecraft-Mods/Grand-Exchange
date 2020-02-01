@@ -141,7 +141,14 @@ public final class ExchangeManager {
         } else if(offer.isSellOffer()) {
             ResourceLocation offerRes = new ResourceLocation(offer.getItemResourceName());
             boolean isOfferBlock = ForgeRegistries.BLOCKS.containsKey(offerRes);
-            ExchangeManager.addPayout(offer.getOwner(), isOfferBlock ? new ItemStack(Objects.requireNonNull(ForgeRegistries.BLOCKS.getValue(offerRes)), offer.getAmount(), offer.getItemMeta()) : new ItemStack(Objects.requireNonNull(ForgeRegistries.ITEMS.getValue(offerRes)), offer.getAmount(), offer.getItemMeta()));
+            int returningAmount = offer.getAmount();
+            ItemStack sizeCheckStack = isOfferBlock ? new ItemStack(Objects.requireNonNull(ForgeRegistries.BLOCKS.getValue(offerRes)), offer.getAmount(), offer.getItemMeta()) : new ItemStack(Objects.requireNonNull(ForgeRegistries.ITEMS.getValue(offerRes)), offer.getAmount(), offer.getItemMeta());
+            int maxStackSize = sizeCheckStack.getMaxStackSize();
+            while(returningAmount > maxStackSize) {
+                addPayout(offer.getOwner(), getStack(isOfferBlock, offerRes, maxStackSize, offer.getItemMeta(), offer.getNbt()));
+                returningAmount -= maxStackSize;
+            }
+            addPayout(offer.getOwner(), getStack(isOfferBlock, offerRes, returningAmount, offer.getItemMeta(), offer.getNbt()));
         }
     }
 
