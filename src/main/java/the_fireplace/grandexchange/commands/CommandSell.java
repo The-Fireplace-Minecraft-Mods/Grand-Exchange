@@ -14,6 +14,7 @@ import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import the_fireplace.grandeconomy.api.GrandEconomyApi;
 import the_fireplace.grandexchange.market.ExchangeManager;
 import the_fireplace.grandexchange.market.NewOffer;
+import the_fireplace.grandexchange.market.OfferStatusMessager;
 import the_fireplace.grandexchange.market.OfferType;
 import the_fireplace.grandexchange.util.SerializationUtils;
 import the_fireplace.grandexchange.util.translation.TranslationUtil;
@@ -94,16 +95,20 @@ public class CommandSell extends CommandBase {
                     if(!verifyItemCount((EntityPlayerMP) sender, new ResourceLocation(offer.getItemResourceName()), offer.getItemMeta(), amount, offer.getNbt()))
                         throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.sell.not_enough_items"));
                     removeItems((EntityPlayerMP) sender, new ResourceLocation(offer.getItemResourceName()), offer.getItemMeta(), amount, offer.getNbt());
-                    if(amount == offer.getAmount())
+                    if(amount == offer.getAmount()) {
                         ExchangeManager.removeOffer(offerId);
-                    else
+                        OfferStatusMessager.updateStatusComplete(offer);
+                    } else {
                         ExchangeManager.updateCount(offerId, offer.getAmount() - amount);
+                        OfferStatusMessager.updateStatusPartial(offer.getOwner(), offerId);
+                    }
 
                     GrandEconomyApi.addToBalance(((EntityPlayerMP) sender).getUniqueID(), amount * offer.getPrice(), true);
                     ExchangeManager.addPayouts(offer.getOwner(), offer.getItemResourceName(), offer.getItemMeta(), amount, offer.getNbt());
                     sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.offer_fulfilled_balance", GrandEconomyApi.toString(GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID(), true))));
                 } else
                     sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_offer_number"));
+                return;
             }
             throw new WrongUsageException(getUsage(sender));
         } else

@@ -1,5 +1,6 @@
 package the_fireplace.grandexchange.market;
 
+import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -30,6 +31,10 @@ public class OfferStatusMessager {
             getDatabase().updateOfferStatusPartial(player, offerId);
     }
 
+    public static void updateStatusComplete(NewOffer offer) {
+        updateStatusComplete(offer.getOwner(), offer.getIdentifier(), "ge."+offer.getType().toString().toLowerCase()+"offer.fulfilled"+(offer.getNbt() == null ? "" : "_nbt"), offer.getOriginalAmount(), OfferStatusMessager.getFormatted(offer.getItemResourceName(), offer.getItemMeta()), offer.getPrice(), offer.getNbt());
+    }
+
     public static void updateStatusComplete(UUID player, long offerId, String message, int amount, String name, long price, @Nullable String nbt) {
         getDatabase().removeOfferStatusPartial(player, offerId);
         EntityPlayerMP playerEntity = FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getPlayerByUUID(player);
@@ -46,10 +51,10 @@ public class OfferStatusMessager {
         if(!hasPartialOfferUpdates && !hasCompleteOfferUpdates)
             return;
         if(hasPartialOfferUpdates)
-            for(long offerId: getDatabase().getPartialOfferUpdates(player.getUniqueID()))
+            for(long offerId: Lists.newArrayList(getDatabase().getPartialOfferUpdates(player.getUniqueID())))
                 sendPartialStatusUpdate(player, offerId);
         if(hasCompleteOfferUpdates)
-            for(MessageObj message: getDatabase().getCompleteOfferUpdates(player.getUniqueID()))
+            for(MessageObj message: Lists.newArrayList(getDatabase().getCompleteOfferUpdates(player.getUniqueID())))
                 sendCompleteStatusUpdate(player, message);
     }
 
