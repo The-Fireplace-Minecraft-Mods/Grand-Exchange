@@ -15,6 +15,7 @@ import the_fireplace.grandexchange.util.translation.TranslationUtil;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.regex.PatternSyntaxException;
 
 public class CommandCancelOffer extends CommandBase {
     @Override
@@ -68,6 +69,7 @@ public class CommandCancelOffer extends CommandBase {
                 if(args.length >= 4)
                     price = parseInt(args[3]);
 
+                try {
                 if(enableBuySearch)
                     for (NewOffer offer : buyOffers) {
                         if (offer.getItemResourceName().matches(filter) && (meta == null || meta == offer.getItemMeta()) && (price == null || price == offer.getPrice())) {
@@ -85,6 +87,9 @@ public class CommandCancelOffer extends CommandBase {
                             sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.canceloffer.success_sell", offer.getOfferChatMessage(sender.getServer()).getFormattedText()));
                         }
                     }
+                } catch(PatternSyntaxException e) {
+                    throw new CommandException(TranslationUtil.getStringTranslation("commands.ge.common.regex", e.getMessage()));
+                }
 
                 if (buyOffers.isEmpty() && sellOffers.isEmpty())
                     sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.not_buying_or_selling"));

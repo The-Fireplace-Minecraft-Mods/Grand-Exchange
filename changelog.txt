@@ -1,4 +1,5 @@
 Additions:
+Offer IDs: You can now buy, sell, and cancel by offer ID. Offer IDs are shown when browsing offers.
 
 Changes:
 Players will now be notified if offers have been completed when they were offline
@@ -8,3 +9,4 @@ Major database rewrite into json format - updates and fixes will come quicker, a
 
 Fixes:
 Players are now notified if an offer is partially completed when they make it
+If invalid regex is put into the canceloffer command, proper feedback is now given

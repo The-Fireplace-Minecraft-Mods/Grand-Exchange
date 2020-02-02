@@ -11,6 +11,7 @@ commands.ge.common.no_results=No results found.
 commands.ge.common.not_buying_or_selling=You are not buying or selling anything.
 commands.ge.common.untradeable=This item cannot be traded on the Grand Exchange.
 commands.ge.common.not_holding_anything=Error: You aren't holding anything.
+commands.ge.common.regex=Invalid regex search: %s
 
 commands.ge.usage=/ge <command> [parameters]
 

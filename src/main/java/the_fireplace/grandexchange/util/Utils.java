@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.command.CommandException;
 import net.minecraft.util.ResourceLocation;
 import the_fireplace.grandexchange.market.NewOffer;
+import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
 import java.util.Collection;
 import java.util.List;
@@ -35,7 +36,7 @@ public class Utils {
 
             return list;
         } catch(PatternSyntaxException e) {
-            throw new CommandException("Invalid regex search: %s", e.getMessage());
+            throw new CommandException(TranslationUtil.getStringTranslation("commands.ge.common.regex", e.getMessage()));
         }
     }
 
