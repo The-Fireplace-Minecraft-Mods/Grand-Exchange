@@ -12,11 +12,14 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import the_fireplace.grandeconomy.api.GrandEconomyApi;
+import the_fireplace.grandexchange.GrandExchange;
 import the_fireplace.grandexchange.market.ExchangeManager;
 import the_fireplace.grandexchange.market.NewOffer;
 import the_fireplace.grandexchange.market.OfferStatusMessager;
 import the_fireplace.grandexchange.market.OfferType;
 import the_fireplace.grandexchange.util.SerializationUtils;
+import the_fireplace.grandexchange.util.TextStyles;
+import the_fireplace.grandexchange.util.Utils;
 import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
 import javax.annotation.Nullable;
@@ -69,8 +72,14 @@ public class CommandSell extends CommandBase {
                     throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_price"));
                 if(nbt != null && !SerializationUtils.isValidNBT(nbt))
                     throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_nbt"));
-                if(!verifyItemCount((EntityPlayerMP) sender, offerResource, meta, amount, nbt))
+                if(!hasEnoughItems((EntityPlayerMP) sender, offerResource, meta, amount, nbt))
                     throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.sell.not_enough_items"));
+                long tax = Utils.calculateTax(amount * price);
+                if(!GrandEconomyApi.takeFromBalance(((EntityPlayerMP) sender).getUniqueID(), tax, true)) {
+                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.not_enough_tax", GrandEconomyApi.getCurrencyName(2), tax).setStyle(TextStyles.RED));
+                    return;
+                }
+                GrandExchange.getTaxDistributor().distributeTax(((EntityPlayerMP) sender).getUniqueID(), tax);
                 removeItems((EntityPlayerMP) sender, offerResource, meta, amount, nbt);
 
                 boolean madePurchase = ExchangeManager.makeOffer(OfferType.SELL, offerResource.toString(), meta, amount, price, ((EntityPlayerMP) sender).getUniqueID(), nbt);
@@ -92,7 +101,7 @@ public class CommandSell extends CommandBase {
                     }
                     if(amount == null || amount > offer.getAmount())
                         amount = offer.getAmount();
-                    if(!verifyItemCount((EntityPlayerMP) sender, new ResourceLocation(offer.getItemResourceName()), offer.getItemMeta(), amount, offer.getNbt()))
+                    if(!hasEnoughItems((EntityPlayerMP) sender, new ResourceLocation(offer.getItemResourceName()), offer.getItemMeta(), amount, offer.getNbt()))
                         throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.sell.not_enough_items"));
                     removeItems((EntityPlayerMP) sender, new ResourceLocation(offer.getItemResourceName()), offer.getItemMeta(), amount, offer.getNbt());
                     if(amount == offer.getAmount()) {
@@ -115,7 +124,8 @@ public class CommandSell extends CommandBase {
             throw new CommandException(TranslationUtil.getRawTranslationString(sender, "commands.ge.common.not_player"));
     }
 
-    public static boolean verifyItemCount(EntityPlayerMP sender, ResourceLocation offerResource, int meta, int amount, @Nullable String nbt) {
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public static boolean hasEnoughItems(EntityPlayerMP sender, ResourceLocation offerResource, int meta, int amount, @Nullable String nbt) {
         int itemCount = 0;
         for(ItemStack stack: sender.inventory.mainInventory) {
             //noinspection ConstantConditions

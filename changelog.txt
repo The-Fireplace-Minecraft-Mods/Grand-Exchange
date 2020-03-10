@@ -1,12 +1,6 @@
 Additions:
-Offer IDs: You can now buy, sell, and cancel by offer ID. Offer IDs are shown when browsing offers.
+Selling tax: Players can now be taxed when selling items. This tax can either disappear or (if Clans is loaded) be sent to their clans
 
 Changes:
-Players will now be notified if offers have been completed when they were offline
-Updated most messages sent by the mod
-All messages are now able to be localized
-Major database rewrite into json format - updates and fixes will come quicker, and the data can be easily read and modified by server owners
 
 Fixes:
-Players are now notified if an offer is partially completed when they make it
-If invalid regex is put into the canceloffer command, proper feedback is now given

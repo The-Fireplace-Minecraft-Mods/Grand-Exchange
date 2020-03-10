@@ -11,8 +11,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import the_fireplace.grandeconomy.api.GrandEconomyApi;
+import the_fireplace.grandexchange.GrandExchange;
 import the_fireplace.grandexchange.market.ExchangeManager;
 import the_fireplace.grandexchange.market.OfferType;
+import the_fireplace.grandexchange.util.TextStyles;
+import the_fireplace.grandexchange.util.Utils;
 import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
 import javax.annotation.Nullable;
@@ -61,6 +64,12 @@ public class CommandSellThis extends CommandBase {
                 }
                 if(itemCount < amount)
                     throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.sell.not_enough_items"));
+                long tax = Utils.calculateTax(amount * price);
+                if(!GrandEconomyApi.takeFromBalance(((EntityPlayerMP) sender).getUniqueID(), tax, true)) {
+                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.not_enough_tax", GrandEconomyApi.getCurrencyName(2), tax).setStyle(TextStyles.RED));
+                    return;
+                }
+                GrandExchange.getTaxDistributor().distributeTax(((EntityPlayerMP) sender).getUniqueID(), tax);
                 int i = 0;
                 for(ItemStack stack: ((EntityPlayerMP) sender).inventory.mainInventory) {
                     //noinspection ConstantConditions

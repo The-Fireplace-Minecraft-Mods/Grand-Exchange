@@ -4,6 +4,7 @@ import com.google.common.base.Functions;
 import com.google.common.collect.Lists;
 import net.minecraft.command.CommandException;
 import net.minecraft.util.ResourceLocation;
+import the_fireplace.grandexchange.GrandExchange;
 import the_fireplace.grandexchange.market.NewOffer;
 import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
@@ -50,5 +51,12 @@ public class Utils {
         for(NewOffer offer : in)
             names.add(offer.getItemResourceName());
         return names;
+    }
+
+    public static long calculateTax(long amount) {
+        if(GrandExchange.cfg.sellingTax <= 0)
+            return Math.abs(GrandExchange.cfg.sellingTax);
+        else
+            return amount * GrandExchange.cfg.sellingTax / 100;
     }
 }
