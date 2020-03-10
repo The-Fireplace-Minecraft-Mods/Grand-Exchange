@@ -13,6 +13,8 @@ import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
+import java.util.Objects;
+import java.util.regex.PatternSyntaxException;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -32,9 +34,24 @@ public class CommandCollect extends CommandBase {
         if (sender instanceof EntityPlayer) {
             if(ExchangeManager.hasPayout(((EntityPlayer) sender).getUniqueID())) {
                 List<ItemStack> removeItems = Lists.newArrayList();
-                for(ItemStack stack: ExchangeManager.getPayout(((EntityPlayer) sender).getUniqueID())) {
-                    if(stack != null && ((EntityPlayer) sender).addItemStackToInventory(stack.copy()))//Use a copy because in addItemStackToInventory, the stack's count gets set to 0 and that could be a problem when removing payouts
-                        removeItems.add(stack);
+                String filter = ".*";
+                if(args.length > 0)
+                    filter = args[0];
+                if(filter.matches("^[a-zA-Z_]*$")) filter = "minecraft:"+ filter;
+                else if(filter.equals("any") || filter.equals("*")) filter = ".*";
+                try {
+                    for (ItemStack stack : ExchangeManager.getPayout(((EntityPlayer) sender).getUniqueID())) {
+                        if (stack != null && Objects.requireNonNull(stack.getItem().getRegistryName()).toString().matches(filter)) {
+                            if (((EntityPlayer) sender).addItemStackToInventory(stack.copy()))//Use a copy because in addItemStackToInventory, the stack's count gets set to 0 and that could be a problem when removing payouts
+                                removeItems.add(stack);
+                        }
+                    }
+                } catch(PatternSyntaxException e) {
+                    throw new CommandException(TranslationUtil.getStringTranslation("commands.ge.common.regex", e.getMessage()));
+                }
+                if(removeItems.isEmpty()) {
+                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayer) sender).getUniqueID(), "commands.ge.collect.nothing_to_collect_filter", filter));
+                    return;
                 }
                 ExchangeManager.removePayouts(((EntityPlayer) sender).getUniqueID(), removeItems.toArray(new ItemStack[]{}));
                 if(ExchangeManager.hasPayout(((EntityPlayer) sender).getUniqueID()))
