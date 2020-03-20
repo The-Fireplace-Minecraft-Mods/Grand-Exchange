@@ -141,7 +141,7 @@ public class JsonDatabase implements IDatabaseHandler {
 
     @Override
     public void removeOfferStatusComplete(UUID player, long offerId) {
-        if(completeOfferStatusMessages.get(player).removeIf(messageObj -> messageObj.getOfferId() == offerId))
+        if(completeOfferStatusMessages.getOrDefault(player, Collections.emptyList()).removeIf(messageObj -> messageObj.getOfferId() == offerId))
             markChanged();
     }
 

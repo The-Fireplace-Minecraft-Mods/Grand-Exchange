@@ -5,3 +5,4 @@ Added the ability to choose which items you want to collect based on a regex fil
 Changes:
 
 Fixes:
+Fixed issue when attempting to buy stuff
