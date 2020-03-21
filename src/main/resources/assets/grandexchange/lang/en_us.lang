@@ -14,11 +14,11 @@ commands.ge.common.not_holding_anything=Error: You aren't holding anything.
 commands.ge.common.regex=Invalid regex search: %s
 commands.ge.common.not_enough_tax=You do not have enough %s to pay the tax for that. Amount required: %s.
 
-commands.ge.usage=/ge <command> [parameters]
-
 commands.ge.common.offer_fulfilled_balance=Offer succeeded. Your balance is now %s
 commands.ge.common.offer_made_balance=Offer succeeded. Your balance is now %s
 commands.ge.common.offer_made=Offer succeeded.
+
+commands.ge.usage=/ge <command> [parameters]
 
 commands.ge.buy.usage=/ge buy <item> <meta> <amount> <price> [nbt] or /ge buy <offer number> [amount]
 commands.ge.buy.success_completed=Purchase succeeded. Your balance is now %s. You can collect your items with /ge collect
@@ -45,6 +45,8 @@ commands.ge.identify.success=This item is: %s
 commands.ge.myoffers.usage=/ge myoffers [filter] [page]
 commands.ge.myoffers.no_buy_results=No buy results found.
 commands.ge.myoffers.no_sell_results=No sell results found.
+
+commands.ge.opoffers.usage=/ge opoffers [filter] [page]
 
 commands.ge.sell.usage=/ge sell <item> <meta> <amount> <price> [nbt] or /ge sell <offer number> [amount]
 commands.ge.sell.not_enough_items=Error: You do not have enough of that item in your inventory to make this offer.

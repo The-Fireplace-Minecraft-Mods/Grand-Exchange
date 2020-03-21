@@ -32,6 +32,7 @@ public class CommandGe extends CommandBase {
     private static final CommandBase opbuy = new CommandOpBuy();
     private static final CommandBase opsell = new CommandOpSell();
     private static final CommandBase opsellthis = new CommandOpSellThis();
+    private static final CommandBase opoffers = new CommandOpOffers();
 
     @Override
     public String getName() {
@@ -101,6 +102,10 @@ public class CommandGe extends CommandBase {
             case "opsellthis":
             case "ost":
                 opsellthis.execute(server, sender, args);
+                return;
+            case "opoffers":
+            case "oo":
+                opoffers.execute(server, sender, args);
                 return;
             case "help":
             case "h":
