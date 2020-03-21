@@ -16,7 +16,7 @@ public class NewOffer extends Offer {
     private long identifier;
     private int originalAmount;
     private OfferType type;
-    public NewOffer(long id, String offertype, String item, int meta, int amount, long price, UUID owner, @Nullable String nbt) {
+    public NewOffer(long id, String offertype, String item, int meta, @Nullable Integer amount, long price, @Nullable UUID owner, @Nullable String nbt) {
         super(offertype, item, meta, amount, price, owner, nbt);
         identifier = id;
         originalAmount = amount;

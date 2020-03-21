@@ -23,6 +23,8 @@ commands.ge.common.offer_made=Offer succeeded.
 commands.ge.buy.usage=/ge buy <item> <meta> <amount> <price> [nbt] or /ge buy <offer number> [amount]
 commands.ge.buy.success_completed=Purchase succeeded. Your balance is now %s. You can collect your items with /ge collect
 
+commands.ge.opbuy.usage=/ge opbuy <item> <meta> <price> [nbt]
+
 commands.ge.buyoffers.usage=/ge buyoffers [filter] [page]
 commands.ge.buyoffers.none=Nobody is buying anything.
 
@@ -48,10 +50,14 @@ commands.ge.sell.usage=/ge sell <item> <meta> <amount> <price> [nbt] or /ge sell
 commands.ge.sell.not_enough_items=Error: You do not have enough of that item in your inventory to make this offer.
 commands.ge.sell.failed=Error: Something went wrong when removing items from your inventory.
 
+commands.ge.opsell.usage=/ge opsell <item> <meta> <price> [nbt]
+
 commands.ge.selloffers.usage=/ge selloffers [filter] [page]
 commands.ge.selloffers.none=Nobody is selling anything.
 
 commands.ge.sellthis.usage=/ge sellthis <amount> <price>
+
+commands.ge.opsellthis.usage=/ge sellthis <price>
 
 ge.buyoffer=[ID: %s] %s x %s wanted for %s each.
 ge.buyoffer_nbt=[ID: %s] %s x %s with NBT %s wanted for %s each.
