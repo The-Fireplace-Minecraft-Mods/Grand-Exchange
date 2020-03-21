@@ -16,7 +16,7 @@ public interface IDatabaseHandler {
      * Add an offer to the database
      * @return the offer id
      */
-    long addOffer(OfferType type, String item, @Nullable Integer meta, int amount, long price, @Nullable UUID owner, @Nullable String nbt);
+    long addOffer(OfferType type, String item, int meta, @Nullable Integer amount, long price, @Nullable UUID owner, @Nullable String nbt);
 
     /**
      * Remove the offer with the matching ID from the database.

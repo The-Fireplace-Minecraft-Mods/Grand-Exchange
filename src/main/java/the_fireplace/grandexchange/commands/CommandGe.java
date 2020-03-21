@@ -29,6 +29,10 @@ public class CommandGe extends CommandBase {
     private static final CommandBase myoffers = new CommandMyOffers();
     private static final CommandBase canceloffer = new CommandCancelOffer();
 
+    private static final CommandBase opbuy = new CommandOpBuy();
+    private static final CommandBase opsell = new CommandOpSell();
+    private static final CommandBase opsellthis = new CommandOpSellThis();
+
     @Override
     public String getName() {
         return "ge";
@@ -86,6 +90,18 @@ public class CommandGe extends CommandBase {
             case "co":
                 canceloffer.execute(server, sender, args);
                 return;
+            case "opbuy":
+            case "ob":
+                opbuy.execute(server, sender, args);
+                return;
+            case "opsell":
+            case "os":
+                opsell.execute(server, sender, args);
+                return;
+            case "opsellthis":
+            case "ost":
+                opsellthis.execute(server, sender, args);
+                return;
             case "help":
             case "h":
                 sender.sendMessage(new TextComponentString("/ge commands:\n" +
@@ -98,6 +114,9 @@ public class CommandGe extends CommandBase {
                         "selloffers\n" +
                         "myoffers\n" +
                         "canceloffer\n" +
+                        "opbuy\n" +
+                        "opsell\n" +
+                        "opsellthis\n" +
                         "help"));
                 return;
         }

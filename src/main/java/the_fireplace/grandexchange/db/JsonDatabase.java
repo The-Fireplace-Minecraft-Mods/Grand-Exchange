@@ -166,7 +166,7 @@ public class JsonDatabase implements IDatabaseHandler {
     }
 
     @Override
-    public long addOffer(OfferType type, String item, int meta, @Nullable Integer amount, long price, UUID owner, @Nullable String nbt) {
+    public long addOffer(OfferType type, String item, int meta, @Nullable Integer amount, long price, @Nullable UUID owner, @Nullable String nbt) {
         long id = getNewIdentifier();
         NewOffer offer = new NewOffer(id, type.toString().toLowerCase(), item, meta, amount, price, owner, nbt);
         offers.put(id, offer);
@@ -326,6 +326,7 @@ public class JsonDatabase implements IDatabaseHandler {
         }
     }
 
+    @Override
     public void onServerStop() {
         save();
     }

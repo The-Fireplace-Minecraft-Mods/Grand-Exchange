@@ -20,17 +20,17 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Collections;
 import java.util.List;
 
-@ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class CommandOpBuy extends CommandBase {
+@ParametersAreNonnullByDefault
+public class CommandOpSell extends CommandBase {
     @Override
     public String getName() {
-        return "opbuy";
+        return "opsell";
     }
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return TranslationUtil.getRawTranslationString(sender, "commands.ge.opbuy.usage");
+        return TranslationUtil.getRawTranslationString(sender, "commands.ge.opsell.usage");
     }
 
     @SuppressWarnings("Duplicates")
@@ -44,26 +44,25 @@ public class CommandOpBuy extends CommandBase {
                 String nbt = args.length == 4 ? args[3] : null;
                 if(args.length == 2 && resourceName.split(":").length < 3)
                     throw new WrongUsageException(getUsage(sender));
-                //Parse if the command format is /ge opbuy domain:resource:meta price [nbt]
+                //Parse if the command format is /ge opsell domain:resource:meta price [nbt]
                 if(resourceName.split(":").length == 3) {
                     resourceName = resourceName.substring(0, resourceName.lastIndexOf(":"));
                     meta = parseInt(args[0].split(":")[2]);
                     price = parseLong(args[1]);
                     nbt = args.length == 3 ? args[2] : null;
                 }
-
                 ResourceLocation offerResource = new ResourceLocation(resourceName);
                 boolean isValidRequest = ForgeRegistries.BLOCKS.containsKey(offerResource) || ForgeRegistries.ITEMS.containsKey(offerResource);
                 if(!isValidRequest)
                     throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_item"));
                 if(meta < 0)
                     throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_meta"));
-                if(price < 0)
+                if (price < 0)
                     throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_price"));
                 if(nbt != null && !SerializationUtils.isValidNBT(nbt))
                     throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_nbt"));
 
-                ExchangeManager.makeOpOffer(OfferType.BUY, offerResource, meta, price, nbt);
+                ExchangeManager.makeOpOffer(OfferType.SELL, offerResource.toString(), meta, price, nbt);
 
                 sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.offer_made"));
                 return;
