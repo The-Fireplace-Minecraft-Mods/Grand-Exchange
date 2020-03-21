@@ -163,11 +163,12 @@ public final class ExchangeManager {
      * Returns the part of the offer that was not fulfilled. For sell offers, this returns the items. For buy offers, this returns the money.
      */
     public static void returnInvestment(Offer offer) {
-        if(offer.isBuyOffer()) {
-            GrandEconomyApi.addToBalance(offer.getOwner(), offer.getPrice()*offer.getAmount(), true);
-        } else if(offer.isSellOffer()) {
-            addPayouts(offer.getOwner(), offer.getItemResourceName(), offer.getItemMeta(), offer.getAmount(), offer.getNbt());
-        }
+        if(offer.getOwner() != null && offer.getAmount() != null)
+            if(offer.isBuyOffer()) {
+                GrandEconomyApi.addToBalance(offer.getOwner(), offer.getPrice()*offer.getAmount(), true);
+            } else if(offer.isSellOffer()) {
+                addPayouts(offer.getOwner(), offer.getItemResourceName(), offer.getItemMeta(), offer.getAmount(), offer.getNbt());
+            }
     }
 
     public static void addPayouts(UUID payPlayer, String itemResourceName, int meta, int itemCount, @Nullable String nbt) {
@@ -212,10 +213,15 @@ public final class ExchangeManager {
             List<Long> removeOfferIds = Lists.newArrayList();
             for(Offer buyOffer: possibleBuyOffers) {
                 ResourceLocation offerResource = new ResourceLocation(item);
-                if(amount == null || amount > buyOffer.getAmount()){
-                    if(owner != null)
-                        GrandEconomyApi.addToBalance(owner, buyOffer.getAmount()*buyOffer.getPrice(), true);
-                    addPayouts(buyOffer.getOwner(), offerResource, meta, buyOffer.getAmount(), nbt, isOfferBlock, maxStackSize);
+                if(amount == null || buyOffer.getAmount() == null || amount > buyOffer.getAmount()) {
+                    if(amount != null || buyOffer.getAmount() != null) {
+                        int payoutAmount = buyOffer.getAmount() != null ? buyOffer.getAmount() : amount;
+                        if (owner != null)
+                            GrandEconomyApi.addToBalance(owner, payoutAmount * buyOffer.getPrice(), true);
+                        if(buyOffer.getOwner() != null)
+                            addPayouts(buyOffer.getOwner(), offerResource, meta, payoutAmount, nbt, isOfferBlock, maxStackSize);
+                    } else
+                        GrandExchange.LOGGER.warn("Potential infinite money source created: Buy {} for {} and sell for {}.", offerResource.toString()+":"+meta, price, buyOffer.getPrice());
                     if(amount != null)
                         amount -= buyOffer.getAmount();
                     removeOfferIds.add(buyOffer.getIdentifier());
@@ -226,7 +232,7 @@ public final class ExchangeManager {
                     else
                         GrandExchange.LOGGER.error("Offer owner should not be null in this scenario.");
                     addPayouts(buyOffer.getOwner(), offerResource, meta, amount, nbt, isOfferBlock, maxStackSize);
-                    if(amount == buyOffer.getAmount()) {
+                    if(Objects.equals(amount, buyOffer.getAmount())) {
                         removeOfferIds.add(buyOffer.getIdentifier());
                         updateBuyStatusComplete(buyOffer);
                     } else {
@@ -245,6 +251,8 @@ public final class ExchangeManager {
     }
 
     private static void updateBuyStatusComplete(Offer buyOffer) {
+        if(buyOffer.getOwner() == null || buyOffer.getAmount() == null || buyOffer.getOriginalAmount() == null)
+            return;
         if(buyOffer.getNbt() == null)
             OfferStatusMessager.updateStatusComplete(buyOffer.getOwner(), buyOffer.getIdentifier(), "ge.buyoffer.fulfilled", buyOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(buyOffer.getItemResourceName(), buyOffer.getItemMeta()), buyOffer.getPrice(), null);
         else
@@ -257,16 +265,22 @@ public final class ExchangeManager {
             List<Long> removeOfferIds = Lists.newArrayList();
             for(Offer sellOffer: possibleSellOffers){
                 ResourceLocation offerResource = new ResourceLocation(item);
-                if(amount == null || amount > sellOffer.getAmount()){
-                    GrandEconomyApi.addToBalance(sellOffer.getOwner(), sellOffer.getAmount()*sellOffer.getPrice(), true);
-                    if(nbt == null)
-                        OfferStatusMessager.updateStatusComplete(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled", sellOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(item, meta), price, null);
-                    else
-                        OfferStatusMessager.updateStatusComplete(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled_nbt", sellOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(item, meta), price, nbt);
-                    if(owner != null)
-                        addPayouts(owner, offerResource, meta, sellOffer.getAmount(), nbt, isOfferBlock, maxStackSize);
-                    if(amount != null)
-                        amount -= sellOffer.getAmount();
+                if(amount == null || sellOffer.getAmount() == null || amount > sellOffer.getAmount()){
+                    if(sellOffer.getOwner() != null && sellOffer.getAmount() != null && sellOffer.getOriginalAmount() != null) {
+                        GrandEconomyApi.addToBalance(sellOffer.getOwner(), sellOffer.getAmount() * sellOffer.getPrice(), true);
+                        if (nbt == null)
+                            OfferStatusMessager.updateStatusComplete(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled", sellOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(item, meta), price, null);
+                        else
+                            OfferStatusMessager.updateStatusComplete(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled_nbt", sellOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(item, meta), price, nbt);
+                    }
+                    if(sellOffer.getAmount() != null || amount != null) {
+                        if (owner != null)
+                            addPayouts(owner, offerResource, meta, sellOffer.getAmount() != null ? sellOffer.getAmount() : amount, nbt, isOfferBlock, maxStackSize);
+                        if (amount != null && sellOffer.getAmount() != null)
+                            amount -= sellOffer.getAmount();
+                        else if(amount != null)
+                            amount = 0;
+                    }
                     removeOfferIds.add(sellOffer.getIdentifier());
                 } else {
                     GrandEconomyApi.addToBalance(sellOffer.getOwner(), amount*sellOffer.getPrice(), true);
@@ -274,12 +288,14 @@ public final class ExchangeManager {
                         addPayouts(owner, offerResource, meta, amount, nbt, isOfferBlock, maxStackSize);
                     else
                         GrandExchange.LOGGER.error("Offer owner should not be null in this scenario.");
-                    if(amount == sellOffer.getAmount()) {
+                    if(Objects.equals(amount, sellOffer.getAmount())) {
                         removeOfferIds.add(sellOffer.getIdentifier());
-                        if(nbt == null)
-                            OfferStatusMessager.updateStatusComplete(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled", sellOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(item, meta), price, null);
-                        else
-                            OfferStatusMessager.updateStatusComplete(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled_nbt", sellOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(item, meta), price, nbt);
+                        if(sellOffer.getOwner() != null && sellOffer.getAmount() != null && sellOffer.getOriginalAmount() != null) {
+                            if (nbt == null)
+                                OfferStatusMessager.updateStatusComplete(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled", sellOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(item, meta), price, null);
+                            else
+                                OfferStatusMessager.updateStatusComplete(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled_nbt", sellOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(item, meta), price, nbt);
+                        }
                     } else {
                         updateCount(sellOffer.getIdentifier(), sellOffer.getAmount() - amount);
                         OfferStatusMessager.updateStatusPartial(sellOffer.getOwner(), sellOffer.getIdentifier());

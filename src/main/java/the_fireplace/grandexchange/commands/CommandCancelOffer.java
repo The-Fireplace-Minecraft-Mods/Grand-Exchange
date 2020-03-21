@@ -70,23 +70,23 @@ public class CommandCancelOffer extends CommandBase {
                     price = parseInt(args[3]);
 
                 try {
-                if(enableBuySearch)
-                    for (Offer offer : buyOffers) {
-                        if (offer.getItemResourceName().matches(filter) && (meta == null || meta == offer.getItemMeta()) && (price == null || price == offer.getPrice())) {
-                            ExchangeManager.removeOffer(offer.getIdentifier());
-                            ExchangeManager.returnInvestment(offer);
-                            sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.canceloffer.success_buy", offer.getOfferChatMessage(sender.getServer()).getFormattedText()));
+                    if(enableBuySearch)
+                        for (Offer offer : buyOffers) {
+                            if (offer.getItemResourceName().matches(filter) && (meta == null || meta == offer.getItemMeta()) && (price == null || price == offer.getPrice())) {
+                                ExchangeManager.removeOffer(offer.getIdentifier());
+                                ExchangeManager.returnInvestment(offer);
+                                sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.canceloffer.success_buy", offer.getOfferChatMessage(sender.getServer()).getFormattedText()));
+                            }
                         }
-                    }
 
-                if(enableSellSearch)
-                    for (Offer offer : sellOffers) {
-                        if (offer.getItemResourceName().matches(filter) && (meta == null || meta == offer.getItemMeta()) && (price == null || price == offer.getPrice())) {
-                            ExchangeManager.removeOffer(offer.getIdentifier());
-                            ExchangeManager.returnInvestment(offer);
-                            sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.canceloffer.success_sell", offer.getOfferChatMessage(sender.getServer()).getFormattedText()));
+                    if(enableSellSearch)
+                        for (Offer offer : sellOffers) {
+                            if (offer.getItemResourceName().matches(filter) && (meta == null || meta == offer.getItemMeta()) && (price == null || price == offer.getPrice())) {
+                                ExchangeManager.removeOffer(offer.getIdentifier());
+                                ExchangeManager.returnInvestment(offer);
+                                sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.canceloffer.success_sell", offer.getOfferChatMessage(sender.getServer()).getFormattedText()));
+                            }
                         }
-                    }
                 } catch(PatternSyntaxException e) {
                     throw new CommandException(TranslationUtil.getStringTranslation("commands.ge.common.regex", e.getMessage()));
                 }

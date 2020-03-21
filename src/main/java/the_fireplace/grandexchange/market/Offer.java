@@ -16,10 +16,10 @@ public class Offer {
     @Nullable
     protected Integer amount, originalAmount;
     protected int meta;
-    protected long price;
+    protected long price, identifier;
+    @Nullable
     protected UUID owner;
     protected long timestamp = System.currentTimeMillis();
-    private long identifier;
     private OfferType type;
 
     public Offer(long id, OfferType offertype, String item, int meta, @Nullable Integer amount, long price, @Nullable UUID owner, @Nullable String nbt) {
@@ -81,6 +81,7 @@ public class Offer {
     public final long getPrice(){
         return price;
     }
+    @Nullable
     public final UUID getOwner(){
         return owner;
     }
@@ -128,13 +129,16 @@ public class Offer {
         ret.addProperty("type", type.toString().toLowerCase());
         if(nbt != null)
             ret.addProperty("nbt", nbt);
-        ret.addProperty("amount", amount);
+        if(amount != null)
+            ret.addProperty("amount", amount);
         ret.addProperty("meta", meta);
         ret.addProperty("price", price);
-        ret.addProperty("owner", owner.toString());
+        if(owner != null)
+            ret.addProperty("owner", owner.toString());
         ret.addProperty("timestamp", timestamp);
         ret.addProperty("identifier", identifier);
-        ret.addProperty("original_amount", originalAmount);
+        if(originalAmount != null)
+            ret.addProperty("original_amount", originalAmount);
         return ret;
     }
 }
