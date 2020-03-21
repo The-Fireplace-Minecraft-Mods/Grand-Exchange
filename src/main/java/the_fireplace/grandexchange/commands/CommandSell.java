@@ -14,7 +14,7 @@ import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import the_fireplace.grandeconomy.api.GrandEconomyApi;
 import the_fireplace.grandexchange.GrandExchange;
 import the_fireplace.grandexchange.market.ExchangeManager;
-import the_fireplace.grandexchange.market.NewOffer;
+import the_fireplace.grandexchange.market.Offer;
 import the_fireplace.grandexchange.market.OfferStatusMessager;
 import the_fireplace.grandexchange.market.OfferType;
 import the_fireplace.grandexchange.util.SerializationUtils;
@@ -93,7 +93,7 @@ public class CommandSell extends CommandBase {
                 long offerId = parseLong(args[0]);
                 Integer amount = args.length == 2 ? parseInt(args[1]) : null;
 
-                NewOffer offer = ExchangeManager.getOffer(offerId);
+                Offer offer = ExchangeManager.getOffer(offerId);
                 if(offer != null) {
                     if(offer.isSellOffer()) {
                         sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.wrong_offer_type"));

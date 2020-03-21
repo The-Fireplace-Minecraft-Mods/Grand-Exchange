@@ -5,7 +5,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.command.CommandException;
 import net.minecraft.util.ResourceLocation;
 import the_fireplace.grandexchange.GrandExchange;
-import the_fireplace.grandexchange.market.NewOffer;
+import the_fireplace.grandexchange.market.Offer;
 import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
 import java.util.Collection;
@@ -46,9 +46,9 @@ public class Utils {
     //    return region.regionMatches(true, 0, original, 0, original.length());
     //}
 
-    public static List<String> getOfferNames(List<NewOffer> in){
+    public static List<String> getOfferNames(List<Offer> in){
         List<String> names = Lists.newArrayList();
-        for(NewOffer offer : in)
+        for(Offer offer : in)
             names.add(offer.getItemResourceName());
         return names;
     }

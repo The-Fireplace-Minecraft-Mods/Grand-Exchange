@@ -17,7 +17,6 @@ import the_fireplace.grandexchange.compat.DummyTaxDistributor;
 import the_fireplace.grandexchange.compat.TaxDistributor;
 import the_fireplace.grandexchange.db.IDatabaseHandler;
 import the_fireplace.grandexchange.db.JsonDatabase;
-import the_fireplace.grandexchange.util.TransactionDatabase;
 
 @SuppressWarnings("WeakerAccess")
 @Mod(modid = GrandExchange.MODID, name = GrandExchange.MODNAME, version = GrandExchange.VERSION, acceptedMinecraftVersions = "[1.12,1.13)", acceptableRemoteVersions = "*", dependencies="required-after:grandeconomy@[1.3.1,);after:clans")
@@ -54,8 +53,6 @@ public final class GrandExchange {
         ICommandManager command = server.getCommandManager();
         ServerCommandManager manager = (ServerCommandManager) command;
         manager.registerCommand(new CommandGe());
-        //TODO Remove this old code when porting to 1.14+
-        TransactionDatabase.getInstance();
     }
 
     @Mod.EventHandler

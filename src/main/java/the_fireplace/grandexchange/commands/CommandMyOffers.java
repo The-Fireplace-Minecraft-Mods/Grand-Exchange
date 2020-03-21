@@ -8,7 +8,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
 import the_fireplace.grandexchange.market.ExchangeManager;
-import the_fireplace.grandexchange.market.NewOffer;
+import the_fireplace.grandexchange.market.Offer;
 import the_fireplace.grandexchange.market.OfferType;
 import the_fireplace.grandexchange.util.ChatPageUtil;
 import the_fireplace.grandexchange.util.TextStyles;
@@ -36,8 +36,8 @@ public class CommandMyOffers extends CommandBase {
     @Override
     public void execute(@Nullable MinecraftServer server, @Nonnull ICommandSender sender, @Nullable String[] args) throws CommandException {
         if(sender instanceof EntityPlayerMP) {
-            List<NewOffer> buyOffers = Lists.newArrayList(ExchangeManager.getOffers(OfferType.BUY, ((EntityPlayerMP) sender).getUniqueID()));
-            List<NewOffer> sellOffers = Lists.newArrayList(ExchangeManager.getOffers(OfferType.SELL, ((EntityPlayerMP) sender).getUniqueID()));
+            List<Offer> buyOffers = Lists.newArrayList(ExchangeManager.getOffers(OfferType.BUY, ((EntityPlayerMP) sender).getUniqueID()));
+            List<Offer> sellOffers = Lists.newArrayList(ExchangeManager.getOffers(OfferType.SELL, ((EntityPlayerMP) sender).getUniqueID()));
 
             int page = 1;
             if (args != null && args.length == 2)
@@ -61,7 +61,7 @@ public class CommandMyOffers extends CommandBase {
             final List<String> buyresults = Utils.getListOfStringsMatchingString(search, Utils.getOfferNames(buyOffers));
             buyOffers.removeIf(offer -> !buyresults.contains(offer.getItemResourceName()));
 
-            for (NewOffer offer : buyOffers) {
+            for (Offer offer : buyOffers) {
                 messages.add(offer.getOfferChatMessage(sender));
             }
             
@@ -71,7 +71,7 @@ public class CommandMyOffers extends CommandBase {
             final List<String> sellresults = Utils.getListOfStringsMatchingString(search, Utils.getOfferNames(sellOffers));
             sellOffers.removeIf(offer -> !sellresults.contains(offer.getItemResourceName()));
 
-            for (NewOffer offer : sellOffers) {
+            for (Offer offer : sellOffers) {
                 messages.add(offer.getOfferChatMessage(sender));
             }
             if(sellOffers.isEmpty())

@@ -31,7 +31,7 @@ public class OfferStatusMessager {
             getDatabase().updateOfferStatusPartial(player, offerId);
     }
 
-    public static void updateStatusComplete(NewOffer offer) {
+    public static void updateStatusComplete(Offer offer) {
         updateStatusComplete(offer.getOwner(), offer.getIdentifier(), "ge."+offer.getType().toString().toLowerCase()+"offer.fulfilled"+(offer.getNbt() == null ? "" : "_nbt"), offer.getOriginalAmount(), OfferStatusMessager.getFormatted(offer.getItemResourceName(), offer.getItemMeta()), offer.getPrice(), offer.getNbt());
     }
 
@@ -67,7 +67,7 @@ public class OfferStatusMessager {
     }
 
     private static void sendPartialStatusUpdate(EntityPlayerMP player, long offerId) {
-        NewOffer offer = ExchangeManager.getOffer(offerId);
+        Offer offer = ExchangeManager.getOffer(offerId);
         if(offer.getNbt() == null)
             player.sendMessage(TranslationUtil.getTranslation(player.getUniqueID(), "ge."+offer.getType().toString().toLowerCase()+"offer.fulfilled_partial", offer.getOriginalAmount()-offer.getAmount(), offer.getOriginalAmount(), OfferStatusMessager.getFormatted(offer.getItemResourceName(), offer.getItemMeta())).setStyle(TextStyles.BLUE));
         else
