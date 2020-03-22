@@ -2,9 +2,11 @@ Additions:
 Selling tax: Players can now be taxed when selling items. This tax can either disappear or (if Clans is loaded) be sent to their clans
 Added the ability to choose which items you want to collect based on a regex filter
 Added the ability for server operators to create infinite offers.
+Added permission management integration for Sponge-based and Forge-based permission managers
 
 Changes:
 Removed backwards compatibility for versions earlier than 1.3.X
+Overhauled /ge help to show full usage and descriptions of ge commands
 
 Fixes:
 Fixed issue when attempting to buy stuff
