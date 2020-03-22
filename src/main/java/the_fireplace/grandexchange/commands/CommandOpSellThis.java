@@ -46,7 +46,7 @@ public class CommandOpSellThis extends CommandBase {
                 if (price < 0)
                     throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_price"));
 
-                ExchangeManager.makeOpOffer(OfferType.SELL, selling.getItem().getRegistryName().toString(), selling.getMetadata(), price, selling.hasTagCompound() ? Objects.requireNonNull(selling.getTagCompound()).toString() : null);
+                ExchangeManager.makeOpOffer(OfferType.SELL, Objects.requireNonNull(selling.getItem().getRegistryName()).toString(), selling.getMetadata(), price, selling.hasTagCompound() ? Objects.requireNonNull(selling.getTagCompound()).toString() : null);
 
                 sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.offer_made"));
                 return;

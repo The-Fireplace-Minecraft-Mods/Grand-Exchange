@@ -32,7 +32,6 @@ public class CommandSellOffers extends CommandBase {
         return TranslationUtil.getRawTranslationString(sender, "commands.ge.selloffers.usage");
     }
 
-    @SuppressWarnings("Duplicates")
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if(args.length <= 2) {
