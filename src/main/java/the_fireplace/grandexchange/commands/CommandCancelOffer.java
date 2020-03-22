@@ -7,6 +7,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
+import the_fireplace.grandexchange.GrandExchange;
 import the_fireplace.grandexchange.market.ExchangeManager;
 import the_fireplace.grandexchange.market.Offer;
 import the_fireplace.grandexchange.market.OfferType;
@@ -16,6 +17,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
+
+import static the_fireplace.grandexchange.permission.PermissionManager.GE_COMMAND_PREFIX;
 
 public class CommandCancelOffer extends CommandBase {
     @Override
@@ -32,8 +35,8 @@ public class CommandCancelOffer extends CommandBase {
 
     @Override
     public void execute(@Nullable MinecraftServer server, @Nonnull ICommandSender sender, @Nullable String[] args) throws CommandException {
-        if(sender instanceof EntityPlayerMP) {
-            if (args != null && args.length >= 2) {
+        if (args != null && args.length >= 2) {
+            if(sender instanceof EntityPlayerMP) {
                 List<Offer> buyOffers = Lists.newArrayList(ExchangeManager.getOffers(OfferType.BUY, ((EntityPlayerMP) sender).getUniqueID()));
                 List<Offer> sellOffers = Lists.newArrayList(ExchangeManager.getOffers(OfferType.SELL, ((EntityPlayerMP) sender).getUniqueID()));
                 boolean enableBuySearch = false, enableSellSearch = false;
@@ -93,15 +96,22 @@ public class CommandCancelOffer extends CommandBase {
 
                 if (buyOffers.isEmpty() && sellOffers.isEmpty())
                     sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.not_buying_or_selling"));
-            } else if(args != null && args.length == 1) {
-                Offer cancelled = ExchangeManager.removeOffer(parseLong(args[0]));
-                if(cancelled != null) {
-                    ExchangeManager.returnInvestment(cancelled);
-                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.canceloffer.success_"+cancelled.getType().toString().toLowerCase(), cancelled.getOfferChatMessage(sender.getServer()).getFormattedText()));
-                } else
-                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_offer_number"));
             } else
                 throw new WrongUsageException(getUsage(sender));
+        } else if(args != null && args.length == 1) {
+            Offer offer = ExchangeManager.getOffer(parseLong(args[0]));
+            if(!(sender instanceof EntityPlayerMP)
+                    || ((EntityPlayerMP) sender).getUniqueID().equals(offer.getOwner())
+                    || (offer.getOwner() == null
+                        && GrandExchange.getPermissionHandler().permissionManagementExists()
+                        && GrandExchange.getPermissionHandler().hasPermission((EntityPlayerMP)sender, GE_COMMAND_PREFIX+"canceloffer.op"))) {
+                Offer cancelled = ExchangeManager.removeOffer(parseLong(args[0]));
+                if (cancelled != null) {
+                    ExchangeManager.returnInvestment(cancelled);
+                    sender.sendMessage(TranslationUtil.getTranslation(sender, "commands.ge.canceloffer.success_" + cancelled.getType().toString().toLowerCase(), cancelled.getOfferChatMessage(sender.getServer()).getFormattedText()));
+                } else
+                    sender.sendMessage(TranslationUtil.getTranslation(sender, "commands.ge.common.invalid_offer_number"));
+            }
         } else
             throw new CommandException(TranslationUtil.getRawTranslationString(sender, "commands.ge.common.not_player"));
     }

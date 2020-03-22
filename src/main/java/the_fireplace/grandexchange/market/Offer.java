@@ -58,7 +58,7 @@ public class Offer {
         meta = object.get("meta").getAsInt();
         amount = object.has("amount") ? object.get("amount").getAsInt() : null;
         price = object.get("price").getAsInt();
-        owner = UUID.fromString(object.get("owner").getAsString());
+        owner = object.has("owner") ? UUID.fromString(object.get("owner").getAsString()) : null;
         nbt = object.has("nbt") ? object.get("nbt").getAsString() : null;
         identifier = object.get("identifier").getAsLong();
         type = object.get("type").getAsString().equals("buy") ? OfferType.BUY : OfferType.SELL;

@@ -11,3 +11,4 @@ Overhauled /ge help to show full usage and descriptions of ge commands
 Fixes:
 Fixed issue when attempting to buy stuff
 Fixed mismatched number of dashes for the top and bottom of a one-page paged chat message
+Fixed /ge canceloffer <offernumber> allowing cancelling any offer

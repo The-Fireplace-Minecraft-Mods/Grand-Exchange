@@ -23,6 +23,7 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -91,19 +92,22 @@ public class CommandBuy extends CommandBase {
                         sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.wrong_offer_type"));
                         return;
                     }
-                    if(amount == null || amount > offer.getAmount())
+                    if(offer.getAmount() != null && (amount == null || amount > offer.getAmount()))
                         amount = offer.getAmount();
+                    else if(amount == null)
+                        amount = 1;
                     if(GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID(), true) < offer.getPrice()*amount)
                         throw new InsufficientCreditException(((EntityPlayerMP) sender).getUniqueID());
                     GrandEconomyApi.takeFromBalance(((EntityPlayerMP) sender).getUniqueID(), offer.getPrice() * amount, true);
-                    if(amount == offer.getAmount()) {
+                    if(Objects.equals(amount, offer.getAmount())) {
                         ExchangeManager.removeOffer(offerId);
                         OfferStatusMessager.updateStatusComplete(offer);
-                    } else {
+                    } else if(offer.getAmount() != null) {
                         ExchangeManager.updateCount(offerId, offer.getAmount() - amount);
                         OfferStatusMessager.updateStatusPartial(offer.getOwner(), offerId);
                     }
-                    GrandEconomyApi.addToBalance(offer.getOwner(), amount * offer.getPrice(), true);
+                    if(offer.getOwner() != null)
+                        GrandEconomyApi.addToBalance(offer.getOwner(), amount * offer.getPrice(), true);
                     ExchangeManager.addPayouts(((EntityPlayerMP) sender).getUniqueID(), offer.getItemResourceName(), offer.getItemMeta(), amount, offer.getNbt());
                     sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.buy.success_completed", GrandEconomyApi.toString(GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID(), true))));
                 } else

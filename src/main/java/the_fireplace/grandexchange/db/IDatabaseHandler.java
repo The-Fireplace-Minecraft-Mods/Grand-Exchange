@@ -32,7 +32,6 @@ public interface IDatabaseHandler {
     Collection<ItemStack> getPayouts(UUID player);
     int countPayouts(UUID player);
     void updateCount(long offerId, int newAmount);
-    int getCount(long offerId);
 
     /**
      * Get all offers of a type for an item with the specified minimum or maximum price

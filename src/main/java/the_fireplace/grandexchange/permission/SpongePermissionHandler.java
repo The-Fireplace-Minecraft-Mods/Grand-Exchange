@@ -24,6 +24,8 @@ public class SpongePermissionHandler implements IPermissionHandler {
             registerPermission(GE_COMMAND_PREFIX+subcommand, PermissionDescription.ROLE_USER, "");
         for(String subcommand: CommandGe.opcommands.keySet())
             registerPermission(GE_COMMAND_PREFIX+subcommand, PermissionDescription.ROLE_ADMIN, "");
+
+        registerPermission(GE_COMMAND_PREFIX+"canceloffer.op", PermissionDescription.ROLE_ADMIN, "");
     }
 
     @Override

@@ -14,6 +14,7 @@ public class ForgePermissionHandler implements IPermissionHandler {
             registerPermission(GE_COMMAND_PREFIX+subcommand, DefaultPermissionLevel.ALL, "");
         for(String subcommand: CommandGe.opcommands.keySet())
             registerPermission(GE_COMMAND_PREFIX+subcommand, DefaultPermissionLevel.OP, "");
+        registerPermission(GE_COMMAND_PREFIX+"canceloffer.op", DefaultPermissionLevel.OP, "");
     }
 
     @Override

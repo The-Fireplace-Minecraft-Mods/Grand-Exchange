@@ -151,9 +151,6 @@ public final class ExchangeManager {
     public static void updateCount(long offerId, int newAmount){
         getDatabase().updateCount(offerId, newAmount);
     }
-    public static int getCount(long offerId) {
-        return getDatabase().getCount(offerId);
-    }
 
     public static boolean canTransactItem(ItemStack item){
         return !item.isEmpty();
@@ -224,7 +221,8 @@ public final class ExchangeManager {
                         GrandExchange.LOGGER.warn("Potential infinite money source created: Buy {} for {} and sell for {}.", offerResource.toString()+":"+meta, price, buyOffer.getPrice());
                     if(amount != null)
                         amount -= buyOffer.getAmount();
-                    removeOfferIds.add(buyOffer.getIdentifier());
+                    if(buyOffer.getAmount() != null && buyOffer.getOwner() != null)
+                        removeOfferIds.add(buyOffer.getIdentifier());
                     updateBuyStatusComplete(buyOffer);
                 } else {
                     if(owner != null)
@@ -263,9 +261,9 @@ public final class ExchangeManager {
         Collection<Offer> possibleSellOffers = getOffers(OfferType.SELL, Pair.of(item, meta), price, nbt);
         if(!possibleSellOffers.isEmpty()) {
             List<Long> removeOfferIds = Lists.newArrayList();
-            for(Offer sellOffer: possibleSellOffers){
+            for(Offer sellOffer: possibleSellOffers) {
                 ResourceLocation offerResource = new ResourceLocation(item);
-                if(amount == null || sellOffer.getAmount() == null || amount > sellOffer.getAmount()){
+                if(amount == null || sellOffer.getAmount() == null || amount > sellOffer.getAmount()) {
                     if(sellOffer.getOwner() != null && sellOffer.getAmount() != null && sellOffer.getOriginalAmount() != null) {
                         GrandEconomyApi.addToBalance(sellOffer.getOwner(), sellOffer.getAmount() * sellOffer.getPrice(), true);
                         if (nbt == null)
@@ -281,7 +279,8 @@ public final class ExchangeManager {
                         else if(amount != null)
                             amount = 0;
                     }
-                    removeOfferIds.add(sellOffer.getIdentifier());
+                    if(sellOffer.getAmount() != null && sellOffer.getOwner() != null)
+                        removeOfferIds.add(sellOffer.getIdentifier());
                 } else {
                     GrandEconomyApi.addToBalance(sellOffer.getOwner(), amount*sellOffer.getPrice(), true);
                     if(owner != null)

@@ -78,11 +78,6 @@ public class JsonDatabase implements IDatabaseHandler {
     }
 
     @Override
-    public int getCount(long offerId) {
-        return offers.get(offerId).getAmount();
-    }
-
-    @Override
     public Collection<Offer> getOffers(OfferType type, Pair<String, Integer> itemPair, long minMaxPrice, @Nullable String nbt) {
         List<Offer> resultList = Lists.newArrayList();
         if(type.equals(OfferType.BUY) && buyOffers.containsKey(itemPair)) {
@@ -102,7 +97,7 @@ public class JsonDatabase implements IDatabaseHandler {
     public Collection<Offer> getOffers(OfferType type, UUID owner) {
         List<Offer> resultList = Lists.newArrayList();
         for(Offer offer: offers.values().stream().filter(o -> o.getType().equals(type)).collect(Collectors.toList()))
-            if(offer.getOwner().equals(owner))
+            if(Objects.equals(offer.getOwner(), owner))
                 resultList.add(offer.copy());
         return Collections.unmodifiableList(resultList);
     }
