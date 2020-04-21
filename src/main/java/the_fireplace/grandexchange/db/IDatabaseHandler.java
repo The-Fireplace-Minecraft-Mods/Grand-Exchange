@@ -2,7 +2,7 @@ package the_fireplace.grandexchange.db;
 
 import net.minecraft.item.ItemStack;
 import org.apache.commons.lang3.tuple.Pair;
-import the_fireplace.grandexchange.market.NewOffer;
+import the_fireplace.grandexchange.market.Offer;
 import the_fireplace.grandexchange.market.OfferStatusMessager;
 import the_fireplace.grandexchange.market.OfferType;
 
@@ -16,7 +16,7 @@ public interface IDatabaseHandler {
      * Add an offer to the database
      * @return the offer id
      */
-    long addOffer(OfferType type, String item, int meta, int amount, long price, UUID owner, @Nullable String nbt);
+    long addOffer(OfferType type, String item, int meta, @Nullable Integer amount, long price, @Nullable UUID owner, @Nullable String nbt);
 
     /**
      * Remove the offer with the matching ID from the database.
@@ -26,13 +26,12 @@ public interface IDatabaseHandler {
      * The offer that was removed, or null if not found.
      */
     @Nullable
-    NewOffer removeOffer(long offerId);
+    Offer removeOffer(long offerId);
     void addPayout(UUID player, ItemStack payout);
     void removePayout(UUID player, ItemStack payout);
     Collection<ItemStack> getPayouts(UUID player);
     int countPayouts(UUID player);
     void updateCount(long offerId, int newAmount);
-    int getCount(long offerId);
 
     /**
      * Get all offers of a type for an item with the specified minimum or maximum price
@@ -47,14 +46,14 @@ public interface IDatabaseHandler {
      * @return
      * A collection of offers matching the criteria
      */
-    Collection<NewOffer> getOffers(OfferType type, Pair<String, Integer> itemPair, long minMaxPrice, @Nullable String nbt);
+    Collection<Offer> getOffers(OfferType type, Pair<String, Integer> itemPair, long minMaxPrice, @Nullable String nbt);
 
     /**
      * Gets all offers of a type with the specified owner
      */
-    Collection<NewOffer> getOffers(OfferType type, UUID owner);
-    Collection<NewOffer> getOffers(OfferType type);
-    NewOffer getOffer(long offerId);
+    Collection<Offer> getOffers(OfferType type, UUID owner);
+    Collection<Offer> getOffers(OfferType type);
+    Offer getOffer(long offerId);
 
     void updateOfferStatusPartial(UUID player, long offerId);
     void removeOfferStatusPartial(UUID player, long offerId);

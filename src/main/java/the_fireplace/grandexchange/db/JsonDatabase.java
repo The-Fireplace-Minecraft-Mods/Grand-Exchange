@@ -8,7 +8,7 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.commons.lang3.tuple.Pair;
-import the_fireplace.grandexchange.market.NewOffer;
+import the_fireplace.grandexchange.market.Offer;
 import the_fireplace.grandexchange.market.OfferStatusMessager;
 import the_fireplace.grandexchange.market.OfferType;
 import the_fireplace.grandexchange.util.SerializationUtils;
@@ -28,9 +28,9 @@ public class JsonDatabase implements IDatabaseHandler {
 
     private long nextIdentifier = 0;
 
-    private HashMap<Long, NewOffer> offers = Maps.newHashMap();
-    private HashMap<Pair<String, Integer>, List<NewOffer>> buyOffers = Maps.newHashMap();
-    private HashMap<Pair<String, Integer>, List<NewOffer>> sellOffers = Maps.newHashMap();
+    private HashMap<Long, Offer> offers = Maps.newHashMap();
+    private HashMap<Pair<String, Integer>, List<Offer>> buyOffers = Maps.newHashMap();
+    private HashMap<Pair<String, Integer>, List<Offer>> sellOffers = Maps.newHashMap();
     private HashMap<UUID, List<ItemStack>> payouts = Maps.newHashMap();
 
     private Map<UUID, List<Long>> partialOfferStatusMessages = Maps.newHashMap();
@@ -78,42 +78,37 @@ public class JsonDatabase implements IDatabaseHandler {
     }
 
     @Override
-    public int getCount(long offerId) {
-        return offers.get(offerId).getAmount();
-    }
-
-    @Override
-    public Collection<NewOffer> getOffers(OfferType type, Pair<String, Integer> itemPair, long minMaxPrice, @Nullable String nbt) {
-        List<NewOffer> resultList = Lists.newArrayList();
+    public Collection<Offer> getOffers(OfferType type, Pair<String, Integer> itemPair, long minMaxPrice, @Nullable String nbt) {
+        List<Offer> resultList = Lists.newArrayList();
         if(type.equals(OfferType.BUY) && buyOffers.containsKey(itemPair)) {
-            for(NewOffer offer: buyOffers.get(itemPair))
+            for(Offer offer: buyOffers.get(itemPair))
                 if(offer.getPrice() >= minMaxPrice && (nbt == null || nbt.equals(offer.getNbt())))
                     resultList.add(offer.copy());
         } else if(type.equals(OfferType.SELL) && sellOffers.containsKey(itemPair)) {
-            for(NewOffer offer: sellOffers.get(itemPair))
+            for(Offer offer: sellOffers.get(itemPair))
                 if(offer.getPrice() <= minMaxPrice && (nbt == null || nbt.equals(offer.getNbt())))
                     resultList.add(offer.copy());
         }
-        resultList.sort(Comparator.comparing(NewOffer::getTimestamp));
+        resultList.sort(Comparator.comparing(Offer::getTimestamp));
         return Collections.unmodifiableList(resultList);
     }
 
     @Override
-    public Collection<NewOffer> getOffers(OfferType type, UUID owner) {
-        List<NewOffer> resultList = Lists.newArrayList();
-        for(NewOffer offer: offers.values().stream().filter(o -> o.getType().equals(type)).collect(Collectors.toList()))
-            if(offer.getOwner().equals(owner))
+    public Collection<Offer> getOffers(OfferType type, UUID owner) {
+        List<Offer> resultList = Lists.newArrayList();
+        for(Offer offer: offers.values().stream().filter(o -> o.getType().equals(type)).collect(Collectors.toList()))
+            if(Objects.equals(offer.getOwner(), owner))
                 resultList.add(offer.copy());
         return Collections.unmodifiableList(resultList);
     }
 
     @Override
-    public Collection<NewOffer> getOffers(OfferType type) {
+    public Collection<Offer> getOffers(OfferType type) {
         return Collections.unmodifiableCollection(offers.values().stream().filter(o -> o.getType().equals(type)).collect(Collectors.toList()));
     }
 
     @Override
-    public NewOffer getOffer(long offerId) {
+    public Offer getOffer(long offerId) {
         return offers.get(offerId);
     }
 
@@ -141,7 +136,7 @@ public class JsonDatabase implements IDatabaseHandler {
 
     @Override
     public void removeOfferStatusComplete(UUID player, long offerId) {
-        if(completeOfferStatusMessages.get(player).removeIf(messageObj -> messageObj.getOfferId() == offerId))
+        if(completeOfferStatusMessages.getOrDefault(player, Collections.emptyList()).removeIf(messageObj -> messageObj.getOfferId() == offerId))
             markChanged();
     }
 
@@ -166,9 +161,9 @@ public class JsonDatabase implements IDatabaseHandler {
     }
 
     @Override
-    public long addOffer(OfferType type, String item, int meta, int amount, long price, UUID owner, @Nullable String nbt) {
+    public long addOffer(OfferType type, String item, int meta, @Nullable Integer amount, long price, @Nullable UUID owner, @Nullable String nbt) {
         long id = getNewIdentifier();
-        NewOffer offer = new NewOffer(id, type.toString().toLowerCase(), item, meta, amount, price, owner, nbt);
+        Offer offer = new Offer(id, type, item, meta, amount, price, owner, nbt);
         offers.put(id, offer);
         if(offer.isBuyOffer()) {
             buyOffers.putIfAbsent(offer.getItemPair(), Lists.newArrayList());
@@ -182,8 +177,8 @@ public class JsonDatabase implements IDatabaseHandler {
     }
 
     @Override
-    public NewOffer removeOffer(long offerId) {
-        NewOffer offer = offers.remove(offerId);
+    public Offer removeOffer(long offerId) {
+        Offer offer = offers.remove(offerId);
         if(offer != null) {
             if(offer.isBuyOffer())
                 for (Pair<String, Integer> key: buyOffers.keySet())
@@ -206,7 +201,7 @@ public class JsonDatabase implements IDatabaseHandler {
 
                 JsonArray offers = db.getAsJsonArray("offers");
                 for(JsonElement e: offers) {
-                    NewOffer offer = new NewOffer(e.getAsJsonObject());
+                    Offer offer = new Offer(e.getAsJsonObject());
                     this.offers.put(offer.getIdentifier(), offer);
                     if(offer.isBuyOffer()) {
                         this.buyOffers.putIfAbsent(offer.getItemPair(), Lists.newArrayList());
@@ -260,7 +255,7 @@ public class JsonDatabase implements IDatabaseHandler {
         JsonObject db = new JsonObject();
 
         JsonArray offers = new JsonArray();
-        for(NewOffer offer: this.offers.values())
+        for(Offer offer: this.offers.values())
             offers.add(offer.toJsonObject());
         db.add("offers", offers);
 
@@ -326,6 +321,7 @@ public class JsonDatabase implements IDatabaseHandler {
         }
     }
 
+    @Override
     public void onServerStop() {
         save();
     }

@@ -14,7 +14,7 @@ import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import the_fireplace.grandeconomy.api.GrandEconomyApi;
 import the_fireplace.grandexchange.GrandExchange;
 import the_fireplace.grandexchange.market.ExchangeManager;
-import the_fireplace.grandexchange.market.NewOffer;
+import the_fireplace.grandexchange.market.Offer;
 import the_fireplace.grandexchange.market.OfferStatusMessager;
 import the_fireplace.grandexchange.market.OfferType;
 import the_fireplace.grandexchange.util.SerializationUtils;
@@ -26,6 +26,7 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
@@ -93,27 +94,30 @@ public class CommandSell extends CommandBase {
                 long offerId = parseLong(args[0]);
                 Integer amount = args.length == 2 ? parseInt(args[1]) : null;
 
-                NewOffer offer = ExchangeManager.getOffer(offerId);
+                Offer offer = ExchangeManager.getOffer(offerId);
                 if(offer != null) {
                     if(offer.isSellOffer()) {
                         sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.wrong_offer_type"));
                         return;
                     }
-                    if(amount == null || amount > offer.getAmount())
+                    if(offer.getAmount() != null && (amount == null || amount > offer.getAmount()))
                         amount = offer.getAmount();
+                    else if(amount == null)
+                        amount = 1;
                     if(!hasEnoughItems((EntityPlayerMP) sender, new ResourceLocation(offer.getItemResourceName()), offer.getItemMeta(), amount, offer.getNbt()))
                         throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.sell.not_enough_items"));
                     removeItems((EntityPlayerMP) sender, new ResourceLocation(offer.getItemResourceName()), offer.getItemMeta(), amount, offer.getNbt());
-                    if(amount == offer.getAmount()) {
+                    if(Objects.equals(amount, offer.getAmount())) {
                         ExchangeManager.removeOffer(offerId);
                         OfferStatusMessager.updateStatusComplete(offer);
-                    } else {
+                    } else if(offer.getAmount() != null) {
                         ExchangeManager.updateCount(offerId, offer.getAmount() - amount);
                         OfferStatusMessager.updateStatusPartial(offer.getOwner(), offerId);
                     }
 
                     GrandEconomyApi.addToBalance(((EntityPlayerMP) sender).getUniqueID(), amount * offer.getPrice(), true);
-                    ExchangeManager.addPayouts(offer.getOwner(), offer.getItemResourceName(), offer.getItemMeta(), amount, offer.getNbt());
+                    if(offer.getOwner() != null)
+                        ExchangeManager.addPayouts(offer.getOwner(), offer.getItemResourceName(), offer.getItemMeta(), amount, offer.getNbt());
                     sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.offer_fulfilled_balance", GrandEconomyApi.toString(GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID(), true))));
                 } else
                     sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_offer_number"));

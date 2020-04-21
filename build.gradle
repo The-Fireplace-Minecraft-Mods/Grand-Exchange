@@ -40,6 +40,17 @@ minecraft {
 	clientRunArgs += "--uuid=0b1ec5ad-cb2a-43b7-995d-889320eb2e5b --username=The_Fireplace"
 }
 
+dependencies {
+    provided 'org.spongepowered:spongeapi:7.1.0'
+}
+
+repositories {
+    jcenter()
+    mavenCentral()
+    // Sponge
+    maven { url 'https://repo.spongepowered.org/maven' }
+}
+
 processResources
 {
     inputs.property "version", project.version

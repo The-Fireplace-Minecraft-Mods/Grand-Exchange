@@ -31,8 +31,9 @@ public class OfferStatusMessager {
             getDatabase().updateOfferStatusPartial(player, offerId);
     }
 
-    public static void updateStatusComplete(NewOffer offer) {
-        updateStatusComplete(offer.getOwner(), offer.getIdentifier(), "ge."+offer.getType().toString().toLowerCase()+"offer.fulfilled"+(offer.getNbt() == null ? "" : "_nbt"), offer.getOriginalAmount(), OfferStatusMessager.getFormatted(offer.getItemResourceName(), offer.getItemMeta()), offer.getPrice(), offer.getNbt());
+    public static void updateStatusComplete(Offer offer) {
+        if(offer.getOwner() != null && offer.getOriginalAmount() != null && offer.getAmount() != null)
+            updateStatusComplete(offer.getOwner(), offer.getIdentifier(), "ge."+offer.getType().toString().toLowerCase()+"offer.fulfilled"+(offer.getNbt() == null ? "" : "_nbt"), offer.getOriginalAmount(), OfferStatusMessager.getFormatted(offer.getItemResourceName(), offer.getItemMeta()), offer.getPrice(), offer.getNbt());
     }
 
     public static void updateStatusComplete(UUID player, long offerId, String message, int amount, String name, long price, @Nullable String nbt) {
@@ -67,11 +68,13 @@ public class OfferStatusMessager {
     }
 
     private static void sendPartialStatusUpdate(EntityPlayerMP player, long offerId) {
-        NewOffer offer = ExchangeManager.getOffer(offerId);
-        if(offer.getNbt() == null)
-            player.sendMessage(TranslationUtil.getTranslation(player.getUniqueID(), "ge."+offer.getType().toString().toLowerCase()+"offer.fulfilled_partial", offer.getOriginalAmount()-offer.getAmount(), offer.getOriginalAmount(), OfferStatusMessager.getFormatted(offer.getItemResourceName(), offer.getItemMeta())).setStyle(TextStyles.BLUE));
-        else
-            player.sendMessage(TranslationUtil.getTranslation(player.getUniqueID(), "ge."+offer.getType().toString().toLowerCase()+"offer.fulfilled_partial_nbt", offer.getOriginalAmount()-offer.getAmount(), offer.getOriginalAmount(), OfferStatusMessager.getFormatted(offer.getItemResourceName(), offer.getItemMeta()), offer.getNbt()).setStyle(TextStyles.BLUE));
+        Offer offer = ExchangeManager.getOffer(offerId);
+        if(offer.getAmount() != null && offer.getOriginalAmount() != null && offer.getOwner() != null) {
+            if (offer.getNbt() == null)
+                player.sendMessage(TranslationUtil.getTranslation(player.getUniqueID(), "ge." + offer.getType().toString().toLowerCase() + "offer.fulfilled_partial", offer.getOriginalAmount() - offer.getAmount(), offer.getOriginalAmount(), OfferStatusMessager.getFormatted(offer.getItemResourceName(), offer.getItemMeta())).setStyle(TextStyles.BLUE));
+            else
+                player.sendMessage(TranslationUtil.getTranslation(player.getUniqueID(), "ge." + offer.getType().toString().toLowerCase() + "offer.fulfilled_partial_nbt", offer.getOriginalAmount() - offer.getAmount(), offer.getOriginalAmount(), OfferStatusMessager.getFormatted(offer.getItemResourceName(), offer.getItemMeta()), offer.getNbt()).setStyle(TextStyles.BLUE));
+        }
         getDatabase().removeOfferStatusPartial(player.getUniqueID(), offerId);
     }
 

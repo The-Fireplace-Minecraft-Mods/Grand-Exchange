@@ -17,7 +17,9 @@ import the_fireplace.grandexchange.compat.DummyTaxDistributor;
 import the_fireplace.grandexchange.compat.TaxDistributor;
 import the_fireplace.grandexchange.db.IDatabaseHandler;
 import the_fireplace.grandexchange.db.JsonDatabase;
-import the_fireplace.grandexchange.util.TransactionDatabase;
+import the_fireplace.grandexchange.permission.ForgePermissionHandler;
+import the_fireplace.grandexchange.permission.IPermissionHandler;
+import the_fireplace.grandexchange.permission.SpongePermissionHandler;
 
 @SuppressWarnings("WeakerAccess")
 @Mod(modid = GrandExchange.MODID, name = GrandExchange.MODNAME, version = GrandExchange.VERSION, acceptedMinecraftVersions = "[1.12,1.13)", acceptableRemoteVersions = "*", dependencies="required-after:grandeconomy@[1.3.1,);after:clans")
@@ -26,8 +28,11 @@ public final class GrandExchange {
     public static final String MODNAME = "Grand Exchange";
     public static final String VERSION = "${version}";
     public static final Logger LOGGER = LogManager.getLogger(MODID);
-    private static IDatabaseHandler db = null;
 
+    @Mod.Instance(MODID)
+    public static GrandExchange instance;
+
+    private static IDatabaseHandler db = null;
     public static IDatabaseHandler getDatabase() {
         if(db == null)//TODO Check config for database type once implemented
             db = new JsonDatabase();
@@ -35,9 +40,12 @@ public final class GrandExchange {
     }
 
     private static TaxDistributor taxDistributor;
-
     public static TaxDistributor getTaxDistributor() {
         return taxDistributor;
+    }
+    private static IPermissionHandler permissionHandler;
+    public static IPermissionHandler getPermissionHandler() {
+        return permissionHandler;
     }
 
     @Mod.EventHandler
@@ -46,6 +54,10 @@ public final class GrandExchange {
             taxDistributor = new ClansTaxDistributor();
         else
             taxDistributor = new DummyTaxDistributor();
+        if(Loader.isModLoaded("spongeapi") && !cfg.forgePermissionPrecedence)
+            permissionHandler = new SpongePermissionHandler();
+        else
+            permissionHandler = new ForgePermissionHandler();
     }
 
     @Mod.EventHandler
@@ -54,8 +66,6 @@ public final class GrandExchange {
         ICommandManager command = server.getCommandManager();
         ServerCommandManager manager = (ServerCommandManager) command;
         manager.registerCommand(new CommandGe());
-        //TODO Remove this old code when porting to 1.14+
-        TransactionDatabase.getInstance();
     }
 
     @Mod.EventHandler
@@ -71,5 +81,7 @@ public final class GrandExchange {
         public static int sellingTax = 3;
         @Config.Comment("Should the tax be contributed to the player's clans' balances if Clans is loaded?")
         public static boolean taxToClans = true;
+        @Config.Comment("Whether Forge takes precedence over Sponge when finding permissions. Set this to true if your permissions manager uses Forge.")
+        public static boolean forgePermissionPrecedence = false;
     }
 }

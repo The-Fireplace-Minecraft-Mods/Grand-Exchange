@@ -9,7 +9,7 @@ import net.minecraft.command.WrongUsageException;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
 import the_fireplace.grandexchange.market.ExchangeManager;
-import the_fireplace.grandexchange.market.NewOffer;
+import the_fireplace.grandexchange.market.Offer;
 import the_fireplace.grandexchange.market.OfferType;
 import the_fireplace.grandexchange.util.ChatPageUtil;
 import the_fireplace.grandexchange.util.Utils;
@@ -32,11 +32,10 @@ public class CommandSellOffers extends CommandBase {
         return TranslationUtil.getRawTranslationString(sender, "commands.ge.selloffers.usage");
     }
 
-    @SuppressWarnings("Duplicates")
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if(args.length <= 2) {
-            List<NewOffer> offers = Lists.newArrayList(ExchangeManager.getOffers(OfferType.SELL));
+            List<Offer> offers = Lists.newArrayList(ExchangeManager.getOffers(OfferType.SELL));
             int page = 1;
             if (args.length == 2)
                 try {
@@ -59,7 +58,7 @@ public class CommandSellOffers extends CommandBase {
 
             ArrayList<ITextComponent> messages = Lists.newArrayList();
 
-            for (NewOffer offer : offers)
+            for (Offer offer : offers)
                 messages.add(offer.getOfferChatMessage(sender));
 
             if(offers.isEmpty())

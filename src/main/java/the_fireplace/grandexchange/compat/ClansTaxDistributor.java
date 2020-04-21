@@ -12,10 +12,12 @@ public class ClansTaxDistributor implements TaxDistributor {
     @Override
     public void distributeTax(UUID player, long amount) {
         List<Clan> playerClans = ClanCache.getPlayerClans(player);
-        long dividedAmount = amount / playerClans.size();
-        long remainder = amount % playerClans.size();
-        for(Clan clan: playerClans)
-            ClansAPI.getPaymentHandler().addAmount(dividedAmount, clan.getId());
-        ClansAPI.getPaymentHandler().addAmount(remainder, PlayerData.getDefaultClan(player));
+        if(!playerClans.isEmpty()) {
+            long dividedAmount = amount / playerClans.size();
+            long remainder = amount % playerClans.size();
+            for (Clan clan : playerClans)
+                ClansAPI.getPaymentHandler().addAmount(dividedAmount, clan.getId());
+            ClansAPI.getPaymentHandler().addAmount(remainder, PlayerData.getDefaultClan(player));
+        }
     }
 }

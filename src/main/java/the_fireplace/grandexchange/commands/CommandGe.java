@@ -1,5 +1,6 @@
 package the_fireplace.grandexchange.commands;
 
+import com.google.common.collect.Maps;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -7,27 +8,61 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentString;
+import the_fireplace.grandexchange.permission.PermissionManager;
 import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class CommandGe extends CommandBase {
-    private static final CommandBase buy = new CommandBuy();
-    private static final CommandBase sell = new CommandSell();
-    private static final CommandBase sellthis = new CommandSellThis();
-    private static final CommandBase identify = new CommandIdentify();
-    private static final CommandBase collect = new CommandCollect();
-    private static final CommandBase buyoffers = new CommandBuyOffers();
-    private static final CommandBase selloffers = new CommandSellOffers();
-    private static final CommandBase myoffers = new CommandMyOffers();
-    private static final CommandBase canceloffer = new CommandCancelOffer();
+    public static final HashMap<String, CommandBase> commands = new HashMap<String, CommandBase>() {
+        {
+            this.put("buy", new CommandBuy());
+            this.put("sell", new CommandSell());
+            this.put("sellthis", new CommandSellThis());
+            this.put("identify", new CommandIdentify());
+            this.put("collect", new CommandCollect());
+            this.put("buyoffers", new CommandBuyOffers());
+            this.put("selloffers", new CommandSellOffers());
+            this.put("myoffers", new CommandMyOffers());
+            this.put("canceloffer", new CommandCancelOffer());
+            this.put("help", new CommandGeHelp());
+        }
+    };
+    public static final HashMap<String, CommandBase> opcommands = new HashMap<String, CommandBase>() {
+        {
+            this.put("opbuy", new CommandOpBuy());
+            this.put("opsell", new CommandOpSell());
+            this.put("opsellthis", new CommandOpSellThis());
+            this.put("opoffers", new CommandOpOffers());
+        }
+    };
+    public static final Map<String, String> aliases = Maps.newHashMap();
+
+    static {
+        aliases.put("b", "buy");
+        aliases.put("s", "sell");
+        aliases.put("st", "sellthis");
+        aliases.put("i", "identify");
+        aliases.put("c", "collect");
+        aliases.put("bo", "buyoffers");
+        aliases.put("so", "selloffers");
+        aliases.put("m", "myoffers");
+        aliases.put("mo", "myoffers");
+        aliases.put("co", "canceloffer");
+
+        aliases.put("ob", "opbuy");
+        aliases.put("os", "opsell");
+        aliases.put("ost", "opsellthis");
+        aliases.put("oo", "opoffers");
+    }
+
+    public static String processAlias(String subCommand) {
+        return aliases.getOrDefault(subCommand, subCommand);
+    }
 
     @Override
     public String getName() {
@@ -48,59 +83,18 @@ public class CommandGe extends CommandBase {
             args = Arrays.copyOfRange(args, 1, args.length);
         else
             args = new String[]{};
-        switch(tag){//TODO migrate these to maps like in Clans
-            case "buy":
-            case "b":
-                buy.execute(server, sender, args);
-                return;
-            case "sell":
-            case "s":
-                sell.execute(server, sender, args);
-                return;
-            case "sellthis":
-            case "st":
-                sellthis.execute(server, sender, args);
-                return;
-            case "identify":
-            case "i":
-                identify.execute(server, sender, args);
-                return;
-            case "collect":
-            case "c":
-                collect.execute(server, sender, args);
-                return;
-            case "buyoffers":
-            case "bo":
-                buyoffers.execute(server, sender, args);
-                return;
-            case "selloffers":
-            case "so":
-                selloffers.execute(server, sender, args);
-                return;
-            case "myoffers":
-            case "m":
-            case "mo":
-                myoffers.execute(server, sender, args);
-                return;
-            case "canceloffer":
-            case "co":
-                canceloffer.execute(server, sender, args);
-                return;
-            case "help":
-            case "h":
-                sender.sendMessage(new TextComponentString("/ge commands:\n" +
-                        "buy\n" +
-                        "sell\n" +
-                        "sellthis\n" +
-                        "identify\n" +
-                        "collect\n" +
-                        "buyoffers\n" +
-                        "selloffers\n" +
-                        "myoffers\n" +
-                        "canceloffer\n" +
-                        "help"));
-                return;
-        }
+        //Check permissions and run command
+        if(!PermissionManager.permissionManagementExists() || PermissionManager.hasPermission(sender, PermissionManager.GE_COMMAND_PREFIX+processAlias(tag))) {
+            String alias = processAlias(tag);
+            if(commands.containsKey(alias))
+                commands.get(alias).execute(server, sender, args);
+            else if(opcommands.containsKey(alias))
+                opcommands.get(alias).execute(server, sender, args);
+            else
+                throw new WrongUsageException(getUsage(sender));
+            return;
+        } else if(commands.containsKey(tag) || opcommands.containsKey(tag) || aliases.containsKey(tag))
+            throw new CommandException("commands.generic.permission");
         throw new WrongUsageException(getUsage(sender));
     }
 

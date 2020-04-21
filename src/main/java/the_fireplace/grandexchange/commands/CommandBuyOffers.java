@@ -9,7 +9,7 @@ import net.minecraft.command.WrongUsageException;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
 import the_fireplace.grandexchange.market.ExchangeManager;
-import the_fireplace.grandexchange.market.NewOffer;
+import the_fireplace.grandexchange.market.Offer;
 import the_fireplace.grandexchange.market.OfferType;
 import the_fireplace.grandexchange.util.ChatPageUtil;
 import the_fireplace.grandexchange.util.TextStyles;
@@ -37,7 +37,7 @@ public class CommandBuyOffers extends CommandBase {
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if(args.length <= 2) {
-            List<NewOffer> offers = Lists.newArrayList(ExchangeManager.getOffers(OfferType.BUY));
+            List<Offer> offers = Lists.newArrayList(ExchangeManager.getOffers(OfferType.BUY));
             int page = 1;
             if (args.length == 2)
                 try {
@@ -59,7 +59,7 @@ public class CommandBuyOffers extends CommandBase {
             }
 
             ArrayList<ITextComponent> messages = Lists.newArrayList();
-            for (NewOffer offer : offers)
+            for (Offer offer : offers)
                 messages.add(offer.getOfferChatMessage(sender));
             if(offers.isEmpty())
             	sender.sendMessage(TranslationUtil.getTranslation(sender, "commands.ge.common.no_results").setStyle(TextStyles.RED));
