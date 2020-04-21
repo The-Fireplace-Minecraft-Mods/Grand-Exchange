@@ -312,7 +312,7 @@ public final class ExchangeManager {
 
     private static ItemStack getStack(boolean isOfferBlock, ResourceLocation offerResource, int amount, int meta, @Nullable String nbt) {
         //noinspection ConstantConditions
-        ItemStack stack =  isOfferBlock ? new ItemStack(Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(offerResource)), amount, meta) : new ItemStack(ForgeRegistries.ITEMS.getValue(offerResource), amount, meta);
+        ItemStack stack =  isOfferBlock && !ForgeRegistries.ITEMS.containsKey(offerResource) ? new ItemStack(Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(offerResource)), amount, meta) : new ItemStack(ForgeRegistries.ITEMS.getValue(offerResource), amount, meta);
         if(nbt != null)
             stack.setTagCompound(SerializationUtils.getNbt(nbt));
         return stack;

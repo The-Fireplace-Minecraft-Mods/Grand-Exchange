@@ -42,7 +42,7 @@ public class CommandCollect extends CommandBase {
                 try {
                     for (ItemStack stack : ExchangeManager.getPayout(((EntityPlayer) sender).getUniqueID())) {
                         if (stack != null && Objects.requireNonNull(stack.getItem().getRegistryName()).toString().matches(filter)) {
-                            if (((EntityPlayer) sender).addItemStackToInventory(stack.copy()))//Use a copy because in addItemStackToInventory, the stack's count gets set to 0 and that could be a problem when removing payouts
+                            if (((EntityPlayer) sender).addItemStackToInventory(stack.copy()) || stack.isEmpty())//Use a copy because in addItemStackToInventory, the stack's count gets set to 0 and that could be a problem when removing payouts
                                 removeItems.add(stack);
                         }
                     }
