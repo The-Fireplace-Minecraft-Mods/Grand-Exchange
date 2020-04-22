@@ -3,5 +3,4 @@ Additions:
 Changes:
 
 Fixes:
-Fixed inability to collect beds
-Empty stacks left by errors will now be removed from payouts when the player uses collect
+Fixed money disappearing when someone makes a buy offer at a higher price than an existing sell offer

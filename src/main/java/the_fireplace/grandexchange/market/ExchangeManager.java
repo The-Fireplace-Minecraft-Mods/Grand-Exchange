@@ -265,7 +265,7 @@ public final class ExchangeManager {
                 ResourceLocation offerResource = new ResourceLocation(item);
                 if(amount == null || sellOffer.getAmount() == null || amount > sellOffer.getAmount()) {
                     if(sellOffer.getOwner() != null && sellOffer.getAmount() != null && sellOffer.getOriginalAmount() != null) {
-                        GrandEconomyApi.addToBalance(sellOffer.getOwner(), sellOffer.getAmount() * sellOffer.getPrice(), true);
+                        GrandEconomyApi.addToBalance(sellOffer.getOwner(), sellOffer.getAmount() * price, true);
                         if (nbt == null)
                             OfferStatusMessager.updateStatusComplete(sellOffer.getOwner(), sellOffer.getIdentifier(), "ge.selloffer.fulfilled", sellOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(item, meta), price, null);
                         else
@@ -282,7 +282,7 @@ public final class ExchangeManager {
                     if(sellOffer.getAmount() != null && sellOffer.getOwner() != null)
                         removeOfferIds.add(sellOffer.getIdentifier());
                 } else {
-                    GrandEconomyApi.addToBalance(sellOffer.getOwner(), amount*sellOffer.getPrice(), true);
+                    GrandEconomyApi.addToBalance(sellOffer.getOwner(), amount*price, true);
                     if(owner != null)
                         addPayouts(owner, offerResource, meta, amount, nbt, isOfferBlock, maxStackSize);
                     else
