@@ -4,3 +4,4 @@ Changes:
 
 Fixes:
 Fixed money disappearing when someone makes a buy offer at a higher price than an existing sell offer
+Fixed swapped "wrong usage" and "Not a player" error messages when cancelling offers

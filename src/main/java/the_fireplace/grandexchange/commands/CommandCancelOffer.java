@@ -97,7 +97,7 @@ public class CommandCancelOffer extends CommandBase {
                 if (buyOffers.isEmpty() && sellOffers.isEmpty())
                     sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.not_buying_or_selling"));
             } else
-                throw new WrongUsageException(getUsage(sender));
+                throw new CommandException(TranslationUtil.getRawTranslationString(sender, "commands.ge.common.not_player"));
         } else if(args != null && args.length == 1) {
             Offer offer = ExchangeManager.getOffer(parseLong(args[0]));
             if(!(sender instanceof EntityPlayerMP)
@@ -113,7 +113,7 @@ public class CommandCancelOffer extends CommandBase {
                     sender.sendMessage(TranslationUtil.getTranslation(sender, "commands.ge.common.invalid_offer_number"));
             }
         } else
-            throw new CommandException(TranslationUtil.getRawTranslationString(sender, "commands.ge.common.not_player"));
+            throw new WrongUsageException(getUsage(sender));
     }
 
     @Override
