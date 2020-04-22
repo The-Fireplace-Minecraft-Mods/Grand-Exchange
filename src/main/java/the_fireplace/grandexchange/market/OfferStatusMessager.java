@@ -63,7 +63,7 @@ public class OfferStatusMessager {
         if(message.getNbt() == null)
             player.sendMessage(TranslationUtil.getTranslation(player.getUniqueID(), message.getMessage(), message.getAmount(), message.getName(), message.getPrice()).setStyle(TextStyles.BLUE));
         else
-            player.sendMessage(TranslationUtil.getTranslation(player.getUniqueID(), message.getMessage(), message.getAmount(), message.getName(), message.getPrice(), message.getNbt()).setStyle(TextStyles.BLUE));
+            player.sendMessage(TranslationUtil.getTranslation(player.getUniqueID(), message.getMessage(), message.getAmount(), message.getName(), message.getNbt(), message.getPrice()).setStyle(TextStyles.BLUE));
         getDatabase().removeOfferStatusComplete(player.getUniqueID(), message.offerId);
     }
 
