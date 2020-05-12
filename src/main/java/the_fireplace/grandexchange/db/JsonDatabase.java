@@ -78,7 +78,7 @@ public class JsonDatabase implements IDatabaseHandler {
     }
 
     @Override
-    public Collection<Offer> getOffers(OfferType type, Pair<String, Integer> itemPair, long minMaxPrice, @Nullable String nbt) {
+    public Collection<Offer> getOffers(OfferType type, Pair<String, Integer> itemPair, double minMaxPrice, @Nullable String nbt) {
         List<Offer> resultList = Lists.newArrayList();
         if(type.equals(OfferType.BUY) && buyOffers.containsKey(itemPair)) {
             for(Offer offer: buyOffers.get(itemPair))
@@ -128,7 +128,7 @@ public class JsonDatabase implements IDatabaseHandler {
     }
 
     @Override
-    public void updateOfferStatusComplete(UUID player, long offerId, String message, int amount, String name, long price, @Nullable String nbt) {
+    public void updateOfferStatusComplete(UUID player, long offerId, String message, int amount, String name, double price, @Nullable String nbt) {
         completeOfferStatusMessages.putIfAbsent(player, Lists.newArrayList());
         completeOfferStatusMessages.get(player).add(new OfferStatusMessager.MessageObj(offerId, message, amount, name, price, nbt));
         markChanged();
@@ -161,7 +161,7 @@ public class JsonDatabase implements IDatabaseHandler {
     }
 
     @Override
-    public long addOffer(OfferType type, String item, int meta, @Nullable Integer amount, long price, @Nullable UUID owner, @Nullable String nbt) {
+    public long addOffer(OfferType type, String item, int meta, @Nullable Integer amount, double price, @Nullable UUID owner, @Nullable String nbt) {
         long id = getNewIdentifier();
         Offer offer = new Offer(id, type, item, meta, amount, price, owner, nbt);
         offers.put(id, offer);

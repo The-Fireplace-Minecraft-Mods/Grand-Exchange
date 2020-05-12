@@ -40,7 +40,7 @@ public class CommandOpSell extends CommandBase {
             if (args.length >= 2 && args.length <= 4) {
                 String resourceName = args[0];
                 int meta = parseInt(args[1]);
-                long price = parseLong(args.length == 3 ? args[2] : "0");
+                double price = parseDouble(args.length == 3 ? args[2] : "0");
                 String nbt = args.length == 4 ? args[3] : null;
                 if(args.length == 2 && resourceName.split(":").length < 3)
                     throw new WrongUsageException(getUsage(sender));
@@ -48,7 +48,7 @@ public class CommandOpSell extends CommandBase {
                 if(resourceName.split(":").length == 3) {
                     resourceName = resourceName.substring(0, resourceName.lastIndexOf(":"));
                     meta = parseInt(args[0].split(":")[2]);
-                    price = parseLong(args[1]);
+                    price = parseDouble(args[1]);
                     nbt = args.length == 3 ? args[2] : null;
                 }
                 ResourceLocation offerResource = new ResourceLocation(resourceName);

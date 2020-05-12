@@ -36,7 +36,7 @@ public class OfferStatusMessager {
             updateStatusComplete(offer.getOwner(), offer.getIdentifier(), "ge."+offer.getType().toString().toLowerCase()+"offer.fulfilled"+(offer.getNbt() == null ? "" : "_nbt"), offer.getOriginalAmount(), OfferStatusMessager.getFormatted(offer.getItemResourceName(), offer.getItemMeta()), offer.getPrice(), offer.getNbt());
     }
 
-    public static void updateStatusComplete(UUID player, long offerId, String message, int amount, String name, long price, @Nullable String nbt) {
+    public static void updateStatusComplete(UUID player, long offerId, String message, int amount, String name, double price, @Nullable String nbt) {
         getDatabase().removeOfferStatusPartial(player, offerId);
         EntityPlayerMP playerEntity = FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getPlayerByUUID(player);
         //noinspection ConstantConditions
@@ -86,15 +86,15 @@ public class OfferStatusMessager {
     }
 
     public static class MessageObj {
-        private String message;
-        private String name;
-        private int amount;
-        private long offerId;
-        private long price;
+        private final String message;
+        private final String name;
+        private final int amount;
+        private final long offerId;
+        private final double price;
         @Nullable
-        private String nbt;
+        private final String nbt;
 
-        public MessageObj(long offerId, String message, int amount, String name, long price, @Nullable String nbt) {
+        public MessageObj(long offerId, String message, int amount, String name, double price, @Nullable String nbt) {
             this.offerId = offerId;
             this.message = message;
             this.amount = amount;
@@ -108,7 +108,7 @@ public class OfferStatusMessager {
             name = obj.get("name").getAsString();
             amount = obj.get("amount").getAsInt();
             offerId = obj.get("offerId").getAsLong();
-            price = obj.get("price").getAsLong();
+            price = obj.get("price").getAsDouble();
             nbt = obj.has("nbt") ? obj.get("nbt").getAsString() : null;
         }
 
@@ -142,7 +142,7 @@ public class OfferStatusMessager {
             return offerId;
         }
 
-        public long getPrice() {
+        public double getPrice() {
             return price;
         }
 

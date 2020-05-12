@@ -46,7 +46,7 @@ public class CommandBuy extends CommandBase {
                 String resourceName = args[0];
                 int meta = parseInt(args[1]);
                 int amount = parseInt(args[2]);
-                long price = parseLong(args.length == 4 ? args[3] : "0");
+                double price = parseDouble(args.length == 4 ? args[3] : "0");
                 String nbt = args.length == 5 ? args[4] : null;
                 if(args.length == 3 && resourceName.split(":").length < 3)
                     throw new WrongUsageException(getUsage(sender));
@@ -55,7 +55,7 @@ public class CommandBuy extends CommandBase {
                     resourceName = resourceName.substring(0, resourceName.lastIndexOf(":"));
                     meta = parseInt(args[0].split(":")[2]);
                     amount = parseInt(args[1]);
-                    price = parseLong(args[2]);
+                    price = parseDouble(args[2]);
                     nbt = args.length == 4 ? args[3] : null;
                 }
 
@@ -78,9 +78,9 @@ public class CommandBuy extends CommandBase {
                 GrandEconomyApi.takeFromBalance(((EntityPlayerMP) sender).getUniqueID(), price*amount, true);
 
                 if(madePurchase)
-                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.buy.success_completed", GrandEconomyApi.toString(GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID(), true))));
+                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.buy.success_completed", GrandEconomyApi.getFormattedBalance(((EntityPlayerMP) sender).getUniqueID(), true)));
                 else
-                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.offer_made_balance", GrandEconomyApi.toString(GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID(), true))));
+                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.offer_made_balance", GrandEconomyApi.getFormattedBalance(((EntityPlayerMP) sender).getUniqueID(), true)));
                 return;
             } else if(args.length == 1 || args.length == 2) {
                 long offerId = parseLong(args[0]);
@@ -109,7 +109,7 @@ public class CommandBuy extends CommandBase {
                     if(offer.getOwner() != null)
                         GrandEconomyApi.addToBalance(offer.getOwner(), amount * offer.getPrice(), true);
                     ExchangeManager.addPayouts(((EntityPlayerMP) sender).getUniqueID(), offer.getItemResourceName(), offer.getItemMeta(), amount, offer.getNbt());
-                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.buy.success_completed", GrandEconomyApi.toString(GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID(), true))));
+                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.buy.success_completed", GrandEconomyApi.getFormattedBalance(((EntityPlayerMP) sender).getUniqueID(), true)));
                 } else
                     sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_offer_number"));
                 return;

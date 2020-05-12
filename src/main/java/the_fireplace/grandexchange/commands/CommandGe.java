@@ -1,13 +1,16 @@
 package the_fireplace.grandexchange.commands;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
+import org.apache.commons.lang3.ArrayUtils;
 import the_fireplace.grandexchange.permission.PermissionManager;
 import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
@@ -106,7 +109,10 @@ public class CommandGe extends CommandBase {
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos)
     {
         if(args.length == 1){
-            return getListOfStringsMatchingLastWord(args, "buy","sell","sellthis","identify","collect","buyoffers","selloffers","myoffers","canceloffer","help");
+            Collection<String> ret = Lists.newArrayList(commands.keySet());
+            if(!(sender instanceof EntityPlayerMP) || ArrayUtils.contains(server.getPlayerList().getOppedPlayerNames(), sender.getName()))
+                ret.addAll(opcommands.keySet());
+            return getListOfStringsMatchingLastWord(args, ret);
         }
         return Collections.emptyList();
     }

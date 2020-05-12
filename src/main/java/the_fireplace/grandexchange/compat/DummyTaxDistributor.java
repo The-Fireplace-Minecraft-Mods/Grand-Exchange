@@ -4,7 +4,7 @@ import java.util.UUID;
 
 public class DummyTaxDistributor implements TaxDistributor {
     @Override
-    public void distributeTax(UUID player, long amount) {
+    public void distributeTax(UUID player, double amount) {
 
     }
 }

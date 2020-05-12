@@ -49,7 +49,7 @@ public class CommandSellThis extends CommandBase {
                 int amount = parseInt(args[0]);
                 if(amount <= 0)
                     throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_amount"));
-                long price = parseLong(args[1]);
+                double price = parseDouble(args[1]);
                 if (price < 0)
                     throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_price"));
                 int itemCount = 0;
@@ -64,7 +64,7 @@ public class CommandSellThis extends CommandBase {
                 }
                 if(itemCount < amount)
                     throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.sell.not_enough_items"));
-                long tax = Utils.calculateTax(amount * price);
+                double tax = Utils.calculateTax(amount * price);
                 if(!GrandEconomyApi.takeFromBalance(((EntityPlayerMP) sender).getUniqueID(), tax, true)) {
                     sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.not_enough_tax", GrandEconomyApi.getCurrencyName(2), tax).setStyle(TextStyles.RED));
                     return;
@@ -90,7 +90,7 @@ public class CommandSellThis extends CommandBase {
                 boolean madePurchase = ExchangeManager.makeOffer(OfferType.SELL, selling.getItem().getRegistryName().toString(), selling.getMetadata(), amount, price, ((EntityPlayerMP) sender).getUniqueID(), selling.hasTagCompound() ? Objects.requireNonNull(selling.getTagCompound()).toString() : null);
 
                 if(madePurchase)
-                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.offer_fulfilled_balance", GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID(), true)));
+                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.offer_fulfilled_balance", GrandEconomyApi.getFormattedBalance(((EntityPlayerMP) sender).getUniqueID(), true)));
                 else
                     sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.offer_made"));
                 return;

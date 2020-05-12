@@ -16,7 +16,7 @@ public interface IDatabaseHandler {
      * Add an offer to the database
      * @return the offer id
      */
-    long addOffer(OfferType type, String item, int meta, @Nullable Integer amount, long price, @Nullable UUID owner, @Nullable String nbt);
+    long addOffer(OfferType type, String item, int meta, @Nullable Integer amount, double price, @Nullable UUID owner, @Nullable String nbt);
 
     /**
      * Remove the offer with the matching ID from the database.
@@ -46,7 +46,7 @@ public interface IDatabaseHandler {
      * @return
      * A collection of offers matching the criteria
      */
-    Collection<Offer> getOffers(OfferType type, Pair<String, Integer> itemPair, long minMaxPrice, @Nullable String nbt);
+    Collection<Offer> getOffers(OfferType type, Pair<String, Integer> itemPair, double minMaxPrice, @Nullable String nbt);
 
     /**
      * Gets all offers of a type with the specified owner
@@ -57,7 +57,7 @@ public interface IDatabaseHandler {
 
     void updateOfferStatusPartial(UUID player, long offerId);
     void removeOfferStatusPartial(UUID player, long offerId);
-    void updateOfferStatusComplete(UUID player, long offerId, String message, int amount, String name, long price, @Nullable String nbt);
+    void updateOfferStatusComplete(UUID player, long offerId, String message, int amount, String name, double price, @Nullable String nbt);
     void removeOfferStatusComplete(UUID player, long offerId);
     boolean hasPartialOfferUpdates(UUID player);
     boolean hasCompleteOfferUpdates(UUID player);

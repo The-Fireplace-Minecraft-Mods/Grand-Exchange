@@ -53,10 +53,10 @@ public class Utils {
         return names;
     }
 
-    public static long calculateTax(long amount) {
+    public static double calculateTax(double amount) {
         if(GrandExchange.cfg.sellingTax <= 0)
             return Math.abs(GrandExchange.cfg.sellingTax);
         else
-            return amount * GrandExchange.cfg.sellingTax / 100;
+            return amount * GrandExchange.cfg.sellingTax / 100f;
     }
 }

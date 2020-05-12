@@ -40,7 +40,7 @@ public final class ExchangeManager {
      * @return
      * True if the offer was fulfilled, false otherwise.
      */
-    public static boolean makeOffer(OfferType type, String item, int meta, int amount, long price, UUID owner, @Nullable String nbt) {
+    public static boolean makeOffer(OfferType type, String item, int meta, int amount, double price, UUID owner, @Nullable String nbt) {
         int amountUnfulfilled = tryFulfillOffer(type, item, meta, amount, price, owner, nbt);
         if(amountUnfulfilled > 0) {
             long newOfferId = getDatabase().addOffer(type, item, meta, amountUnfulfilled, price, owner, nbt);
@@ -53,16 +53,16 @@ public final class ExchangeManager {
             GrandExchange.LOGGER.error("Amount unfulfilled was {}! This is not good.", amountUnfulfilled);
         return amountUnfulfilled <= 0;
     }
-    public static boolean makeOffer(OfferType type, ResourceLocation item, int meta, int amount, long price, UUID owner, @Nullable String nbt) {
+    public static boolean makeOffer(OfferType type, ResourceLocation item, int meta, int amount, double price, UUID owner, @Nullable String nbt) {
         return makeOffer(type, item.toString(), meta, amount, price, owner, nbt);
     }
-    public static boolean makeOffer(OfferType type, ResourceLocation item, int meta, int amount, long price, UUID owner, @Nonnull NBTTagCompound nbt) {
+    public static boolean makeOffer(OfferType type, ResourceLocation item, int meta, int amount, double price, UUID owner, @Nonnull NBTTagCompound nbt) {
         return makeOffer(type, item.toString(), meta, amount, price, owner, nbt.toString());
     }
-    public static boolean makeOffer(OfferType type, String item, int meta, int amount, long price, UUID owner) {
+    public static boolean makeOffer(OfferType type, String item, int meta, int amount, double price, UUID owner) {
         return makeOffer(type, item, meta, amount, price, owner, null);
     }
-    public static boolean makeOffer(OfferType type, ItemStack stack, int amount, long price, UUID owner) {
+    public static boolean makeOffer(OfferType type, ItemStack stack, int amount, double price, UUID owner) {
         return makeOffer(type, Objects.requireNonNull(stack.getItem().getRegistryName()).toString(), stack.getMetadata(), amount, price, owner, stack.hasTagCompound() ? Objects.requireNonNull(stack.getTagCompound()).toString() : null);
     }
     /**
@@ -78,20 +78,20 @@ public final class ExchangeManager {
      * @param nbt
      * The String form of the item's NBT
      */
-    public static void makeOpOffer(OfferType type, String item, int meta, long price, @Nullable String nbt) {
+    public static void makeOpOffer(OfferType type, String item, int meta, double price, @Nullable String nbt) {
         tryFulfillOffer(type, item, meta, null, price, null, nbt);
         getDatabase().addOffer(type, item, meta, null, price, null, nbt);
     }
-    public static void makeOpOffer(OfferType type, ResourceLocation item, int meta, long price, @Nullable String nbt) {
+    public static void makeOpOffer(OfferType type, ResourceLocation item, int meta, double price, @Nullable String nbt) {
         makeOpOffer(type, item.toString(), meta, price, nbt);
     }
-    public static void makeOpOffer(OfferType type, ResourceLocation item, int meta, long price, @Nonnull NBTTagCompound nbt) {
+    public static void makeOpOffer(OfferType type, ResourceLocation item, int meta, double price, @Nonnull NBTTagCompound nbt) {
         makeOpOffer(type, item.toString(), meta, price, nbt.toString());
     }
-    public static void makeOpOffer(OfferType type, String item, int meta, long price) {
+    public static void makeOpOffer(OfferType type, String item, int meta, double price) {
         makeOpOffer(type, item, meta, price, null);
     }
-    public static void makeOpOffer(OfferType type, ItemStack stack, long price) {
+    public static void makeOpOffer(OfferType type, ItemStack stack, double price) {
         makeOpOffer(type, Objects.requireNonNull(stack.getItem().getRegistryName()).toString(), stack.getMetadata(), price, stack.hasTagCompound() ? Objects.requireNonNull(stack.getTagCompound()).toString() : null);
     }
 
@@ -139,7 +139,7 @@ public final class ExchangeManager {
      * @return
      * A collection of offers matching the criteria
      */
-    public static Collection<Offer> getOffers(OfferType type, Pair<String, Integer> itemPair, long minMaxPrice, @Nullable String nbt) {
+    public static Collection<Offer> getOffers(OfferType type, Pair<String, Integer> itemPair, double minMaxPrice, @Nullable String nbt) {
         return getDatabase().getOffers(type, itemPair, minMaxPrice, nbt);
     }
     public static Collection<Offer> getOffers(OfferType type, UUID owner) {
@@ -190,7 +190,7 @@ public final class ExchangeManager {
     /**
      * Attempts to fulfill an offer meeting the criteria and returns the remaining amount after fulfilling as much as possible
      */
-    private static int tryFulfillOffer(OfferType type, String item, int meta, @Nullable Integer amount, long price, @Nullable UUID owner, @Nullable String nbt) {
+    private static int tryFulfillOffer(OfferType type, String item, int meta, @Nullable Integer amount, double price, @Nullable UUID owner, @Nullable String nbt) {
         ResourceLocation offerResource = new ResourceLocation(item);
         boolean isOfferBlock = !ForgeRegistries.ITEMS.containsKey(offerResource);
         @SuppressWarnings("ConstantConditions")
@@ -204,7 +204,7 @@ public final class ExchangeManager {
         return amount != null ? amount : Integer.MAX_VALUE;
     }
 
-    private static int tryFulfillSellOffer(String item, int meta, @Nullable Integer amount, long price, @Nullable UUID owner, @Nullable String nbt, boolean isOfferBlock, int maxStackSize) {
+    private static int tryFulfillSellOffer(String item, int meta, @Nullable Integer amount, double price, @Nullable UUID owner, @Nullable String nbt, boolean isOfferBlock, int maxStackSize) {
         Collection<Offer> possibleBuyOffers = getOffers(OfferType.BUY, Pair.of(item, meta), price, nbt);
         if(!possibleBuyOffers.isEmpty()) {
             List<Long> removeOfferIds = Lists.newArrayList();
@@ -257,7 +257,7 @@ public final class ExchangeManager {
             OfferStatusMessager.updateStatusComplete(buyOffer.getOwner(), buyOffer.getIdentifier(), "ge.buyoffer.fulfilled_nbt", buyOffer.getOriginalAmount(), OfferStatusMessager.getFormatted(buyOffer.getItemResourceName(), buyOffer.getItemMeta()), buyOffer.getPrice(), buyOffer.getNbt());
     }
 
-    private static int tryFulfillBuyOffer(String item, int meta, @Nullable Integer amount, long price, @Nullable UUID owner, @Nullable String nbt, boolean isOfferBlock, int maxStackSize) {
+    private static int tryFulfillBuyOffer(String item, int meta, @Nullable Integer amount, double price, @Nullable UUID owner, @Nullable String nbt, boolean isOfferBlock, int maxStackSize) {
         Collection<Offer> possibleSellOffers = getOffers(OfferType.SELL, Pair.of(item, meta), price, nbt);
         if(!possibleSellOffers.isEmpty()) {
             List<Long> removeOfferIds = Lists.newArrayList();

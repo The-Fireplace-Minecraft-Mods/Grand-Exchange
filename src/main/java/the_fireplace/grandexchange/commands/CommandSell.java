@@ -49,7 +49,7 @@ public class CommandSell extends CommandBase {
                 String resourceName = args[0];
                 int meta = parseInt(args[1]);
                 int amount = parseInt(args[2]);
-                long price = parseLong(args.length == 4 ? args[3] : "0");
+                double price = parseDouble(args.length == 4 ? args[3] : "0");
                 String nbt = args.length == 5 ? args[4] : null;
                 if(args.length == 3 && resourceName.split(":").length < 3)
                     throw new WrongUsageException(getUsage(sender));
@@ -58,7 +58,7 @@ public class CommandSell extends CommandBase {
                     resourceName = resourceName.substring(0, resourceName.lastIndexOf(":"));
                     meta = parseInt(args[0].split(":")[2]);
                     amount = parseInt(args[1]);
-                    price = parseLong(args[2]);
+                    price = parseDouble(args[2]);
                     nbt = args.length == 4 ? args[3] : null;
                 }
                 ResourceLocation offerResource = new ResourceLocation(resourceName);
@@ -75,7 +75,7 @@ public class CommandSell extends CommandBase {
                     throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_nbt"));
                 if(!hasEnoughItems((EntityPlayerMP) sender, offerResource, meta, amount, nbt))
                     throw new CommandException(TranslationUtil.getRawTranslationString(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.sell.not_enough_items"));
-                long tax = Utils.calculateTax(amount * price);
+                double tax = Utils.calculateTax(amount * price);
                 if(!GrandEconomyApi.takeFromBalance(((EntityPlayerMP) sender).getUniqueID(), tax, true)) {
                     sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.not_enough_tax", GrandEconomyApi.getCurrencyName(2), tax).setStyle(TextStyles.RED));
                     return;
@@ -86,7 +86,7 @@ public class CommandSell extends CommandBase {
                 boolean madePurchase = ExchangeManager.makeOffer(OfferType.SELL, offerResource.toString(), meta, amount, price, ((EntityPlayerMP) sender).getUniqueID(), nbt);
 
                 if(madePurchase)
-                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.offer_fulfilled_balance", GrandEconomyApi.toString(GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID(), true))));
+                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.offer_fulfilled_balance", GrandEconomyApi.getFormattedBalance(((EntityPlayerMP) sender).getUniqueID(), true)));
                 else
                     sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.offer_made"));
                 return;
@@ -118,7 +118,7 @@ public class CommandSell extends CommandBase {
                     GrandEconomyApi.addToBalance(((EntityPlayerMP) sender).getUniqueID(), amount * offer.getPrice(), true);
                     if(offer.getOwner() != null)
                         ExchangeManager.addPayouts(offer.getOwner(), offer.getItemResourceName(), offer.getItemMeta(), amount, offer.getNbt());
-                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.offer_fulfilled_balance", GrandEconomyApi.toString(GrandEconomyApi.getBalance(((EntityPlayerMP) sender).getUniqueID(), true))));
+                    sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.offer_fulfilled_balance", GrandEconomyApi.getFormattedBalance(((EntityPlayerMP) sender).getUniqueID(), true)));
                 } else
                     sender.sendMessage(TranslationUtil.getTranslation(((EntityPlayerMP) sender).getUniqueID(), "commands.ge.common.invalid_offer_number"));
                 return;

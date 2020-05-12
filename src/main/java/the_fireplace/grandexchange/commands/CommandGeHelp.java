@@ -60,6 +60,6 @@ public class CommandGeHelp extends CommandBase {
             comp.add(String.valueOf(i));
         comp.addAll(CommandGe.aliases.keySet());
         comp.addAll(CommandGe.commands.keySet());
-        return comp;
+        return getListOfStringsMatchingLastWord(args, comp);
     }
 }
