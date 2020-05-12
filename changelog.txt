@@ -1,6 +1,7 @@
 Additions:
 Added support for decimal prices
 Added ability to have flat and percentage tax, and use decimals for those too
+Added command aliases: gex, exchange, grandexchange
 
 Changes:
 Updated to support Grand Economy 2.0.0+

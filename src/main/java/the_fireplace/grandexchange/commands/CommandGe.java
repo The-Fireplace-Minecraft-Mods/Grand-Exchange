@@ -73,6 +73,11 @@ public class CommandGe extends CommandBase {
     }
 
     @Override
+    public List<String> getAliases() {
+        return Lists.newArrayList("grandexchange", "gex", "exchange");
+    }
+
+    @Override
     public String getUsage(ICommandSender sender) {
         return TranslationUtil.getRawTranslationString(sender, "commands.ge.usage");
     }
