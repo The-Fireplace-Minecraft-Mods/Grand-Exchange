@@ -35,6 +35,7 @@ minecraft {
     version = "1.12.2-14.23.5.2847"
     runDir = "run"
     replace '${version}', project.version
+    replace '${fingerprint}', project.findProperty('signSha1')
     mappings = "stable_39"
 	
 	clientRunArgs += "--uuid=0b1ec5ad-cb2a-43b7-995d-889320eb2e5b --username=The_Fireplace"
@@ -71,6 +72,27 @@ task deobfJar(type: Jar) {
     from sourceSets.main.output
     classifier = 'deobf'
 }
+
+task signJar(type: SignJar, dependsOn: reobfJar) {
+
+    // Skips if the keyStore property is missing.
+    onlyIf {
+        project.hasProperty('keyStore')
+    }
+
+    // findProperty allows us to reference the property without it existing.
+    // Using project.propName would cause the script to fail validation if
+    // the property did not exist.
+    keyStore = project.findProperty('keyStore')
+    alias = project.findProperty('keyStoreAlias')
+    storePass = project.findProperty('keyStorePass')
+    keyPass = project.findProperty('keyStoreKeyPass')
+
+    inputFile = jar.archivePath
+    outputFile = jar.archivePath
+}
+
+build.dependsOn signJar
 
 artifacts {
     archives jar
