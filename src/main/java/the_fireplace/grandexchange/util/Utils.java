@@ -54,9 +54,6 @@ public class Utils {
     }
 
     public static double calculateTax(double amount) {
-        if(GrandExchange.cfg.sellingTax <= 0)
-            return Math.abs(GrandExchange.cfg.sellingTax);
-        else
-            return amount * GrandExchange.cfg.sellingTax / 100f;
+        return GrandExchange.cfg.flatTax + amount * GrandExchange.cfg.percentTax / 100d;
     }
 }

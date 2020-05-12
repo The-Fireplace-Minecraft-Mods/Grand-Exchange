@@ -1,8 +1,8 @@
 Additions:
+Added support for decimal prices
+Added ability to have flat and percentage tax, and use decimals for those too
 
 Changes:
+Updated to support Grand Economy 2.0.0+
 
 Fixes:
-Fixed money disappearing when someone makes a buy offer at a higher price than an existing sell offer
-Fixed swapped "wrong usage" and "Not a player" error messages when cancelling offers
-Fixed swapped NBT and price on offer complete notifications that have both

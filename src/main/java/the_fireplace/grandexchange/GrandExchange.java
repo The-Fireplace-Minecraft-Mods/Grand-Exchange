@@ -77,8 +77,12 @@ public final class GrandExchange {
     public static class cfg {
         @Config.Comment("Server locale - the client's locale takes precedence if Grand Exchange is installed there.")
         public static String locale = "en_us";
-        @Config.Comment("Tax for selling items on the Grand Exchange. This tax is non-refundable and taken up front, to prevent players from using the Grand Exchange as free storage. Negative numbers indicate a flat tax, positive numbers ingicate a percent of the total price.")
-        public static double sellingTax = 3;
+        @Config.Comment("Flat tax for selling items on the Grand Exchange. This tax is non-refundable and taken up front, to prevent players from using the Grand Exchange as free storage.")
+        @Config.RangeDouble(min = 0)
+        public static double flatTax = 0;
+        @Config.Comment("Percentage tax for selling items on the Grand Exchange. This tax is non-refundable and taken up front, to prevent players from using the Grand Exchange as free storage.")
+        @Config.RangeDouble(min = 0, max = 100)
+        public static double percentTax = 3;
         @Config.Comment("Should the tax be contributed to the player's clans' balances if Clans is loaded?")
         public static boolean taxToClans = true;
         @Config.Comment("Whether Forge takes precedence over Sponge when finding permissions. Set this to true if your permissions manager uses Forge.")
