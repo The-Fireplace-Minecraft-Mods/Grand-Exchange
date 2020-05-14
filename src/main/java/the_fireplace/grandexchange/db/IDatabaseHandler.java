@@ -64,5 +64,5 @@ public interface IDatabaseHandler {
     List<Long> getPartialOfferUpdates(UUID player);
     List<OfferStatusMessager.MessageObj> getCompleteOfferUpdates(UUID player);
 
-    void onServerStop();
+    void manualSave();
 }

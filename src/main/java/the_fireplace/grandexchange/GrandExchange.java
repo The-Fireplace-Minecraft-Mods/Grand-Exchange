@@ -70,7 +70,7 @@ public final class GrandExchange {
 
     @Mod.EventHandler
     public void onServerStop(FMLServerStoppingEvent event) {
-        getDatabase().onServerStop();
+        getDatabase().manualSave();
     }
 
     @Config(modid=MODID)

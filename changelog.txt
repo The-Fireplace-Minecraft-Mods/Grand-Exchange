@@ -5,6 +5,7 @@ Added command aliases: gex, exchange, grandexchange
 
 Changes:
 Updated to support Grand Economy 2.0.0+
+The database will now save every 5 minutes
 
 Fixes:
 Fixed NPE when selling to admin shop

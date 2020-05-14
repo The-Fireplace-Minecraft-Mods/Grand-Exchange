@@ -23,18 +23,18 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("WeakerAccess")
 public class JsonDatabase implements IDatabaseHandler {
-    private File exchangeDataFile;
+    private final File exchangeDataFile;
     private boolean isChanged;
 
     private long nextIdentifier = 0;
 
-    private HashMap<Long, Offer> offers = Maps.newHashMap();
-    private HashMap<Pair<String, Integer>, List<Offer>> buyOffers = Maps.newHashMap();
-    private HashMap<Pair<String, Integer>, List<Offer>> sellOffers = Maps.newHashMap();
-    private HashMap<UUID, List<ItemStack>> payouts = Maps.newHashMap();
+    private final HashMap<Long, Offer> offers = Maps.newHashMap();
+    private final HashMap<Pair<String, Integer>, List<Offer>> buyOffers = Maps.newHashMap();
+    private final HashMap<Pair<String, Integer>, List<Offer>> sellOffers = Maps.newHashMap();
+    private final HashMap<UUID, List<ItemStack>> payouts = Maps.newHashMap();
 
-    private Map<UUID, List<Long>> partialOfferStatusMessages = Maps.newHashMap();
-    private Map<UUID, List<OfferStatusMessager.MessageObj>> completeOfferStatusMessages = Maps.newHashMap();
+    private final Map<UUID, List<Long>> partialOfferStatusMessages = Maps.newHashMap();
+    private final Map<UUID, List<OfferStatusMessager.MessageObj>> completeOfferStatusMessages = Maps.newHashMap();
 
     public JsonDatabase() {
         exchangeDataFile = new File(FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(0).getSaveHandler().getWorldDirectory(), "exchange_database.json");
@@ -322,7 +322,7 @@ public class JsonDatabase implements IDatabaseHandler {
     }
 
     @Override
-    public void onServerStop() {
+    public void manualSave() {
         save();
     }
 }
