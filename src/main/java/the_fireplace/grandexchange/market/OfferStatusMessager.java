@@ -7,6 +7,7 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
+import the_fireplace.grandeconomy.api.GrandEconomyApi;
 import the_fireplace.grandexchange.util.TextStyles;
 import the_fireplace.grandexchange.util.translation.TranslationUtil;
 
@@ -61,9 +62,9 @@ public class OfferStatusMessager {
 
     private static void sendCompleteStatusUpdate(EntityPlayerMP player, MessageObj message) {
         if(message.getNbt() == null)
-            player.sendMessage(TranslationUtil.getTranslation(player.getUniqueID(), message.getMessage(), message.getAmount(), message.getName(), message.getPrice()).setStyle(TextStyles.BLUE));
+            player.sendMessage(TranslationUtil.getTranslation(player.getUniqueID(), message.getMessage(), message.getAmount(), message.getName(), GrandEconomyApi.getFormattedCurrency(message.getPrice())).setStyle(TextStyles.BLUE));
         else
-            player.sendMessage(TranslationUtil.getTranslation(player.getUniqueID(), message.getMessage(), message.getAmount(), message.getName(), message.getNbt(), message.getPrice()).setStyle(TextStyles.BLUE));
+            player.sendMessage(TranslationUtil.getTranslation(player.getUniqueID(), message.getMessage(), message.getAmount(), message.getName(), message.getNbt(), GrandEconomyApi.getFormattedCurrency(message.getPrice())).setStyle(TextStyles.BLUE));
         getDatabase().removeOfferStatusComplete(player.getUniqueID(), message.offerId);
     }
 
