@@ -100,6 +100,10 @@ public class CommandCancelOffer extends CommandBase {
                 throw new CommandException(TranslationUtil.getRawTranslationString(sender, "commands.ge.common.not_player"));
         } else if(args != null && args.length == 1) {
             Offer offer = ExchangeManager.getOffer(parseLong(args[0]));
+            if(offer == null) {
+                sender.sendMessage(TranslationUtil.getTranslation(sender, "commands.ge.common.invalid_offer_number"));
+                return;
+            }
             if(!(sender instanceof EntityPlayerMP)
                     || ((EntityPlayerMP) sender).getUniqueID().equals(offer.getOwner())
                     || (offer.getOwner() == null

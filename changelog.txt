@@ -9,3 +9,4 @@ Updated to support Grand Economy 2.0.0+
 Fixes:
 Fixed NPE when selling to admin shop
 Fixed status updates not using formatted currency amounts
+Fixed NPE when cancelling nonexistant offer number
