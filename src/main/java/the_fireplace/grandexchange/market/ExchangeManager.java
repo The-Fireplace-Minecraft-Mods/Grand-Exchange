@@ -219,7 +219,7 @@ public final class ExchangeManager {
                             addPayouts(buyOffer.getOwner(), offerResource, meta, payoutAmount, nbt, isOfferBlock, maxStackSize);
                     } else
                         GrandExchange.LOGGER.warn("Potential infinite money source created: Buy {} for {} and sell for {}.", offerResource.toString()+":"+meta, price, buyOffer.getPrice());
-                    if(amount != null)
+                    if(amount != null && buyOffer.getAmount() != null)
                         amount -= buyOffer.getAmount();
                     if(buyOffer.getAmount() != null && buyOffer.getOwner() != null)
                         removeOfferIds.add(buyOffer.getIdentifier());
