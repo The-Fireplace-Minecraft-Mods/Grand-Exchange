@@ -60,7 +60,7 @@ public class Offer {
         item = object.get("item").getAsString();
         meta = object.get("meta").getAsInt();
         amount = object.has("amount") ? object.get("amount").getAsInt() : null;
-        price = object.get("price").getAsInt();
+        price = object.get("price").getAsDouble();
         owner = object.has("owner") ? UUID.fromString(object.get("owner").getAsString()) : null;
         nbt = object.has("nbt") ? object.get("nbt").getAsString() : null;
         identifier = object.get("identifier").getAsLong();
