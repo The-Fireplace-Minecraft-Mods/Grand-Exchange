@@ -1,13 +1,2 @@
-Additions:
-Added support for decimal prices
-Added ability to have flat and percentage tax, and use decimals for those too
-Added command aliases: gex, exchange, grandexchange
-
-Changes:
-Updated to support Grand Economy 2.0.0+
-The database will now save every 5 minutes as needed
-
 Fixes:
-Fixed NPE when selling to admin shop
-Fixed status updates not using formatted currency amounts
-Fixed NPE when cancelling nonexistant offer number
+Fixed help command's next/previous buttons using the clan help command

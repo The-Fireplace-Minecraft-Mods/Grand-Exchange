@@ -41,7 +41,7 @@ public class CommandGeHelp extends CommandBase {
                         TranslationUtil.getStringTranslation(sender, "commands.ge." + command.getKey() + ".description")));
             helps.sort(Comparator.comparing(ITextComponent::getUnformattedText));
 
-            ChatPageUtil.showPaginatedChat(sender, "/clan help %s", helps, page);
+            ChatPageUtil.showPaginatedChat(sender, "/ge help %s", helps, page);
         } else if(CommandGe.aliases.containsKey(args[0]) || CommandGe.commands.containsKey(args[0])) {
             sender.sendMessage(TranslationUtil.getTranslation(sender, "commands.ge.help.format",
                     TranslationUtil.getStringTranslation(sender, "commands.ge." + CommandGe.processAlias(args[0]) + ".usage"),
