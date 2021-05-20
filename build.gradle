@@ -12,7 +12,6 @@ buildscript {
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-        classpath 'ModsIOUpload:ModsIOUpload:+'
     }
 }
 
@@ -20,9 +19,8 @@ plugins {
     id "com.matthewprenger.cursegradle" version "1.4.0"
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
-apply plugin: 'net.cazzar.gradle.modsio'
 
-version = "1.5.1"
+version = "1.5.2"
 group = "the_fireplace.grandexchange"
 archivesBaseName = "GrandExchange-1.12.2"
 
@@ -73,27 +71,6 @@ task deobfJar(type: Jar) {
     classifier = 'deobf'
 }
 
-task signJar(type: SignJar, dependsOn: reobfJar) {
-
-    // Skips if the keyStore property is missing.
-    onlyIf {
-        project.hasProperty('keyStore')
-    }
-
-    // findProperty allows us to reference the property without it existing.
-    // Using project.propName would cause the script to fail validation if
-    // the property did not exist.
-    keyStore = project.findProperty('keyStore')
-    alias = project.findProperty('keyStoreAlias')
-    storePass = project.findProperty('keyStorePass')
-    keyPass = project.findProperty('keyStoreKeyPass')
-
-    inputFile = jar.archivePath
-    outputFile = jar.archivePath
-}
-
-build.dependsOn signJar
-
 artifacts {
     archives jar
     archives deobfJar
@@ -125,16 +102,4 @@ curseforge {
         changelog = "*This is a file for mod developers. If you don't know what to do with it, don't use it!*"
     }
   }
-}
-
-modsIO {
-    key = project.hasProperty("modsioApiKey")? project.modsioApiKey : "empty"
-    project{
-		artifact = new File(jar.destinationDir, archivesBaseName+"-"+version+".jar")
-		modid = "1279"
-		minecraft = "1.12.2"
-		try{changelog = file('changelog.txt').text}catch(Exception e){changelog=""}
-		tag = ""
-		current = true
-    }
 }

@@ -1,2 +1,1 @@
-Fixes:
-Fixed help command's next/previous buttons using the clan help command
+Updated to support Clans 2.0.0+

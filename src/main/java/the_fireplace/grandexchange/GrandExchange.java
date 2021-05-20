@@ -22,7 +22,7 @@ import the_fireplace.grandexchange.permission.IPermissionHandler;
 import the_fireplace.grandexchange.permission.SpongePermissionHandler;
 
 @SuppressWarnings("WeakerAccess")
-@Mod(modid = GrandExchange.MODID, name = GrandExchange.MODNAME, version = GrandExchange.VERSION, acceptedMinecraftVersions = "[1.12,1.13)", acceptableRemoteVersions = "*", dependencies="required-after:grandeconomy@[2.0.0,);after:clans", certificateFingerprint = "${fingerprint}")
+@Mod(modid = GrandExchange.MODID, name = GrandExchange.MODNAME, version = GrandExchange.VERSION, acceptedMinecraftVersions = "[1.12,1.13)", acceptableRemoteVersions = "*", dependencies="required-after:grandeconomy@[2.0.0,);after:clans")
 public final class GrandExchange {
     public static final String MODID = "grandexchange";
     public static final String MODNAME = "Grand Exchange";
